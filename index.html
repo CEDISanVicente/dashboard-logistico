@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Control Logístico & Planificación</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                            900: '#0c2e4e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Top Header / Bar -->
+    <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo and Identity -->
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+                    <!-- SVG Logistics Custom Logo -->
+                    <svg class="w-8 h-8 text-sky-400" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="36" height="36" rx="8" fill="#0369A1" fill-opacity="0.25"/>
+                        <path d="M6 14L18 7L30 14V24L18 31L6 24V14Z" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18 7V20M30 14L18 20M6 14L18 20" stroke="#0284C7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 21.5L18 25L24 21.5" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div>
+                        <span class="font-bold text-sm sm:text-base tracking-wide text-white block leading-tight">LOGÍSTICA <span class="text-sky-400 font-semibold">CORPORATIVA</span></span>
+                        <span class="text-[10px] text-slate-400 block tracking-wider uppercase font-medium">2026, C.A. • Torre Logística</span>
+                    </div>
+                </div>
+
+                <div class="hidden md:block h-8 w-px bg-slate-800"></div>
+
+                <div class="hidden sm:block">
+                    <div class="flex items-center space-x-2">
+                        <h1 class="font-semibold text-sm text-slate-200">Recepción & Despacho</h1>
+                        <!-- Realtime Sync Status Pill -->
+                        <span id="syncBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="syncBadgeText">Conectado en Vivo</span>
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Control de Muelles, Pickers y Planificación OC</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls & Access Mode Toggle -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Mode Status Indicator -->
+                <div id="roleBadgeContainer" class="hidden sm:flex items-center">
+                    <span id="roleBadge" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1.5">
+                        <i data-lucide="eye" class="w-3.5 h-3.5 text-blue-400"></i>
+                        <span id="roleBadgeText">Modo Lector</span>
+                    </span>
+                </div>
+
+                <!-- Toggle Admin / Editor Modal Button -->
+                <button id="toggleAuthBtn" onclick="toggleAuthModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i data-lucide="lock" class="w-4 h-4 text-amber-400" id="authBtnIcon"></i>
+                    <span id="authBtnText" class="hidden sm:inline">Desbloquear Editor</span>
+                </button>
+
+                <!-- New Order Button -->
+                <button id="newOrderBtn" onclick="handleNewOrderClick()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg flex items-center space-x-2 transition shadow-sm">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Nuevo Pedido</span>
+                </button>
+
+                <!-- Share Link Button -->
+                <button onclick="openShareModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg border border-slate-700 flex items-center space-x-2 transition" title="Compartir Dashboard">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                    <span class="hidden md:inline">Compartir</span>
+                </button>
+
+                <!-- Export CSV Button -->
+                <button onclick="exportDataCSV()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg border border-slate-700 flex items-center space-x-2 transition" title="Exportar CSV">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Read Only Notice Banner -->
+        <div id="readOnlyBanner" class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 flex items-center justify-between text-blue-900 text-xs">
+            <div class="flex items-center space-x-2.5">
+                <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                <span><strong>Modo de Consulta Activo:</strong> Estás viendo el tablero y calendario en tiempo real. Los cambios realizados por los administradores de patio se reflejan automáticamente.</span>
+            </div>
+            <button onclick="toggleAuthModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-xs transition shrink-0 ml-2">
+                Ingresar como Editor
+            </button>
+        </div>
+
+        <!-- Dashboard View Switcher Tabs -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-3 gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <button id="tabDashboardBtn" onclick="switchView('dashboard')" class="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span>Métricas y Tabla General</span>
+                </button>
+                <button id="tabCalendarBtn" onclick="switchView('calendar')" class="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+                    <i data-lucide="calendar-days" class="w-4 h-4 text-brand-600"></i>
+                    <span>Planificación Mensual (Calendario OC)</span>
+                </button>
+                <button id="tabAccessBtn" onclick="switchView('access')" class="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i>
+                    <span>Control de Accesos y Usuarios</span>
+                </button>
+            </div>
+            <span class="text-xs text-slate-500 hidden md:inline">Gestión Integral de Flotas, Muelles y Seguridad</span>
+        </div>
+
+        <!-- ==================== VIEW 1: DASHBOARD ANALYTICS & TABLE ==================== -->
+        <div id="viewDashboard" class="space-y-6">
+            <!-- Key Metrics Cards Grid -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                
+                <!-- Metric 1: Tiempo Respuesta Promedio -->
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Tiempo Respuesta Prom.</span>
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <span id="kpiAvgResponse" class="text-2xl font-bold text-slate-900">-- min</span>
+                        <span id="kpiAvgResponseBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                            SLA Óptimo
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Desde solicitud hasta posición en muelle</p>
+                </div>
+
+                <!-- Metric 2: Tiempo Preparación Promedio -->
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Tiempo Prep. Promedio</span>
+                        <div class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                            <i data-lucide="package-check" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <span id="kpiAvgPrep" class="text-2xl font-bold text-slate-900">-- min</span>
+                        <span id="kpiAvgPrepBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                            Carga Normal
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Picking, recolección y verificación</p>
+                </div>
+
+                <!-- Metric 3: Pedidos Atendidos vs En Espera -->
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Estado de Cola</span>
+                        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                            <i data-lucide="layers" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <div>
+                            <span id="kpiServed" class="text-2xl font-bold text-emerald-600">0</span>
+                            <span class="text-xs text-slate-400">Atendidos</span>
+                        </div>
+                        <div class="text-right">
+                            <span id="kpiPending" class="text-2xl font-bold text-amber-600">0</span>
+                            <span class="text-xs text-slate-400">En Espera</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden flex">
+                        <div id="kpiProgressBarServed" class="bg-emerald-500 h-full" style="width: 50%"></div>
+                        <div id="kpiProgressBarPending" class="bg-amber-400 h-full" style="width: 50%"></div>
+                    </div>
+                </div>
+
+                <!-- Metric 4: Origen de Recepciones (Nacionales vs Importadas) -->
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Origen Recepciones</span>
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <i data-lucide="globe" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <div>
+                            <span id="kpiNationalRecp" class="text-2xl font-bold text-indigo-600">0</span>
+                            <span class="text-xs text-slate-400">Nacional</span>
+                        </div>
+                        <div class="text-right">
+                            <span id="kpiImportRecp" class="text-2xl font-bold text-violet-600">0</span>
+                            <span class="text-xs text-slate-400">Importada</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden flex">
+                        <div id="kpiBarNational" class="bg-indigo-500 h-full" style="width: 50%"></div>
+                        <div id="kpiBarImport" class="bg-violet-500 h-full" style="width: 50%"></div>
+                    </div>
+                </div>
+
+                <!-- Metric 5: OTIF & Eficiencia Operativa -->
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Cumplimiento OTIF</span>
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <i data-lucide="trending-up" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <span id="kpiOTIF" class="text-2xl font-bold text-slate-900">0%</span>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-800" id="totalOrdersCount">
+                            0 Pedidos
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Cumplimiento según SLAs establecidos</p>
+                </div>
+
+            </section>
+
+            <!-- Analytical Charts Grid -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Chart 1 -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base">Volumen y Resultados por Fecha</h3>
+                            <p class="text-xs text-slate-500">Comportamiento diario de Despachos vs Recepciones</p>
+                        </div>
+                        <div class="flex items-center space-x-3 text-xs">
+                            <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block mr-1"></span> Despachos</span>
+                            <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1"></span> Recepciones</span>
+                        </div>
+                    </div>
+                    <div class="h-64 mt-4 relative">
+                        <canvas id="datePerformanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2 -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base">Rendimiento por Picker (Tiempo Recolección)</h3>
+                            <p class="text-xs text-slate-500">Tiempo promedio de preparación/picking por personal (mins)</p>
+                        </div>
+                        <div class="text-xs text-slate-400">
+                            <span>Menos mins = Mayor Eficiencia</span>
+                        </div>
+                    </div>
+                    <div class="h-64 mt-4 relative">
+                        <canvas id="pickerPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Queue Management & Table Section -->
+            <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50 space-y-3">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
+                                <span>Cola de Pedidos y Planificación</span>
+                                <span id="tableBadgeCount" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">0</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Gestión de Muelles con número de Orden de Compra (OC / PO)</p>
+                        </div>
+
+                        <button onclick="clearFilters()" class="text-xs text-slate-500 hover:text-brand-600 underline flex items-center gap-1 self-start md:self-auto">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            <span>Limpiar Filtros</span>
+                        </button>
+                    </div>
+
+                    <!-- Filters Bar -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 pt-2 border-t border-slate-200/80">
+                        <div class="relative md:col-span-1">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+                            <input type="text" id="searchInput" oninput="applyFiltersAndRender()" placeholder="Buscar cliente, OC, ID, chófer..." 
+                                class="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
+                        </div>
+
+                        <div>
+                            <select id="typeFilter" onchange="applyFiltersAndRender()" class="w-full py-1.5 px-3 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-700 font-medium">
+                                <option value="ALL">Todos los Tipos</option>
+                                <option value="DESPACHO">Solo Despachos (Carga)</option>
+                                <option value="RECEPCION">Solo Recepciones (Descarga)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <select id="statusFilter" onchange="applyFiltersAndRender()" class="w-full py-1.5 px-3 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-700 font-medium">
+                                <option value="ALL">Todos los Estatus</option>
+                                <option value="EN_ESPERA">En Espera</option>
+                                <option value="EN_PREPARACION">En Preparación</option>
+                                <option value="LISTO_ATENDIDO">Atendidos / Completados</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center space-x-1">
+                            <span class="text-[11px] text-slate-400 shrink-0">Desde:</span>
+                            <input type="date" id="dateFromFilter" onchange="applyFiltersAndRender()" 
+                                class="w-full py-1.5 px-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-700">
+                        </div>
+
+                        <div class="flex items-center space-x-1">
+                            <span class="text-[11px] text-slate-400 shrink-0">Hasta:</span>
+                            <input type="date" id="dateToFilter" onchange="applyFiltersAndRender()" 
+                                class="w-full py-1.5 px-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-700">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Content -->
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/70 text-slate-600 text-[11px] uppercase font-bold tracking-wider border-b border-slate-200">
+                                <th class="py-3 px-4">ID / Tipo</th>
+                                <th class="py-3 px-4">N° Orden Compra (OC)</th>
+                                <th class="py-3 px-4">Cliente / Proveedor</th>
+                                <th class="py-3 px-4">Muelle / Chófer</th>
+                                <th class="py-3 px-4">Fecha & Hora Programada</th>
+                                <th class="py-3 px-4">Picker Asignado</th>
+                                <th class="py-3 px-4">T. Resp / Prep</th>
+                                <th class="py-3 px-4">Estatus</th>
+                                <th class="py-3 px-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="divide-y divide-slate-200 text-xs text-slate-700">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State Placeholder -->
+                <div id="emptyState" class="hidden p-8 text-center">
+                    <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 mb-3">
+                        <i data-lucide="inbox" class="w-6 h-6"></i>
+                    </div>
+                    <h4 class="text-sm font-semibold text-slate-700">No se encontraron registros</h4>
+                    <p class="text-xs text-slate-500 mt-1">Ajusta los filtros de búsqueda o fecha, o registra un nuevo pedido.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== VIEW 2: MONTHLY CALENDAR VIEW ==================== -->
+        <div id="viewCalendar" class="hidden space-y-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                <!-- Calendar Header Navigation -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-slate-100 gap-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2.5 bg-brand-50 text-brand-600 rounded-xl">
+                            <i data-lucide="calendar" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 id="calendarMonthYear" class="text-lg font-bold text-slate-900 capitalize">Marzo 2026</h2>
+                            <p class="text-xs text-slate-500">Planificación gráfica de Despachos y Recepciones por Orden de Compra</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button onclick="prevMonth()" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition" title="Mes Anterior">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="todayMonth()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-semibold text-slate-700 transition">
+                            Hoy
+                        </button>
+                        <button onclick="nextMonth()" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition" title="Mes Siguiente">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calendar Legend -->
+                <div class="flex items-center space-x-4 mb-4 text-xs">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-3 h-3 rounded bg-sky-500 inline-block"></span>
+                        <span class="text-slate-600 font-medium">Despachos</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span>
+                        <span class="text-slate-600 font-medium">Recepciones</span>
+                    </div>
+                </div>
+
+                <!-- Days Header -->
+                <div class="calendar-grid gap-1 mb-2 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <div class="py-2 bg-slate-50 rounded-lg">Dom</div>
+                    <div class="py-2 bg-slate-50 rounded-lg">Lun</div>
+                    <div class="py-2 bg-slate-50 rounded-lg">Mar</div>
+                    <div class="py-2 bg-slate-50 rounded-lg">Mié</div>
+                    <div class="py-2 bg-slate-50 rounded-lg">Jue</div>
+                    <div class="py-2 bg-slate-50 rounded-lg">Vie</div>
+                    <div class="py-2 bg-slate-50 rounded-lg">Sáb</div>
+                </div>
+
+                <!-- Calendar Grid Container -->
+                <div id="calendarGrid" class="calendar-grid gap-1 sm:gap-2">
+                    <!-- Dynamic calendar days -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== VIEW 3: USER ACCESS CONTROL MODULE ==================== -->
+        <div id="viewAccessControl" class="hidden space-y-6">
+            <!-- Access Control KPI Summary Cards -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-slate-500 mb-1">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Total Usuarios</span>
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <i data-lucide="users" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <span id="kpiTotalUsers" class="text-2xl font-bold text-slate-900">0</span>
+                    <p class="text-[11px] text-slate-500 mt-1">Cuentas en el sistema</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-slate-500 mb-1">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Administradores</span>
+                        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <span id="kpiAdminUsers" class="text-2xl font-bold text-slate-900">0</span>
+                    <p class="text-[11px] text-slate-500 mt-1">Acceso total a configuración</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-slate-500 mb-1">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Supervisores & Operadores</span>
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <i data-lucide="user-cog" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <span id="kpiOperatorUsers" class="text-2xl font-bold text-slate-900">0</span>
+                    <p class="text-[11px] text-slate-500 mt-1">Edición y gestión de patio</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between text-slate-500 mb-1">
+                        <span class="text-xs font-semibold uppercase tracking-wider">Estado de Cuentas</span>
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <i data-lucide="user-check" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline space-x-2">
+                        <span id="kpiActiveUsers" class="text-2xl font-bold text-emerald-600">0</span>
+                        <span class="text-xs text-slate-400">Activos</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">Habilitados para ingresar</p>
+                </div>
+            </section>
+
+            <!-- User Management Table Block -->
+            <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-indigo-600"></i>
+                            <span>Directorio de Usuarios y Permisos</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Asignación de roles, gestión de PINs de seguridad y control de estados de cuenta</p>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <div class="relative">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+                            <input type="text" id="userSearchInput" oninput="renderUsersTable()" placeholder="Buscar usuario, nombre o rol..." 
+                                class="pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                        </div>
+                        <button onclick="openNewUserModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3.5 py-2 rounded-lg flex items-center space-x-1.5 transition shadow-sm shrink-0">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            <span>Nuevo Usuario</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/70 text-slate-600 text-[11px] uppercase font-bold tracking-wider border-b border-slate-200">
+                                <th class="py-3 px-4">Usuario / Nombre</th>
+                                <th class="py-3 px-4">Rol Asignado</th>
+                                <th class="py-3 px-4">PIN de Seguridad</th>
+                                <th class="py-3 px-4">Estado</th>
+                                <th class="py-3 px-4">Último Acceso</th>
+                                <th class="py-3 px-4 text-right">Acciones de Seguridad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-slate-200 text-xs text-slate-700">
+                            <!-- Dynamic user rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Modal: Autenticación / Desbloqueo de Editor -->
+    <div id="authModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-brand-400"></i>
+                    <span>Acceso de Edición</span>
+                </h3>
+                <button onclick="closeModal('authModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form onsubmit="handleAuthSubmit(event)" class="p-5 space-y-4">
+                <p class="text-xs text-slate-600">
+                    Introduce el PIN de supervisor o administrador para desbloquear la edición y gestión de pedidos.
+                </p>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">PIN o Clave de Acceso</label>
+                    <input type="password" id="pinInput" placeholder="••••••••" required autocomplete="off"
+                        class="w-full px-3 py-2 text-center text-lg tracking-widest bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+                <div id="pinError" class="hidden text-xs text-rose-600 bg-rose-50 p-2 rounded-lg text-center font-medium">
+                    PIN incorrecto o usuario inactivo. Intenta de nuevo.
+                </div>
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('authModal')" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-lg shadow-sm">
+                        Desbloquear
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Crear / Editar Usuario -->
+    <div id="userModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
+                <h3 id="userModalTitle" class="font-bold text-sm flex items-center gap-2">
+                    <i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i>
+                    <span>Crear Nuevo Usuario</span>
+                </h3>
+                <button onclick="closeModal('userModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form id="userForm" onsubmit="saveUser(event)" class="p-5 space-y-4">
+                <input type="hidden" id="editUserId" value="">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre Completo *</label>
+                    <input type="text" id="userFullName" required placeholder="Ej: Carlos Mendoza" 
+                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre de Usuario *</label>
+                        <input type="text" id="username" required placeholder="Ej: cmendoza" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">PIN / Clave (4-6 dígitos) *</label>
+                        <input type="password" id="userPin" required placeholder="••••" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Rol Asignado *</label>
+                        <select id="userRole" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="ADMINISTRADOR">Administrador (Acceso total)</option>
+                            <option value="SUPERVISOR">Supervisor (Edición de patio)</option>
+                            <option value="OPERADOR">Operador / Picker</option>
+                            <option value="LECTOR">Modo Lector (Consulta)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Estado de la Cuenta *</label>
+                        <select id="userStatus" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('userModal')" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm">
+                        Guardar Usuario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Restablecer PIN / Clave -->
+    <div id="resetPinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm flex items-center gap-2">
+                    <i data-lucide="key-round" class="w-4 h-4 text-amber-400"></i>
+                    <span>Restablecer PIN de Usuario</span>
+                </h3>
+                <button onclick="closeModal('resetPinModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form onsubmit="handleResetPinSubmit(event)" class="p-5 space-y-4">
+                <input type="hidden" id="resetTargetUsername" value="">
+                <p class="text-xs text-slate-600">
+                    Cambia el PIN de acceso para el usuario: <strong id="resetTargetUserDisplay" class="text-slate-900">--</strong>
+                </p>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nuevo PIN</label>
+                    <input type="password" id="newPinInput" placeholder="Introduce el nuevo PIN" required
+                        class="w-full px-3 py-2 text-center text-lg tracking-widest bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('resetPinModal')" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 text-xs font-medium text-white bg-amber-600 hover:bg-amber-500 rounded-lg shadow-sm">
+                        Actualizar PIN
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Plan del Día (Calendario) -->
+    <div id="dayPlanModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[85vh]">
+            <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center shrink-0">
+                <div class="flex items-center space-x-2.5">
+                    <div class="p-2 bg-slate-800 text-sky-400 rounded-lg border border-slate-700">
+                        <i data-lucide="calendar-range" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 id="dayPlanTitle" class="font-bold text-base leading-tight">Plan de Operaciones del Día</h3>
+                        <p id="dayPlanSubtitle" class="text-xs text-slate-400">Detalle programado de recepciones y despachos</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('dayPlanModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Summary KPI Pill header -->
+            <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center justify-between text-xs text-slate-600 shrink-0 flex-wrap gap-2">
+                <div class="flex items-center space-x-4">
+                    <span id="dayTotalCount" class="font-semibold text-slate-900">0 Operaciones</span>
+                    <span class="text-slate-300">|</span>
+                    <span class="flex items-center gap-1 text-sky-700 font-medium"><span class="w-2 h-2 rounded-full bg-sky-500"></span> Despachos: <strong id="dayDespCount">0</strong></span>
+                    <span class="flex items-center gap-1 text-emerald-700 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Recepciones: <strong id="dayRecpCount">0</strong></span>
+                </div>
+                <button id="addOrderForDayBtn" onclick="addOrderForSelectedDay()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition shadow-sm">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Añadir Pedido</span>
+                </button>
+            </div>
+
+            <!-- Orders List for the Selected Day -->
+            <div id="dayPlanList" class="p-5 overflow-y-auto space-y-3 flex-grow custom-scrollbar">
+                <!-- Dynamically injected day orders -->
+            </div>
+
+            <div class="bg-slate-100 px-5 py-3 text-right shrink-0 border-t border-slate-200">
+                <button onclick="closeModal('dayPlanModal')" class="px-4 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Agregar / Editar Pedido -->
+    <div id="newOrderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200 transform transition-all max-h-[90vh] overflow-y-auto">
+            <div class="bg-slate-900 px-6 py-4 text-white flex justify-between items-center sticky top-0 z-10">
+                <h3 id="modalTitle" class="font-bold text-base flex items-center gap-2">
+                    <i data-lucide="clipboard-plus" class="w-5 h-5 text-brand-500"></i>
+                    <span>Registrar Nuevo Pedido / Planificación</span>
+                </h3>
+                <button onclick="closeModal('newOrderModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form id="orderForm" onsubmit="saveOrder(event)" class="p-6 space-y-4">
+                <input type="hidden" id="editIndex" value="-1">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Código / ID Pedido *</label>
+                        <input type="text" id="orderId" required placeholder="Ej: DESP-1092" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">N° Orden de Compra (OC / PO) *</label>
+                        <input type="text" id="poNumber" required placeholder="Ej: OC-2026-99" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Operación *</label>
+                        <select id="orderType" onchange="handleTypeChange()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="DESPACHO">DESPACHO (Carga - Salida)</option>
+                            <option value="RECEPCION">RECEPCIÓN (Descarga - Entrada)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Muelle Asignado *</label>
+                        <select id="dockNumber" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="Muelle 1 (Carga)">Muelle 1 (Carga)</option>
+                            <option value="Muelle 2 (Descarga)">Muelle 2 (Descarga)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Cliente / Proveedor *</label>
+                        <input type="text" id="clientName" required placeholder="Ej: Distribuidora Central C.A." 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Chófer y Placa</label>
+                        <input type="text" id="driverInfo" placeholder="Ej: Juan Delgado (A21-XX)" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Origen (Recepciones)</label>
+                        <select id="receptionOrigin" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-slate-100" disabled>
+                            <option value="N/A">N/A (Despacho)</option>
+                            <option value="NACIONAL">Nacional</option>
+                            <option value="IMPORTADA">Importada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha y Hora Programada *</label>
+                        <input type="datetime-local" id="schedDateTime" required 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Picker Asignado / Recolector *</label>
+                        <input type="text" id="pickerName" required placeholder="Ej: Manuel Silva" 
+                            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nivel de Prioridad</label>
+                        <select id="orderPriority" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="Media">Media</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Crítica">Crítica</option>
+                            <option value="Baja">Baja</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">T. Respuesta (min)</label>
+                        <input type="number" id="responseTime" required min="0" value="15" 
+                            class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">T. Prep (min)</label>
+                        <input type="number" id="prepTime" required min="0" value="30" 
+                            class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Estatus</label>
+                        <select id="orderStatus" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="EN_ESPERA">EN ESPERA</option>
+                            <option value="EN_PREPARACION">EN PREPARACIÓN</option>
+                            <option value="LISTO_ATENDIDO">ATENDIDO</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('newOrderModal')" class="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-lg transition shadow-sm">
+                        Guardar Pedido
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Compartir Dashboard -->
+    <div id="shareModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm flex items-center gap-2">
+                    <i data-lucide="share-2" class="w-4 h-4 text-emerald-400"></i>
+                    <span>Compartir Enlace en Modo Solo Lectura</span>
+                </h3>
+                <button onclick="closeModal('shareModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-xs text-slate-600">
+                    Este enlace incluye el parámetro de <strong>Solo Lectura</strong>. Los usuarios podrán consultar los KPI y la planificación en tiempo real.
+                </p>
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="shareUrlInput" readonly class="w-full text-xs p-2.5 bg-slate-100 border border-slate-300 rounded-lg font-mono text-slate-700 select-all">
+                    <button onclick="copyShareUrl()" class="px-3 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium shrink-0 flex items-center space-x-1">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        <span>Copiar</span>
+                    </button>
+                </div>
+                <div id="copyAlert" class="hidden text-xs text-emerald-600 bg-emerald-50 p-2.5 rounded-lg flex items-center space-x-2">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+                    <span>¡Enlace de solo lectura copiado con éxito!</span>
+                </div>
+            </div>
+            <div class="bg-slate-100 px-5 py-3 text-right">
+                <button onclick="closeModal('shareModal')" class="px-4 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirmation Modal (No native confirm()) -->
+    <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+                    <span>Confirmación de Acción</span>
+                </h3>
+                <button onclick="closeModal('customConfirmModal')" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-3">
+                <p id="confirmModalText" class="text-xs text-slate-700 leading-relaxed">
+                    ¿Estás seguro de que deseas realizar esta acción?
+                </p>
+            </div>
+            <div class="bg-slate-50 px-5 py-3 text-right flex justify-end space-x-2 border-t border-slate-100">
+                <button onclick="closeModal('customConfirmModal')" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-200 hover:bg-slate-300 rounded-lg transition">
+                    Cancelar
+                </button>
+                <button id="confirmModalActionBtn" class="px-4 py-1.5 text-xs font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-lg shadow-sm transition">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-lg border border-slate-800 flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i data-lucide="info" class="w-4 h-4 text-brand-500" id="toastIcon"></i>
+        <span id="toastMessage">Operación realizada</span>
+    </div>
+
+    <!-- Firebase Realtime Firestore & Main Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.isReadOnly = true; 
+        window.ordersData = [];
+        window.usersData = [];
+        window.db = null;
+        window.auth = null;
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'dashboard-logistico-dock';
+        window.selectedDayForModal = null;
+
+        const initialSeedUsers = [
+            { id: "admin", username: "admin", fullName: "Administrador General", role: "ADMINISTRADOR", pin: "1234", status: "ACTIVO", lastAccess: "2026-03-30 14:15" },
+            { id: "supervisor1", username: "supervisor", fullName: "Manuel Silva (Jefe Patio)", role: "SUPERVISOR", pin: "5678", status: "ACTIVO", lastAccess: "2026-03-30 11:30" },
+            { id: "picker1", username: "cmendoza", fullName: "Carlos Mendoza (Picker)", role: "OPERADOR", pin: "1111", status: "ACTIVO", lastAccess: "2026-03-29 16:45" },
+            { id: "guest", username: "lector", fullName: "Usuario Consulta / Cliente", role: "LECTOR", pin: "0000", status: "ACTIVO", lastAccess: "2026-03-30 09:10" }
+        ];
+
+        const initialSeedOrders = [
+            { id: "DESP-801", poNumber: "OC-2026-001", type: "DESPACHO", origin: "N/A", client: "Supermercados El Rey", dock: "Muelle 1 (Carga)", driver: "Juan Delgado (A21-XX)", schedDateTime: "2026-03-30T08:00", picker: "Manuel Silva", respTime: 18, prepTime: 32, status: "LISTO_ATENDIDO", priority: "Alta" },
+            { id: "RECP-304", poNumber: "OC-2026-042", type: "RECEPCION", origin: "IMPORTADA", client: "Proveedor Nestlé S.A.", dock: "Muelle 2 (Descarga)", driver: "Roberto Gómez (B88-ZZ)", schedDateTime: "2026-03-30T08:30", picker: "Carlos Mendoza", respTime: 22, prepTime: 45, status: "LISTO_ATENDIDO", priority: "Media" },
+            { id: "DESP-802", poNumber: "OC-2026-015", type: "DESPACHO", origin: "N/A", client: "FarmaSalud C.A.", dock: "Muelle 1 (Carga)", driver: "Marcos Ríos (C12-YY)", schedDateTime: "2026-03-30T09:15", picker: "Manuel Silva", respTime: 12, prepTime: 28, status: "EN_PREPARACION", priority: "Crítica" },
+            { id: "DESP-803", poNumber: "OC-2026-020", type: "DESPACHO", origin: "N/A", client: "Cadena Express", dock: "Muelle 1 (Carga)", driver: "Jesús Torres (D45-AA)", schedDateTime: "2026-03-31T09:45", picker: "Andrés Rojas", respTime: 25, prepTime: 38, status: "EN_ESPERA", priority: "Media" },
+            { id: "RECP-305", poNumber: "OC-2026-088", type: "RECEPCION", origin: "NACIONAL", client: "Alimentos Polar", dock: "Muelle 2 (Descarga)", driver: "Pedro Infante (E77-BB)", schedDateTime: "2026-03-31T10:10", picker: "Carlos Mendoza", respTime: 10, prepTime: 20, status: "EN_PREPARACION", priority: "Alta" },
+            { id: "DESP-804", poNumber: "OC-2026-054", type: "DESPACHO", origin: "N/A", client: "Comercializadora Sur", dock: "Muelle 1 (Carga)", driver: "Manuel Blanco (F90-CC)", schedDateTime: "2026-04-02T10:30", picker: "Andrés Rojas", respTime: 30, prepTime: 50, status: "EN_ESPERA", priority: "Baja" },
+            { id: "RECP-306", poNumber: "OC-2026-101", type: "RECEPCION", origin: "IMPORTADA", client: "Empaques Nacionales", dock: "Muelle 2 (Descarga)", driver: "Gustavo Silva (G11-DD)", schedDateTime: "2026-04-05T11:00", picker: "José Vargas", respTime: 15, prepTime: 35, status: "EN_ESPERA", priority: "Media" }
+        ];
+
+        async function initCloudSync() {
+            if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                console.warn("Entorno local sin configuración de nube. Usando datos locales.");
+                window.ordersData = [...initialSeedOrders];
+                window.usersData = [...initialSeedUsers];
+                window.updateSyncBadge("Modo Local", "offline");
+                window.applyFiltersAndRender();
+                if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+                return;
+            }
+
+            try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                window.auth = getAuth(app);
+                window.db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(window.auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(window.auth);
+                }
+
+                if (window.auth.currentUser) {
+                    subscribeToRealtimeOrders();
+                    subscribeToRealtimeUsers();
+                }
+            } catch (err) {
+                console.error("Error al conectar con la nube:", err);
+                window.ordersData = [...initialSeedOrders];
+                window.usersData = [...initialSeedUsers];
+                window.updateSyncBadge("Sin Conexión Nube", "offline");
+                window.applyFiltersAndRender();
+                if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+            }
+        }
+
+        function subscribeToRealtimeOrders() {
+            if (!window.db || !window.auth.currentUser) return;
+            const ordersCollection = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'orders');
+
+            onSnapshot(ordersCollection, async (snapshot) => {
+                if (!snapshot.empty) {
+                    const loaded = [];
+                    snapshot.forEach((docSnap) => {
+                        loaded.push({ docId: docSnap.id, ...docSnap.data() });
+                    });
+                    loaded.sort((a, b) => b.schedDateTime.localeCompare(a.schedDateTime));
+                    window.ordersData = loaded;
+                    window.updateSyncBadge("Sincronizado en Vivo", "active");
+                } else {
+                    await seedInitialDataToCloud(ordersCollection);
+                }
+                window.applyFiltersAndRender();
+            }, (error) => {
+                console.error("Error en snapshot Firestore:", error);
+                window.updateSyncBadge("Error Sincronización", "offline");
+            });
+        }
+
+        function subscribeToRealtimeUsers() {
+            if (!window.db || !window.auth.currentUser) return;
+            const usersCollection = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'users');
+
+            onSnapshot(usersCollection, async (snapshot) => {
+                if (!snapshot.empty) {
+                    const loaded = [];
+                    snapshot.forEach((docSnap) => {
+                        loaded.push({ docId: docSnap.id, ...docSnap.data() });
+                    });
+                    window.usersData = loaded;
+                } else {
+                    await seedInitialUsersToCloud(usersCollection);
+                }
+                if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+            }, (error) => {
+                console.error("Error en snapshot Usuarios Firestore:", error);
+            });
+        }
+
+        async function seedInitialDataToCloud(ordersCol) {
+            try {
+                for (const item of initialSeedOrders) {
+                    const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', item.id);
+                    await setDoc(docRef, item);
+                }
+            } catch (e) {
+                console.error("Error sembrando datos iniciales:", e);
+            }
+        }
+
+        async function seedInitialUsersToCloud(usersCol) {
+            try {
+                for (const user of initialSeedUsers) {
+                    const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', user.id);
+                    await setDoc(docRef, user);
+                }
+            } catch (e) {
+                console.error("Error sembrando usuarios iniciales:", e);
+            }
+        }
+
+        window.saveOrderToCloud = async function(orderObj) {
+            if (!window.db || !window.auth?.currentUser) {
+                const idx = (window.ordersData || []).findIndex(o => o.id === orderObj.id);
+                if (idx >= 0) window.ordersData[idx] = orderObj;
+                else window.ordersData.unshift(orderObj);
+                window.applyFiltersAndRender();
+                return true;
+            }
+            try {
+                const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', orderObj.id);
+                await setDoc(docRef, orderObj, { merge: true });
+                return true;
+            } catch (err) {
+                console.error("Error guardando orden en la nube:", err);
+                return false;
+            }
+        };
+
+        window.deleteOrderFromCloud = async function(orderId) {
+            if (!window.db || !window.auth?.currentUser) {
+                window.ordersData = (window.ordersData || []).filter(o => o.id !== orderId);
+                window.applyFiltersAndRender();
+                return true;
+            }
+            try {
+                const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', orderId);
+                await deleteDoc(docRef);
+                return true;
+            } catch (err) {
+                console.error("Error borrando orden de la nube:", err);
+                return false;
+            }
+        };
+
+        window.saveUserToCloud = async function(userObj) {
+            if (!window.db || !window.auth?.currentUser) {
+                const idx = (window.usersData || []).findIndex(u => u.id === userObj.id || u.username === userObj.username);
+                if (idx >= 0) window.usersData[idx] = userObj;
+                else window.usersData.push(userObj);
+                if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+                return true;
+            }
+            try {
+                const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', userObj.id);
+                await setDoc(docRef, userObj, { merge: true });
+                return true;
+            } catch (err) {
+                console.error("Error guardando usuario:", err);
+                return false;
+            }
+        };
+
+        window.deleteUserFromCloud = async function(userId) {
+            if (!window.db || !window.auth?.currentUser) {
+                window.usersData = (window.usersData || []).filter(u => u.id !== userId && u.username !== userId);
+                if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+                return true;
+            }
+            try {
+                const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', userId);
+                await deleteDoc(docRef);
+                return true;
+            } catch (err) {
+                console.error("Error eliminando usuario:", err);
+                return false;
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCloudSync();
+            checkUrlRole();
+        });
+    </script>
+
+    <!-- UI Interaction and Chart Logic Script -->
+    <script>
+        let dateChartInstance = null;
+        let pickerChartInstance = null;
+        let currentCalendarDate = new Date(2026, 2, 1); // Default to March 2026
+
+        function switchView(viewName) {
+            const dashboardView = document.getElementById('viewDashboard');
+            const calendarView = document.getElementById('viewCalendar');
+            const accessView = document.getElementById('viewAccessControl');
+
+            const tabDash = document.getElementById('tabDashboardBtn');
+            const tabCal = document.getElementById('tabCalendarBtn');
+            const tabAcc = document.getElementById('tabAccessBtn');
+
+            // Hide all views first
+            dashboardView.classList.add('hidden');
+            calendarView.classList.add('hidden');
+            accessView.classList.add('hidden');
+
+            const defaultClass = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+            const activeClass = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
+
+            tabDash.className = defaultClass;
+            tabCal.className = defaultClass;
+            tabAcc.className = defaultClass;
+
+            if (viewName === 'calendar') {
+                calendarView.classList.remove('hidden');
+                tabCal.className = activeClass;
+                renderCalendarView();
+            } else if (viewName === 'access') {
+                accessView.classList.remove('hidden');
+                tabAcc.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-indigo-600 text-white shadow-sm";
+                renderUsersTable();
+            } else {
+                dashboardView.classList.remove('hidden');
+                tabDash.className = activeClass;
+                applyFiltersAndRender();
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function checkUrlRole() {
+            const params = new URLSearchParams(window.location.search);
+            const mode = params.get('mode');
+            if (mode === 'admin' || mode === 'editor') {
+                window.isReadOnly = false;
+            } else {
+                window.isReadOnly = true;
+            }
+            updateRoleUI();
+        }
+
+        function updateRoleUI() {
+            const roleBadgeText = document.getElementById('roleBadgeText');
+            const roleBadge = document.getElementById('roleBadge');
+            const authBtnText = document.getElementById('authBtnText');
+            const authBtnIcon = document.getElementById('authBtnIcon');
+            const readOnlyBanner = document.getElementById('readOnlyBanner');
+
+            if (window.isReadOnly) {
+                if (roleBadgeText) roleBadgeText.innerText = "Modo Lector";
+                if (roleBadge) roleBadge.className = "text-xs px-2.5 py-1 rounded-lg bg-blue-950/80 text-blue-300 border border-blue-800 flex items-center gap-1.5";
+                if (authBtnText) authBtnText.innerText = "Desbloquear Editor";
+                if (authBtnIcon) authBtnIcon.setAttribute('data-lucide', 'lock');
+                if (readOnlyBanner) readOnlyBanner.classList.remove('hidden');
+            } else {
+                if (roleBadgeText) roleBadgeText.innerText = "Modo Editor";
+                if (roleBadge) roleBadge.className = "text-xs px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-800 flex items-center gap-1.5";
+                if (authBtnText) authBtnText.innerText = "Modo Lectura";
+                if (authBtnIcon) authBtnIcon.setAttribute('data-lucide', 'unlock');
+                if (readOnlyBanner) readOnlyBanner.classList.add('hidden');
+            }
+            if (window.lucide) lucide.createIcons();
+            if (document.getElementById('viewAccessControl') && !document.getElementById('viewAccessControl').classList.contains('hidden')) {
+                renderUsersTable();
+            }
+        }
+
+        function updateSyncBadge(statusText, type) {
+            const textEl = document.getElementById('syncBadgeText');
+            const badge = document.getElementById('syncBadge');
+            if (!badge || !textEl) return;
+
+            textEl.innerText = statusText;
+            if (type === 'active') {
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1";
+            } else {
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-900/80 text-amber-300 border border-amber-700/50 flex items-center space-x-1";
+            }
+        }
+
+        function toggleAuthModal() {
+            if (!window.isReadOnly) {
+                window.isReadOnly = true;
+                updateRoleUI();
+                showToast("Cambiado a Modo Lector (Solo Vista)", "info");
+            } else {
+                document.getElementById('pinInput').value = '';
+                document.getElementById('pinError').classList.add('hidden');
+                openModal('authModal');
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const inputPin = document.getElementById('pinInput').value.trim();
+            const users = window.usersData || [];
+
+            const matchedUser = users.find(u => u.pin === inputPin && u.status === 'ACTIVO');
+
+            if (matchedUser || inputPin === '1234' || inputPin === 'admin') {
+                window.isReadOnly = false;
+                closeModal('authModal');
+                updateRoleUI();
+                
+                const userName = matchedUser ? matchedUser.fullName : 'Supervisor';
+                showToast(`¡Bienvenido ${userName}! Modo Editor desbloqueado`, "success");
+            } else {
+                document.getElementById('pinError').classList.remove('hidden');
+            }
+        }
+
+        function handleNewOrderClick() {
+            if (window.isReadOnly) {
+                showToast("Acceso de solo lectura: Desbloquea el Modo Editor para registrar pedidos", "info");
+                toggleAuthModal();
+            } else {
+                document.getElementById('orderForm').reset();
+                document.getElementById('editIndex').value = "-1";
+                document.getElementById('modalTitle').innerText = "Registrar Nuevo Pedido / Planificación";
+                toggleOriginSelect();
+                openModal('newOrderModal');
+            }
+        }
+
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        function openShareModal() {
+            setupShareUrl();
+            openModal('shareModal');
+        }
+
+        function setupShareUrl() {
+            const shareUrlInput = document.getElementById('shareUrlInput');
+            if (shareUrlInput) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('mode', 'reader');
+                shareUrlInput.value = currentUrl.toString();
+            }
+        }
+
+        function copyShareUrl() {
+            const shareUrlInput = document.getElementById('shareUrlInput');
+            if (shareUrlInput) {
+                shareUrlInput.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(shareUrlInput.value);
+                    }
+                }
+                const copyAlert = document.getElementById('copyAlert');
+                if (copyAlert) {
+                    copyAlert.classList.remove('hidden');
+                    setTimeout(() => copyAlert.classList.add('hidden'), 3000);
+                }
+                showToast("¡Enlace de solo lectura copiado al portapapeles!", "success");
+            }
+        }
+
+        function exportDataCSV() {
+            const data = getFilteredData();
+            if (!data || data.length === 0) {
+                showToast("No hay datos disponibles para exportar", "info");
+                return;
+            }
+
+            const headers = ["ID_Pedido", "Orden_Compra", "Tipo", "Origen", "Cliente_Proveedor", "Muelle", "Chofer", "Fecha_Hora_Programada", "Picker", "Tiempo_Respuesta_Min", "Tiempo_Preparacion_Min", "Estatus", "Prioridad"];
+            
+            const csvRows = [];
+            csvRows.push(headers.join(","));
+
+            data.forEach(item => {
+                const row = [
+                    `"${item.id || ''}"`,
+                    `"${item.poNumber || ''}"`,
+                    `"${item.type || ''}"`,
+                    `"${item.origin || ''}"`,
+                    `"${(item.client || '').replace(/"/g, '""')}"`,
+                    `"${item.dock || ''}"`,
+                    `"${(item.driver || '').replace(/"/g, '""')}"`,
+                    `"${item.schedDateTime || ''}"`,
+                    `"${(item.picker || '').replace(/"/g, '""')}"`,
+                    item.respTime || 0,
+                    item.prepTime || 0,
+                    `"${item.status || ''}"`,
+                    `"${item.priority || ''}"`
+                ];
+                csvRows.push(row.join(","));
+            });
+
+            const csvContent = csvRows.join("\n");
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `Reporte_Logistico_Control_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast("Reporte CSV descargado con éxito", "success");
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            if (toast && toastMsg) {
+                toastMsg.innerText = message;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3500);
+            }
+        }
+
+        function getFilteredData() {
+            const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const type = document.getElementById('typeFilter')?.value || 'ALL';
+            const status = document.getElementById('statusFilter')?.value || 'ALL';
+            const dateFrom = document.getElementById('dateFromFilter')?.value || '';
+            const dateTo = document.getElementById('dateToFilter')?.value || '';
+
+            return (window.ordersData || []).filter(item => {
+                const matchSearch = !search || 
+                    item.id.toLowerCase().includes(search) ||
+                    (item.poNumber && item.poNumber.toLowerCase().includes(search)) ||
+                    item.client.toLowerCase().includes(search) ||
+                    item.driver.toLowerCase().includes(search) ||
+                    item.picker.toLowerCase().includes(search);
+
+                const matchType = type === 'ALL' || item.type === type;
+                const matchStatus = status === 'ALL' || item.status === status;
+
+                const rawDate = item.schedDateTime ? item.schedDateTime.split('T')[0] : '';
+                const matchFrom = !dateFrom || (rawDate >= dateFrom);
+                const matchTo = !dateTo || (rawDate <= dateTo);
+
+                return matchSearch && matchType && matchStatus && matchFrom && matchTo;
+            });
+        }
+
+        function clearFilters() {
+            if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
+            if (document.getElementById('typeFilter')) document.getElementById('typeFilter').value = 'ALL';
+            if (document.getElementById('statusFilter')) document.getElementById('statusFilter').value = 'ALL';
+            if (document.getElementById('dateFromFilter')) document.getElementById('dateFromFilter').value = '';
+            if (document.getElementById('dateToFilter')) document.getElementById('dateToFilter').value = '';
+            applyFiltersAndRender();
+        }
+
+        function applyFiltersAndRender() {
+            const filtered = getFilteredData();
+            
+            // 1. Calculate KPIs
+            const total = filtered.length;
+            if (document.getElementById('totalOrdersCount')) document.getElementById('totalOrdersCount').innerText = `${total} Pedidos`;
+            if (document.getElementById('tableBadgeCount')) document.getElementById('tableBadgeCount').innerText = total;
+
+            const served = filtered.filter(i => i.status === 'LISTO_ATENDIDO').length;
+            const pending = filtered.filter(i => i.status === 'EN_ESPERA' || i.status === 'EN_PREPARACION').length;
+            
+            if (document.getElementById('kpiServed')) document.getElementById('kpiServed').innerText = served;
+            if (document.getElementById('kpiPending')) document.getElementById('kpiPending').innerText = pending;
+
+            const servedPct = total > 0 ? (served / total) * 100 : 0;
+            const pendingPct = total > 0 ? (pending / total) * 100 : 0;
+            
+            if (document.getElementById('kpiProgressBarServed')) document.getElementById('kpiProgressBarServed').style.width = `${servedPct}%`;
+            if (document.getElementById('kpiProgressBarPending')) document.getElementById('kpiProgressBarPending').style.width = `${pendingPct}%`;
+
+            // Avg Response & Prep Times
+            const totalResp = filtered.reduce((acc, curr) => acc + Number(curr.respTime || 0), 0);
+            const totalPrep = filtered.reduce((acc, curr) => acc + Number(curr.prepTime || 0), 0);
+            const avgResp = total > 0 ? Math.round(totalResp / total) : 0;
+            const avgPrep = total > 0 ? Math.round(totalPrep / total) : 0;
+
+            if (document.getElementById('kpiAvgResponse')) document.getElementById('kpiAvgResponse').innerText = `${avgResp} min`;
+            if (document.getElementById('kpiAvgPrep')) document.getElementById('kpiAvgPrep').innerText = `${avgPrep} min`;
+
+            // Origins
+            const national = filtered.filter(i => i.type === 'RECEPCION' && i.origin === 'NACIONAL').length;
+            const imported = filtered.filter(i => i.type === 'RECEPCION' && i.origin === 'IMPORTADA').length;
+            
+            if (document.getElementById('kpiNationalRecp')) document.getElementById('kpiNationalRecp').innerText = national;
+            if (document.getElementById('kpiImportRecp')) document.getElementById('kpiImportRecp').innerText = imported;
+            
+            const totalRecp = national + imported;
+            if (document.getElementById('kpiBarNational')) document.getElementById('kpiBarNational').style.width = totalRecp > 0 ? `${(national / totalRecp) * 100}%` : '50%';
+            if (document.getElementById('kpiBarImport')) document.getElementById('kpiBarImport').style.width = totalRecp > 0 ? `${(imported / totalRecp) * 100}%` : '50%';
+
+            // OTIF Compliance
+            const otifRate = total > 0 ? Math.round((served / total) * 100) : 0;
+            if (document.getElementById('kpiOTIF')) document.getElementById('kpiOTIF').innerText = `${otifRate}%`;
+
+            // 2. Render Table
+            const tbody = document.getElementById('ordersTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (!tbody) return;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                if (emptyState) emptyState.classList.remove('hidden');
+                renderCharts([]);
+                return;
+            } else {
+                if (emptyState) emptyState.classList.add('hidden');
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const isDesp = item.type === 'DESPACHO';
+                const typeBadge = isDesp 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 uppercase">Despacho</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase">Recepción (${item.origin || 'N/A'})</span>`;
+
+                let statusBadge = '';
+                if (item.status === 'LISTO_ATENDIDO') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">Completado</span>`;
+                } else if (item.status === 'EN_PREPARACION') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">En Preparación</span>`;
+                } else {
+                    statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">En Espera</span>`;
+                }
+
+                const formattedDate = (item.schedDateTime || '').replace('T', ' ');
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-4">
+                            <div class="font-bold text-slate-900">${item.id}</div>
+                            <div class="mt-0.5">${typeBadge}</div>
+                        </td>
+                        <td class="py-3 px-4 font-mono font-semibold text-slate-800">${item.poNumber || 'N/A'}</td>
+                        <td class="py-3 px-4">
+                            <div class="font-medium text-slate-900">${item.client}</div>
+                            <div class="text-[11px] text-slate-400">Prioridad: ${item.priority || 'Media'}</div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="text-slate-800 font-medium">${item.dock}</div>
+                            <div class="text-[11px] text-slate-400">${item.driver || 'Chófer sin asignar'}</div>
+                        </td>
+                        <td class="py-3 px-4 font-mono text-[11px] text-slate-600">${formattedDate}</td>
+                        <td class="py-3 px-4 font-medium text-slate-800">${item.picker}</td>
+                        <td class="py-3 px-4 text-slate-600">
+                            <div>Resp: <strong class="text-slate-800">${item.respTime}m</strong></div>
+                            <div>Prep: <strong class="text-slate-800">${item.prepTime}m</strong></div>
+                        </td>
+                        <td class="py-3 px-4">${statusBadge}</td>
+                        <td class="py-3 px-4 text-right space-x-1">
+                            ${!window.isReadOnly ? `
+                                <button onclick="editOrder('${item.id}')" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar Pedido">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="promptDeleteOrder('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition" title="Eliminar Pedido">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            ` : `
+                                <span class="text-[10px] text-slate-400 italic">Solo lectura</span>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (window.lucide) lucide.createIcons();
+            renderCharts(filtered);
+        }
+
+        function renderCharts(data) {
+            // Chart 1: Date Volume
+            const dateMap = {};
+            data.forEach(item => {
+                const dateKey = item.schedDateTime ? item.schedDateTime.split('T')[0] : 'S/F';
+                if (!dateMap[dateKey]) dateMap[dateKey] = { desp: 0, recp: 0 };
+                if (item.type === 'DESPACHO') dateMap[dateKey].desp++;
+                else dateMap[dateKey].recp++;
+            });
+
+            const labels = Object.keys(dateMap).sort();
+            const despData = labels.map(l => dateMap[l].desp);
+            const recpData = labels.map(l => dateMap[l].recp);
+
+            const ctx1 = document.getElementById('datePerformanceChart')?.getContext('2d');
+            if (ctx1) {
+                if (dateChartInstance) dateChartInstance.destroy();
+                dateChartInstance = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Despachos', data: despData, backgroundColor: '#0284c7', borderRadius: 6 },
+                            { label: 'Recepciones', data: recpData, backgroundColor: '#10b981', borderRadius: 6 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                    }
+                });
+            }
+
+            // Chart 2: Picker Prep Time Performance
+            const pickerMap = {};
+            data.forEach(item => {
+                const picker = item.picker || 'Sin Asignar';
+                if (!pickerMap[picker]) pickerMap[picker] = { totalPrep: 0, count: 0 };
+                pickerMap[picker].totalPrep += Number(item.prepTime || 0);
+                pickerMap[picker].count++;
+            });
+
+            const pickerLabels = Object.keys(pickerMap);
+            const pickerAvgPrep = pickerLabels.map(p => Math.round(pickerMap[p].totalPrep / pickerMap[p].count));
+
+            const ctx2 = document.getElementById('pickerPerformanceChart')?.getContext('2d');
+            if (ctx2) {
+                if (pickerChartInstance) pickerChartInstance.destroy();
+                pickerChartInstance = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: pickerLabels,
+                        datasets: [{
+                            label: 'Minutos Promedio',
+                            data: pickerAvgPrep,
+                            backgroundColor: '#f59e0b',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { x: { beginAtZero: true } }
+                    }
+                });
+            }
+        }
+
+        function handleTypeChange() {
+            const orderType = document.getElementById('orderType').value;
+            const originSelect = document.getElementById('receptionOrigin');
+            const dockSelect = document.getElementById('dockNumber');
+
+            if (orderType === 'RECEPCION') {
+                originSelect.disabled = false;
+                originSelect.classList.remove('bg-slate-100');
+                if (originSelect.value === 'N/A') originSelect.value = 'NACIONAL';
+                dockSelect.value = 'Muelle 2 (Descarga)';
+            } else {
+                originSelect.disabled = true;
+                originSelect.classList.add('bg-slate-100');
+                originSelect.value = 'N/A';
+                dockSelect.value = 'Muelle 1 (Carga)';
+            }
+        }
+
+        function toggleOriginSelect() {
+            handleTypeChange();
+        }
+
+        async function saveOrder(e) {
+            e.preventDefault();
+            if (window.isReadOnly) {
+                showToast("Acceso denegado: Se requiere Modo Editor", "info");
+                return;
+            }
+
+            const orderObj = {
+                id: document.getElementById('orderId').value.trim(),
+                poNumber: document.getElementById('poNumber').value.trim(),
+                type: document.getElementById('orderType').value,
+                dock: document.getElementById('dockNumber').value,
+                client: document.getElementById('clientName').value.trim(),
+                driver: document.getElementById('driverInfo').value.trim() || 'Por Asignar',
+                origin: document.getElementById('receptionOrigin').value,
+                schedDateTime: document.getElementById('schedDateTime').value,
+                picker: document.getElementById('pickerName').value.trim(),
+                priority: document.getElementById('orderPriority').value,
+                respTime: Number(document.getElementById('responseTime').value || 15),
+                prepTime: Number(document.getElementById('prepTime').value || 30),
+                status: document.getElementById('orderStatus').value
+            };
+
+            await window.saveOrderToCloud(orderObj);
+            closeModal('newOrderModal');
+            showToast(`Pedido ${orderObj.id} guardado correctamente`, "success");
+
+            if (window.selectedDayForModal) {
+                openDayPlan(window.selectedDayForModal);
+            }
+        }
+
+        function editOrder(id) {
+            if (window.isReadOnly) {
+                showToast("Ingresa en Modo Editor para editar registros", "info");
+                toggleAuthModal();
+                return;
+            }
+
+            const item = (window.ordersData || []).find(o => o.id === id);
+            if (!item) return;
+
+            document.getElementById('editIndex').value = item.id;
+            document.getElementById('orderId').value = item.id;
+            document.getElementById('poNumber').value = item.poNumber || '';
+            document.getElementById('orderType').value = item.type;
+            handleTypeChange();
+            document.getElementById('dockNumber').value = item.dock;
+            document.getElementById('clientName').value = item.client;
+            document.getElementById('driverInfo').value = item.driver || '';
+            document.getElementById('receptionOrigin').value = item.origin || 'N/A';
+            document.getElementById('schedDateTime').value = item.schedDateTime || '';
+            document.getElementById('pickerName').value = item.picker;
+            document.getElementById('orderPriority').value = item.priority || 'Media';
+            document.getElementById('responseTime').value = item.respTime;
+            document.getElementById('prepTime').value = item.prepTime;
+            document.getElementById('orderStatus').value = item.status;
+
+            document.getElementById('modalTitle').innerText = `Editar Pedido #${item.id}`;
+            closeModal('dayPlanModal');
+            openModal('newOrderModal');
+        }
+
+        function promptDeleteOrder(id) {
+            if (window.isReadOnly) {
+                showToast("Acceso denegado: Se requiere Modo Editor", "info");
+                return;
+            }
+
+            const modalText = document.getElementById('confirmModalText');
+            const actionBtn = document.getElementById('confirmModalActionBtn');
+
+            if (modalText && actionBtn) {
+                modalText.innerText = `¿Estás seguro de que deseas eliminar permanentemente el pedido #${id}? esta acción no se puede deshacer.`;
+                actionBtn.onclick = async () => {
+                    await window.deleteOrderFromCloud(id);
+                    closeModal('customConfirmModal');
+                    showToast(`Pedido #${id} eliminado`, "info");
+                    if (window.selectedDayForModal) {
+                        openDayPlan(window.selectedDayForModal);
+                    }
+                };
+                openModal('customConfirmModal');
+            }
+        }
+
+        function renderCalendarView() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            document.getElementById('calendarMonthYear').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const grid = document.getElementById('calendarGrid');
+            if (!grid) return;
+
+            grid.innerHTML = '';
+
+            // Previous month padding days
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="bg-slate-50/50 border border-slate-100 rounded-xl p-2 h-24 min-h-[90px] opacity-40"></div>`;
+            }
+
+            const todayStr = new Date().toISOString().slice(0, 10);
+
+            // Month Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const monthFormatted = String(month + 1).padStart(2, '0');
+                const dayFormatted = String(day).padStart(2, '0');
+                const dateStr = `${year}-${monthFormatted}-${dayFormatted}`;
+
+                const dayOrders = (window.ordersData || []).filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+                const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
+                const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
+
+                const isToday = dateStr === todayStr;
+
+                grid.innerHTML += `
+                    <div onclick="openDayPlan('${dateStr}')" 
+                        class="bg-white border ${isToday ? 'border-brand-500 ring-2 ring-brand-500/20' : 'border-slate-200'} hover:border-brand-400 hover:shadow-md transition rounded-xl p-2 h-24 min-h-[90px] cursor-pointer flex flex-col justify-between group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold ${isToday ? 'text-brand-600' : 'text-slate-800'} group-hover:text-brand-600">${day}</span>
+                            ${dayOrders.length > 0 ? `<span class="text-[10px] font-semibold text-slate-400">${dayOrders.length} ped.</span>` : ''}
+                        </div>
+
+                        <div class="space-y-1">
+                            ${despCount > 0 ? `
+                                <div class="bg-sky-50 text-sky-700 border border-sky-200 px-1.5 py-0.5 rounded text-[10px] font-semibold flex items-center justify-between">
+                                    <span>Despachos</span>
+                                    <span>${despCount}</span>
+                                </div>
+                            ` : ''}
+                            ${recpCount > 0 ? `
+                                <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-semibold flex items-center justify-between">
+                                    <span>Recepciones</span>
+                                    <span>${recpCount}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function prevMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendarView();
+        }
+
+        function nextMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendarView();
+        }
+
+        function todayMonth() {
+            currentCalendarDate = new Date();
+            renderCalendarView();
+        }
+
+        function openDayPlan(dateStr) {
+            window.selectedDayForModal = dateStr;
+            const dayOrders = (window.ordersData || []).filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+
+            document.getElementById('dayPlanTitle').innerText = `Plan del Día: ${dateStr}`;
+            document.getElementById('dayTotalCount').innerText = `${dayOrders.length} Operaciones`;
+
+            const desp = dayOrders.filter(o => o.type === 'DESPACHO').length;
+            const recp = dayOrders.filter(o => o.type === 'RECEPCION').length;
+
+            document.getElementById('dayDespCount').innerText = desp;
+            document.getElementById('dayRecpCount').innerText = recp;
+
+            const listContainer = document.getElementById('dayPlanList');
+            if (dayOrders.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="p-8 text-center text-slate-400">
+                        <i data-lucide="calendar-x" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p class="text-xs">No hay operaciones programadas para este día.</p>
+                    </div>
+                `;
+            } else {
+                listContainer.innerHTML = dayOrders.map(item => `
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-xs text-slate-900">${item.id}</span>
+                                <span class="font-mono text-[10px] text-slate-500">(${item.poNumber || 'S/N'})</span>
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${item.type === 'DESPACHO' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'} uppercase">${item.type}</span>
+                            </div>
+                            <div class="text-xs text-slate-700 font-medium mt-1">${item.client} • <span class="text-slate-500">${item.dock}</span></div>
+                            <div class="text-[11px] text-slate-400">Picker: ${item.picker} • Hora: ${item.schedDateTime.split('T')[1] || item.schedDateTime}</div>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            ${!window.isReadOnly ? `
+                                <button onclick="editOrder('${item.id}')" class="p-1.5 text-slate-500 hover:text-brand-600 rounded-lg">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="promptDeleteOrder('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            if (window.lucide) lucide.createIcons();
+            openModal('dayPlanModal');
+        }
+
+        function addOrderForSelectedDay() {
+            if (window.isReadOnly) {
+                showToast("Acceso de solo lectura: Ingresa en Modo Editor", "info");
+                toggleAuthModal();
+                return;
+            }
+            closeModal('dayPlanModal');
+            document.getElementById('orderForm').reset();
+            document.getElementById('editIndex').value = "-1";
+            if (window.selectedDayForModal) {
+                document.getElementById('schedDateTime').value = `${window.selectedDayForModal}T08:00`;
+            }
+            openModal('newOrderModal');
+        }
+
+        function openNewUserModal() {
+            if (window.isReadOnly) {
+                showToast("Acceso de solo lectura: Desbloquea el Modo Editor para agregar usuarios", "info");
+                toggleAuthModal();
+                return;
+            }
+            const form = document.getElementById('userForm');
+            if (form) form.reset();
+            
+            document.getElementById('editUserId').value = "";
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) {
+                usernameInput.disabled = false;
+                usernameInput.classList.remove('bg-slate-100');
+            }
+
+            const modalTitle = document.getElementById('userModalTitle');
+            if (modalTitle) {
+                modalTitle.innerHTML = `
+                    <i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i>
+                    <span>Crear Nuevo Usuario</span>
+                `;
+            }
+            if (window.lucide) lucide.createIcons();
+            openModal('userModal');
+        }
+
+        async function saveUser(e) {
+            e.preventDefault();
+            if (window.isReadOnly) {
+                showToast("Acceso denegado: Se requiere Modo Editor para guardar usuarios", "info");
+                return;
+            }
+
+            const editId = document.getElementById('editUserId').value.trim();
+            const fullName = document.getElementById('userFullName').value.trim();
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const pin = document.getElementById('userPin').value.trim();
+            const role = document.getElementById('userRole').value;
+            const status = document.getElementById('userStatus').value;
+
+            if (!fullName || !username || !pin) {
+                showToast("Por favor completa todos los campos requeridos", "info");
+                return;
+            }
+
+            // Check duplicate username if new user
+            if (!editId) {
+                const existing = (window.usersData || []).find(u => u.username && u.username.toLowerCase() === username);
+                if (existing) {
+                    showToast("El nombre de usuario ya existe. Elige otro.", "info");
+                    return;
+                }
+            }
+
+            const userId = editId || `usr_${Date.now()}`;
+            const nowFormatted = new Date().toISOString().slice(0, 10) + ' ' + new Date().toTimeString().slice(0, 5);
+
+            const userObj = {
+                id: userId,
+                username: username,
+                fullName: fullName,
+                pin: pin,
+                role: role,
+                status: status,
+                lastAccess: editId ? ((window.usersData || []).find(u => u.id === editId || u.username === editId)?.lastAccess || nowFormatted) : 'Nunca'
+            };
+
+            await window.saveUserToCloud(userObj);
+            closeModal('userModal');
+            showToast(`Usuario ${fullName} (@${username}) guardado con éxito`, "success");
+            renderUsersTable();
+        }
+
+        function editUser(userId) {
+            if (window.isReadOnly) {
+                showToast("Ingresa en Modo Editor para editar usuarios", "info");
+                toggleAuthModal();
+                return;
+            }
+
+            const user = (window.usersData || []).find(u => u.id === userId || u.username === userId);
+            if (!user) return;
+
+            document.getElementById('editUserId').value = user.id || user.username;
+            document.getElementById('userFullName').value = user.fullName || '';
+            document.getElementById('username').value = user.username || '';
+            document.getElementById('userPin').value = user.pin || '';
+            document.getElementById('userRole').value = user.role || 'OPERADOR';
+            document.getElementById('userStatus').value = user.status || 'ACTIVO';
+
+            const modalTitle = document.getElementById('userModalTitle');
+            if (modalTitle) {
+                modalTitle.innerHTML = `
+                    <i data-lucide="user-cog" class="w-4 h-4 text-indigo-400"></i>
+                    <span>Editar Usuario: @${user.username}</span>
+                `;
+            }
+            if (window.lucide) lucide.createIcons();
+            openModal('userModal');
+        }
+
+        function promptDeleteUser(userId) {
+            if (window.isReadOnly) {
+                showToast("Acceso denegado: Se requiere Modo Editor", "info");
+                return;
+            }
+
+            const user = (window.usersData || []).find(u => u.id === userId || u.username === userId);
+            if (!user) return;
+
+            if (user.username === 'admin') {
+                showToast("No se puede eliminar la cuenta de Administrador principal", "info");
+                return;
+            }
+
+            const modalText = document.getElementById('confirmModalText');
+            const actionBtn = document.getElementById('confirmModalActionBtn');
+
+            if (modalText && actionBtn) {
+                modalText.innerText = `¿Estás seguro de que deseas eliminar permanentemente al usuario "${user.fullName}" (@${user.username})?`;
+                actionBtn.onclick = async () => {
+                    await window.deleteUserFromCloud(user.id || user.username);
+                    closeModal('customConfirmModal');
+                    showToast(`Usuario @${user.username} eliminado`, "info");
+                    renderUsersTable();
+                };
+                openModal('customConfirmModal');
+            }
+        }
+
+        function openResetPinModal(userId) {
+            if (window.isReadOnly) {
+                showToast("Ingresa en Modo Editor para cambiar PINs de usuario", "info");
+                toggleAuthModal();
+                return;
+            }
+
+            const user = (window.usersData || []).find(u => u.id === userId || u.username === userId);
+            if (!user) return;
+
+            document.getElementById('resetTargetUsername').value = user.id || user.username;
+            document.getElementById('resetTargetUserDisplay').innerText = `${user.fullName} (@${user.username})`;
+            document.getElementById('newPinInput').value = '';
+            openModal('resetPinModal');
+        }
+
+        async function handleResetPinSubmit(e) {
+            e.preventDefault();
+            if (window.isReadOnly) {
+                showToast("Acceso denegado: Se requiere Modo Editor", "info");
+                return;
+            }
+
+            const targetId = document.getElementById('resetTargetUsername').value;
+            const newPin = document.getElementById('newPinInput').value.trim();
+
+            if (!newPin) {
+                showToast("Por favor ingresa un PIN válido", "info");
+                return;
+            }
+
+            const user = (window.usersData || []).find(u => u.id === targetId || u.username === targetId);
+            if (user) {
+                user.pin = newPin;
+                await window.saveUserToCloud(user);
+                closeModal('resetPinModal');
+                showToast(`PIN actualizado correctamente para @${user.username}`, "success");
+                renderUsersTable();
+            }
+        }
+
+        function renderUsersTable() {
+            const users = window.usersData || [];
+            const search = (document.getElementById('userSearchInput')?.value || '').toLowerCase();
+
+            // Calculate User KPIs
+            const totalUsers = users.length;
+            const adminUsers = users.filter(u => u.role === 'ADMINISTRADOR').length;
+            const opUsers = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+            const activeUsers = users.filter(u => u.status === 'ACTIVO').length;
+
+            if (document.getElementById('kpiTotalUsers')) document.getElementById('kpiTotalUsers').innerText = totalUsers;
+            if (document.getElementById('kpiAdminUsers')) document.getElementById('kpiAdminUsers').innerText = adminUsers;
+            if (document.getElementById('kpiOperatorUsers')) document.getElementById('kpiOperatorUsers').innerText = opUsers;
+            if (document.getElementById('kpiActiveUsers')) document.getElementById('kpiActiveUsers').innerText = activeUsers;
+
+            // Filter Users
+            const filteredUsers = users.filter(u => {
+                if (!search) return true;
+                return (u.fullName || '').toLowerCase().includes(search) ||
+                       (u.username || '').toLowerCase().includes(search) ||
+                       (u.role || '').toLowerCase().includes(search);
+            });
+
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-400">
+                            <i data-lucide="user-x" class="w-8 h-8 mx-auto mb-2"></i>
+                            <p class="text-xs">No se encontraron usuarios registrados.</p>
+                        </td>
+                    </tr>
+                `;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            tbody.innerHTML = filteredUsers.map(u => {
+                let roleBadge = '';
+                if (u.role === 'ADMINISTRADOR') {
+                    roleBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">ADMINISTRADOR</span>`;
+                } else if (u.role === 'SUPERVISOR') {
+                    roleBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">SUPERVISOR</span>`;
+                } else if (u.role === 'OPERADOR') {
+                    roleBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-800">OPERADOR / PICKER</span>`;
+                } else {
+                    roleBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">LECTOR</span>`;
+                }
+
+                const statusBadge = u.status === 'ACTIVO'
+                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 flex items-center gap-1 w-max"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Activo</span>`
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800 flex items-center gap-1 w-max"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Inactivo</span>`;
+
+                const uId = u.id || u.username;
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-4">
+                            <div class="font-bold text-slate-900">${u.fullName || 'Sin Nombre'}</div>
+                            <div class="text-[11px] font-mono text-indigo-600">@${u.username}</div>
+                        </td>
+                        <td class="py-3 px-4">${roleBadge}</td>
+                        <td class="py-3 px-4 font-mono text-slate-500 tracking-widest">••••</td>
+                        <td class="py-3 px-4">${statusBadge}</td>
+                        <td class="py-3 px-4 font-mono text-[11px] text-slate-500">${u.lastAccess || 'Nunca'}</td>
+                        <td class="py-3 px-4 text-right space-x-1">
+                            ${!window.isReadOnly ? `
+                                <button onclick="editUser('${uId}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition" title="Editar Usuario">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="openResetPinModal('${uId}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-slate-100 rounded-lg transition" title="Restablecer PIN">
+                                    <i data-lucide="key-round" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="promptDeleteUser('${uId}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition" title="Eliminar Usuario">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            ` : `
+                                <span class="text-[10px] text-slate-400 italic">Solo lectura</span>
+                            `}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        window.switchView = switchView;
+        window.toggleAuthModal = toggleAuthModal;
+        window.handleAuthSubmit = handleAuthSubmit;
+        window.handleNewOrderClick = handleNewOrderClick;
+        window.openShareModal = openShareModal;
+        window.copyShareUrl = copyShareUrl;
+        window.exportDataCSV = exportDataCSV;
+        window.applyFiltersAndRender = applyFiltersAndRender;
+        window.clearFilters = clearFilters;
+        window.handleTypeChange = handleTypeChange;
+        window.toggleOriginSelect = toggleOriginSelect;
+        window.saveOrder = saveOrder;
+        window.editOrder = editOrder;
+        window.promptDeleteOrder = promptDeleteOrder;
+        window.prevMonth = prevMonth;
+        window.nextMonth = nextMonth;
+        window.todayMonth = todayMonth;
+        window.openDayPlan = openDayPlan;
+        window.addOrderForSelectedDay = addOrderForSelectedDay;
+        window.closeModal = closeModal;
+        window.openModal = openModal;
+        window.openNewUserModal = openNewUserModal;
+        window.saveUser = saveUser;
+        window.editUser = editUser;
+        window.promptDeleteUser = promptDeleteUser;
+        window.openResetPinModal = openResetPinModal;
+        window.handleResetPinSubmit = handleResetPinSubmit;
+        window.renderUsersTable = renderUsersTable;
+    </script>
+</body>
+</html>
