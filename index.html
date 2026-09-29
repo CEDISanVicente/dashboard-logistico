@@ -912,6 +912,30 @@
 
     <!-- Firebase Realtime Firestore & Main Logic -->
     <script type="module">
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDs5Xj3TJyJZxI5kKUcsIMferOoGyHHHTg",
+  authDomain: "dashboard-logistico-2e36c.firebaseapp.com",
+  projectId: "dashboard-logistico-2e36c",
+  storageBucket: "dashboard-logistico-2e36c.firebasestorage.app",
+  messagingSenderId: "810584249063",
+  appId: "1:810584249063:web:7a774fd8cf67fc5c500842",
+  measurementId: "G-J7DE1CWT3Q"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
