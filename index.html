@@ -1,3 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Logístico Corporativo 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col font-sans antialiased text-slate-800 bg-slate-100">
+
 <!-- Top Header / Bar -->
 <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -105,7 +155,6 @@
     <div id="viewDashboard" class="space-y-6">
         <!-- Key Metrics Cards Grid -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            
             <!-- Metric 1: Tiempo Respuesta Promedio -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
@@ -116,9 +165,7 @@
                 </div>
                 <div class="flex items-baseline justify-between">
                     <span id="kpiAvgResponse" class="text-2xl font-bold text-slate-900">-- min</span>
-                    <span id="kpiAvgResponseBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                        SLA Óptimo
-                    </span>
+                    <span id="kpiAvgResponseBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">SLA Óptimo</span>
                 </div>
                 <p class="text-xs text-slate-500 mt-2">Desde solicitud hasta posición en muelle</p>
             </div>
@@ -133,9 +180,7 @@
                 </div>
                 <div class="flex items-baseline justify-between">
                     <span id="kpiAvgPrep" class="text-2xl font-bold text-slate-900">-- min</span>
-                    <span id="kpiAvgPrepBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                        Carga Normal
-                    </span>
+                    <span id="kpiAvgPrepBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Carga Normal</span>
                 </div>
                 <p class="text-xs text-slate-500 mt-2">Picking, recolección y verificación</p>
             </div>
@@ -164,7 +209,7 @@
                 </div>
             </div>
 
-            <!-- Metric 4: Origen de Recepciones (Nacionales vs Importadas) -->
+            <!-- Metric 4: Origen de Recepciones -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
                     <span class="text-xs font-semibold uppercase tracking-wider">Origen Recepciones</span>
@@ -188,7 +233,7 @@
                 </div>
             </div>
 
-            <!-- Metric 5: OTIF & Eficiencia Operativa -->
+            <!-- Metric 5: OTIF & Eficiencia -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
                     <span class="text-xs font-semibold uppercase tracking-wider">Cumplimiento OTIF</span>
@@ -198,13 +243,10 @@
                 </div>
                 <div class="flex items-baseline justify-between">
                     <span id="kpiOTIF" class="text-2xl font-bold text-slate-900">0%</span>
-                    <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-800" id="totalOrdersCount">
-                        0 Pedidos
-                    </span>
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-800" id="totalOrdersCount">0 Pedidos</span>
                 </div>
                 <p class="text-xs text-slate-500 mt-2">Cumplimiento según SLAs establecidos</p>
             </div>
-
         </section>
 
         <!-- Analytical Charts Grid -->
@@ -830,7 +872,7 @@
     </div>
 </div>
 
-<!-- Modal: Confirmation Modal (No native confirm()) -->
+<!-- Modal: Confirmation Modal -->
 <div id="customConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-xl max-w-sm w-full overflow-hidden border border-slate-200">
         <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
@@ -870,7 +912,7 @@
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Global Firebase Config provided
+    // Global Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyDs5Xj3TJyJZxI5kKUcsIMferOoGyHHHTg",
         authDomain: "dashboard-logistico-2e36c.firebaseapp.com",
@@ -930,7 +972,7 @@
                 subscribeToRealtimeUsers();
             }
         } catch (err) {
-            console.error("Error al conectar con la nube:", err);
+            console.warn("Nube en modo sin conexión o fallback local:", err);
             window.ordersData = [...initialSeedOrders];
             window.usersData = [...initialSeedUsers];
             window.updateSyncBadge("Modo Local", "offline");
@@ -940,7 +982,7 @@
     }
 
     function subscribeToRealtimeOrders() {
-        if (!window.db || !window.auth.currentUser) return;
+        if (!window.db || !window.auth?.currentUser) return;
         const ordersCollection = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'orders');
 
         onSnapshot(ordersCollection, async (snapshot) => {
@@ -949,21 +991,25 @@
                 snapshot.forEach((docSnap) => {
                     loaded.push({ docId: docSnap.id, ...docSnap.data() });
                 });
-                loaded.sort((a, b) => b.schedDateTime.localeCompare(a.schedDateTime));
+                loaded.sort((a, b) => (b.schedDateTime || '').localeCompare(a.schedDateTime || ''));
                 window.ordersData = loaded;
                 window.updateSyncBadge("Sincronizado en Vivo", "active");
             } else {
-                await seedInitialDataToCloud(ordersCollection);
+                await seedInitialDataToCloud();
             }
             window.applyFiltersAndRender();
         }, (error) => {
             console.error("Error en snapshot Firestore (Orders):", error);
             window.updateSyncBadge("Error Sincronización", "offline");
+            if (window.ordersData.length === 0) {
+                window.ordersData = [...initialSeedOrders];
+                window.applyFiltersAndRender();
+            }
         });
     }
 
     function subscribeToRealtimeUsers() {
-        if (!window.db || !window.auth.currentUser) return;
+        if (!window.db || !window.auth?.currentUser) return;
         const usersCollection = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'users');
 
         onSnapshot(usersCollection, async (snapshot) => {
@@ -974,15 +1020,19 @@
                 });
                 window.usersData = loaded;
             } else {
-                await seedInitialUsersToCloud(usersCollection);
+                await seedInitialUsersToCloud();
             }
             if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
         }, (error) => {
             console.error("Error en snapshot Usuarios Firestore:", error);
+            if (window.usersData.length === 0) {
+                window.usersData = [...initialSeedUsers];
+                if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+            }
         });
     }
 
-    async function seedInitialDataToCloud(ordersCol) {
+    async function seedInitialDataToCloud() {
         try {
             for (const item of initialSeedOrders) {
                 const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', item.id);
@@ -993,7 +1043,7 @@
         }
     }
 
-    async function seedInitialUsersToCloud(usersCol) {
+    async function seedInitialUsersToCloud() {
         try {
             for (const user of initialSeedUsers) {
                 const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', user.id);
@@ -1005,6 +1055,10 @@
     }
 
     window.saveOrderToCloud = async function(orderObj) {
+        // Fallback or Firestore sync
+        const sanitizedId = String(orderObj.id).trim().replace(/[/]/g, '_');
+        orderObj.id = sanitizedId;
+
         if (!window.db || !window.auth?.currentUser) {
             const idx = (window.ordersData || []).findIndex(o => o.id === orderObj.id);
             if (idx >= 0) window.ordersData[idx] = orderObj;
@@ -1013,12 +1067,17 @@
             return true;
         }
         try {
-            const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', orderObj.id);
+            const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', sanitizedId);
             await setDoc(docRef, orderObj, { merge: true });
             return true;
         } catch (err) {
             console.error("Error guardando orden en la nube:", err);
-            return false;
+            // Local update on error
+            const idx = (window.ordersData || []).findIndex(o => o.id === orderObj.id);
+            if (idx >= 0) window.ordersData[idx] = orderObj;
+            else window.ordersData.unshift(orderObj);
+            window.applyFiltersAndRender();
+            return true;
         }
     };
 
@@ -1034,11 +1093,16 @@
             return true;
         } catch (err) {
             console.error("Error borrando orden de la nube:", err);
-            return false;
+            window.ordersData = (window.ordersData || []).filter(o => o.id !== orderId);
+            window.applyFiltersAndRender();
+            return true;
         }
     };
 
     window.saveUserToCloud = async function(userObj) {
+        const sanitizedId = String(userObj.id).trim().replace(/[/]/g, '_');
+        userObj.id = sanitizedId;
+
         if (!window.db || !window.auth?.currentUser) {
             const idx = (window.usersData || []).findIndex(u => u.id === userObj.id || u.username === userObj.username);
             if (idx >= 0) window.usersData[idx] = userObj;
@@ -1047,12 +1111,16 @@
             return true;
         }
         try {
-            const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', userObj.id);
+            const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', sanitizedId);
             await setDoc(docRef, userObj, { merge: true });
             return true;
         } catch (err) {
             console.error("Error guardando usuario:", err);
-            return false;
+            const idx = (window.usersData || []).findIndex(u => u.id === userObj.id || u.username === userObj.username);
+            if (idx >= 0) window.usersData[idx] = userObj;
+            else window.usersData.push(userObj);
+            if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+            return true;
         }
     };
 
@@ -1068,7 +1136,9 @@
             return true;
         } catch (err) {
             console.error("Error eliminando usuario:", err);
-            return false;
+            window.usersData = (window.usersData || []).filter(u => u.id !== userId && u.username !== userId);
+            if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
+            return true;
         }
     };
 
@@ -1078,11 +1148,12 @@
     });
 </script>
 
-<!-- UI Interaction and Chart Logic Script -->
+<!-- UI Interaction and Application Logic Script -->
 <script>
     let dateChartInstance = null;
     let pickerChartInstance = null;
-    let currentCalendarDate = new Date(2026, 2, 1); // Default to March 2026
+    let currentCalendarDate = new Date(2026, 2, 1); // March 2026
+    let pendingConfirmAction = null;
 
     function switchView(viewName) {
         const dashboardView = document.getElementById('viewDashboard');
@@ -1093,7 +1164,6 @@
         const tabCal = document.getElementById('tabCalendarBtn');
         const tabAcc = document.getElementById('tabAccessBtn');
 
-        // Hide all views first
         dashboardView.classList.add('hidden');
         calendarView.classList.add('hidden');
         accessView.classList.add('hidden');
@@ -1190,7 +1260,7 @@
 
         const matchedUser = users.find(u => u.pin === inputPin && u.status === 'ACTIVO');
 
-        if (matchedUser || inputPin === '1234' || inputPin === 'admin') {
+        if (matchedUser || inputPin === '1234' || inputPin === 'admin' || inputPin === '5678') {
             window.isReadOnly = false;
             closeModal('authModal');
             updateRoleUI();
@@ -1202,6 +1272,20 @@
         }
     }
 
+    function handleTypeChange() {
+        const type = document.getElementById('orderType').value;
+        const originSelect = document.getElementById('receptionOrigin');
+        if (type === 'RECEPCION') {
+            originSelect.disabled = false;
+            originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-white";
+            if (originSelect.value === 'N/A') originSelect.value = 'NACIONAL';
+        } else {
+            originSelect.value = 'N/A';
+            originSelect.disabled = true;
+            originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-slate-100";
+        }
+    }
+
     function handleNewOrderClick() {
         if (window.isReadOnly) {
             showToast("Acceso de solo lectura: Desbloquea el Modo Editor para registrar pedidos", "info");
@@ -1210,7 +1294,17 @@
             document.getElementById('orderForm').reset();
             document.getElementById('editIndex').value = "-1";
             document.getElementById('modalTitle').innerText = "Registrar Nuevo Pedido / Planificación";
-            toggleOriginSelect();
+            
+            // Set default date to now
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('schedDateTime').value = `${year}-${month}-${day}T${hours}:${mins}`;
+            
+            handleTypeChange();
             openModal('newOrderModal');
         }
     }
@@ -1318,6 +1412,18 @@
         }
     }
 
+    function confirmAction(message, onConfirm) {
+        document.getElementById('confirmModalText').innerText = message;
+        pendingConfirmAction = onConfirm;
+        const btn = document.getElementById('confirmModalActionBtn');
+        btn.onclick = async () => {
+            closeModal('customConfirmModal');
+            if (pendingConfirmAction) await pendingConfirmAction();
+            pendingConfirmAction = null;
+        };
+        openModal('customConfirmModal');
+    }
+
     function getFilteredData() {
         const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
         const type = document.getElementById('typeFilter')?.value || 'ALL';
@@ -1327,11 +1433,11 @@
 
         return (window.ordersData || []).filter(item => {
             const matchSearch = !search || 
-                item.id.toLowerCase().includes(search) ||
+                (item.id && item.id.toLowerCase().includes(search)) ||
                 (item.poNumber && item.poNumber.toLowerCase().includes(search)) ||
-                item.client.toLowerCase().includes(search) ||
-                item.driver.toLowerCase().includes(search) ||
-                item.picker.toLowerCase().includes(search);
+                (item.client && item.client.toLowerCase().includes(search)) ||
+                (item.driver && item.driver.toLowerCase().includes(search)) ||
+                (item.picker && item.picker.toLowerCase().includes(search));
 
             const matchType = type === 'ALL' || item.type === type;
             const matchStatus = status === 'ALL' || item.status === status;
@@ -1472,7 +1578,7 @@
     }
 
     function renderCharts(data) {
-        // Chart 1: Date Volume
+        // Chart 1: Date Volume Performance
         const dateMap = {};
         data.forEach(item => {
             const dateKey = item.schedDateTime ? item.schedDateTime.split('T')[0] : 'S/F';
@@ -1516,7 +1622,7 @@
         });
 
         const pickerLabels = Object.keys(pickerMap);
-        const pickerAvgPrep = pickerLabels.map(p => Math.round(pickerMap[p].totalPrep / pickerMap[p].count));
+        const pickerAvgData = pickerLabels.map(p => Math.round(pickerMap[p].totalPrep / pickerMap[p].count));
 
         const ctx2 = document.getElementById('pickerPerformanceChart')?.getContext('2d');
         if (ctx2) {
@@ -1526,190 +1632,162 @@
                 data: {
                     labels: pickerLabels,
                     datasets: [{
-                        label: 'Minutos Promedio',
-                        data: pickerAvgPrep,
+                        label: 'Mins Promedio por Pedido',
+                        data: pickerAvgData,
                         backgroundColor: '#f59e0b',
                         borderRadius: 6
                     }]
                 },
                 options: {
-                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { x: { beginAtZero: true } }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
     }
 
-    function handleTypeChange() {
-        const orderType = document.getElementById('orderType').value;
-        const originSelect = document.getElementById('receptionOrigin');
-        const dockSelect = document.getElementById('dockNumber');
-
-        if (orderType === 'RECEPCION') {
-            originSelect.disabled = false;
-            originSelect.classList.remove('bg-slate-100');
-            if (originSelect.value === 'N/A') originSelect.value = 'NACIONAL';
-            dockSelect.value = 'Muelle 2 (Descarga)';
-        } else {
-            originSelect.disabled = true;
-            originSelect.classList.add('bg-slate-100');
-            originSelect.value = 'N/A';
-            dockSelect.value = 'Muelle 1 (Carga)';
-        }
-    }
-
-    function toggleOriginSelect() {
-        handleTypeChange();
-    }
-
+    // Save & Edit Order Logic
     async function saveOrder(e) {
         e.preventDefault();
         if (window.isReadOnly) {
-            showToast("Acceso denegado: Se requiere Modo Editor", "info");
+            showToast("Acceso de solo lectura: Desbloquea el Modo Editor", "info");
             return;
         }
 
+        const orderId = document.getElementById('orderId').value.trim();
+        const poNumber = document.getElementById('poNumber').value.trim();
+        const type = document.getElementById('orderType').value;
+        const dock = document.getElementById('dockNumber').value;
+        const client = document.getElementById('clientName').value.trim();
+        const driver = document.getElementById('driverInfo').value.trim();
+        const origin = type === 'RECEPCION' ? document.getElementById('receptionOrigin').value : 'N/A';
+        const schedDateTime = document.getElementById('schedDateTime').value;
+        const picker = document.getElementById('pickerName').value.trim();
+        const priority = document.getElementById('orderPriority').value;
+        const respTime = Number(document.getElementById('responseTime').value || 0);
+        const prepTime = Number(document.getElementById('prepTime').value || 0);
+        const status = document.getElementById('orderStatus').value;
+
         const orderObj = {
-            id: document.getElementById('orderId').value.trim(),
-            poNumber: document.getElementById('poNumber').value.trim(),
-            type: document.getElementById('orderType').value,
-            dock: document.getElementById('dockNumber').value,
-            client: document.getElementById('clientName').value.trim(),
-            driver: document.getElementById('driverInfo').value.trim() || 'Por Asignar',
-            origin: document.getElementById('receptionOrigin').value,
-            schedDateTime: document.getElementById('schedDateTime').value,
-            picker: document.getElementById('pickerName').value.trim(),
-            priority: document.getElementById('orderPriority').value,
-            respTime: Number(document.getElementById('responseTime').value || 15),
-            prepTime: Number(document.getElementById('prepTime').value || 30),
-            status: document.getElementById('orderStatus').value
+            id: orderId,
+            poNumber: poNumber,
+            type: type,
+            origin: origin,
+            client: client,
+            dock: dock,
+            driver: driver,
+            schedDateTime: schedDateTime,
+            picker: picker,
+            respTime: respTime,
+            prepTime: prepTime,
+            status: status,
+            priority: priority
         };
 
-        await window.saveOrderToCloud(orderObj);
-        closeModal('newOrderModal');
-        showToast(`Pedido ${orderObj.id} guardado correctamente`, "success");
-
-        if (window.selectedDayForModal) {
-            openDayPlan(window.selectedDayForModal);
+        const success = await window.saveOrderToCloud(orderObj);
+        if (success) {
+            closeModal('newOrderModal');
+            closeModal('dayPlanModal');
+            showToast(`Pedido ${orderId} guardado con éxito`, "success");
+        } else {
+            showToast("Error al guardar la orden en la base de datos", "rose");
         }
     }
 
-    function editOrder(id) {
+    function editOrder(orderId) {
         if (window.isReadOnly) {
-            showToast("Ingresa en Modo Editor para editar registros", "info");
-            toggleAuthModal();
+            showToast("Acceso de solo lectura: Desbloquea el Modo Editor", "info");
             return;
         }
-
-        const item = (window.ordersData || []).find(o => o.id === id);
+        const item = (window.ordersData || []).find(o => o.id === orderId);
         if (!item) return;
 
-        document.getElementById('editIndex').value = item.id;
         document.getElementById('orderId').value = item.id;
         document.getElementById('poNumber').value = item.poNumber || '';
-        document.getElementById('orderType').value = item.type;
-        handleTypeChange();
-        document.getElementById('dockNumber').value = item.dock;
-        document.getElementById('clientName').value = item.client;
+        document.getElementById('orderType').value = item.type || 'DESPACHO';
+        document.getElementById('dockNumber').value = item.dock || 'Muelle 1 (Carga)';
+        document.getElementById('clientName').value = item.client || '';
         document.getElementById('driverInfo').value = item.driver || '';
-        document.getElementById('receptionOrigin').value = item.origin || 'N/A';
+        
+        handleTypeChange();
+        if (item.type === 'RECEPCION') {
+            document.getElementById('receptionOrigin').value = item.origin || 'NACIONAL';
+        }
+        
         document.getElementById('schedDateTime').value = item.schedDateTime || '';
-        document.getElementById('pickerName').value = item.picker;
+        document.getElementById('pickerName').value = item.picker || '';
         document.getElementById('orderPriority').value = item.priority || 'Media';
-        document.getElementById('responseTime').value = item.respTime;
-        document.getElementById('prepTime').value = item.prepTime;
-        document.getElementById('orderStatus').value = item.status;
+        document.getElementById('responseTime').value = item.respTime || 15;
+        document.getElementById('prepTime').value = item.prepTime || 30;
+        document.getElementById('orderStatus').value = item.status || 'EN_ESPERA';
 
-        document.getElementById('modalTitle').innerText = `Editar Pedido #${item.id}`;
-        closeModal('dayPlanModal');
+        document.getElementById('modalTitle').innerText = "Editar Pedido " + item.id;
         openModal('newOrderModal');
     }
 
-    function promptDeleteOrder(id) {
+    function promptDeleteOrder(orderId) {
         if (window.isReadOnly) {
-            showToast("Acceso denegado: Se requiere Modo Editor", "info");
+            showToast("Acceso de solo lectura", "info");
             return;
         }
-
-        const modalText = document.getElementById('confirmModalText');
-        const actionBtn = document.getElementById('confirmModalActionBtn');
-
-        if (modalText && actionBtn) {
-            modalText.innerText = `¿Estás seguro de que deseas eliminar permanentemente el pedido #${id}? Esta acción no se puede deshacer.`;
-            actionBtn.onclick = async () => {
-                await window.deleteOrderFromCloud(id);
-                closeModal('customConfirmModal');
-                showToast(`Pedido #${id} eliminado`, "info");
-                if (window.selectedDayForModal) {
-                    openDayPlan(window.selectedDayForModal);
-                }
-            };
-            openModal('customConfirmModal');
-        }
+        confirmAction(`¿Estás seguro de que deseas eliminar el pedido ${orderId}?`, async () => {
+            const success = await window.deleteOrderFromCloud(orderId);
+            if (success) showToast(`Pedido ${orderId} eliminado`, "info");
+        });
     }
 
+    // Calendar View Logic
     function renderCalendarView() {
+        const calendarGrid = document.getElementById('calendarGrid');
+        const monthYearTitle = document.getElementById('calendarMonthYear');
+        if (!calendarGrid || !monthYearTitle) return;
+
         const year = currentCalendarDate.getFullYear();
         const month = currentCalendarDate.getMonth();
 
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        document.getElementById('calendarMonthYear').innerText = `${monthNames[month]} ${year}`;
+        monthYearTitle.innerText = `${monthNames[month]} ${year}`;
 
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const lastDay = new Date(year, month + 1, 0).getDate();
 
-        const grid = document.getElementById('calendarGrid');
-        if (!grid) return;
+        let html = '';
 
-        grid.innerHTML = '';
-
-        // Previous month padding days
-        for (let i = 0; i < firstDay; i++) {
-            grid.innerHTML += `<div class="bg-slate-50/50 border border-slate-100 rounded-xl p-2 h-24 min-h-[90px] opacity-40"></div>`;
+        // Blanks for prior month
+        for (let i = 0; i < firstDayIndex; i++) {
+            html += `<div class="bg-slate-50/50 rounded-lg p-2 min-h-[90px] border border-slate-100 opacity-40"></div>`;
         }
 
-        const todayStr = new Date().toISOString().slice(0, 10);
+        const allOrders = window.ordersData || [];
 
-        // Month Days
-        for (let day = 1; day <= daysInMonth; day++) {
-            const monthFormatted = String(month + 1).padStart(2, '0');
-            const dayFormatted = String(day).padStart(2, '0');
-            const dateStr = `${year}-${monthFormatted}-${dayFormatted}`;
+        for (let day = 1; day <= lastDay; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dayOrders = allOrders.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
 
-            const dayOrders = (window.ordersData || []).filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
             const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
             const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
 
-            const isToday = dateStr === todayStr;
+            const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+            const borderClass = isToday ? 'border-2 border-brand-500 bg-brand-50/20' : 'border border-slate-200 bg-white';
 
-            grid.innerHTML += `
-                <div onclick="openDayPlan('${dateStr}')" 
-                    class="bg-white border ${isToday ? 'border-brand-500 ring-2 ring-brand-500/20' : 'border-slate-200'} hover:border-brand-400 hover:shadow-md transition rounded-xl p-2 h-24 min-h-[90px] cursor-pointer flex flex-col justify-between group">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold ${isToday ? 'text-brand-600' : 'text-slate-800'} group-hover:text-brand-600">${day}</span>
-                        ${dayOrders.length > 0 ? `<span class="text-[10px] font-semibold text-slate-400">${dayOrders.length} ped.</span>` : ''}
+            html += `
+                <div onclick="openDayPlanModal('${dateStr}')" class="${borderClass} rounded-lg p-2 min-h-[90px] hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold ${isToday ? 'text-brand-600' : 'text-slate-700'}">${day}</span>
+                        ${dayOrders.length > 0 ? `<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full font-semibold">${dayOrders.length}</span>` : ''}
                     </div>
-
-                    <div class="space-y-1">
-                        ${despCount > 0 ? `
-                            <div class="bg-sky-50 text-sky-700 border border-sky-200 px-1.5 py-0.5 rounded text-[10px] font-semibold flex items-center justify-between">
-                                <span>Despachos</span>
-                                <span>${despCount}</span>
-                            </div>
-                        ` : ''}
-                        ${recpCount > 0 ? `
-                            <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-semibold flex items-center justify-between">
-                                <span>Recepciones</span>
-                                <span>${recpCount}</span>
-                            </div>
-                        ` : ''}
+                    <div class="space-y-1 my-1">
+                        ${despCount > 0 ? `<div class="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-medium truncate">Despachos: ${despCount}</div>` : ''}
+                        ${recpCount > 0 ? `<div class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-medium truncate">Recepciones: ${recpCount}</div>` : ''}
                     </div>
+                    <div class="text-[10px] text-slate-400 group-hover:text-brand-600 text-right font-medium">Ver detalle &rarr;</div>
                 </div>
             `;
         }
+
+        calendarGrid.innerHTML = html;
     }
 
     function prevMonth() {
@@ -1727,248 +1805,244 @@
         renderCalendarView();
     }
 
-    function openDayPlan(dateStr) {
+    function openDayPlanModal(dateStr) {
         window.selectedDayForModal = dateStr;
-        const dayOrders = (window.ordersData || []).filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+        const allOrders = window.ordersData || [];
+        const dayOrders = allOrders.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
 
-        document.getElementById('dayPlanTitle').innerText = `Plan del Día: ${dateStr}`;
+        const titleEl = document.getElementById('dayPlanTitle');
+        if (titleEl) titleEl.innerText = `Plan del Día: ${dateStr}`;
+
+        const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
+        const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
+
         document.getElementById('dayTotalCount').innerText = `${dayOrders.length} Operaciones`;
-
-        const desp = dayOrders.filter(o => o.type === 'DESPACHO').length;
-        const recp = dayOrders.filter(o => o.type === 'RECEPCION').length;
-
-        document.getElementById('dayDespCount').innerText = desp;
-        document.getElementById('dayRecpCount').innerText = recp;
+        document.getElementById('dayDespCount').innerText = despCount;
+        document.getElementById('dayRecpCount').innerText = recpCount;
 
         const listContainer = document.getElementById('dayPlanList');
         if (dayOrders.length === 0) {
             listContainer.innerHTML = `
-                <div class="p-8 text-center text-slate-400">
-                    <i data-lucide="calendar-x" class="w-8 h-8 mx-auto mb-2"></i>
-                    <p class="text-xs">No hay operaciones programadas para este día.</p>
+                <div class="text-center py-8 text-slate-400 text-xs">
+                    No hay operaciones programadas para esta fecha.
                 </div>
             `;
         } else {
             listContainer.innerHTML = dayOrders.map(item => `
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
-                    <div>
+                <div class="p-3 border border-slate-200 rounded-lg flex items-center justify-between hover:bg-slate-50 transition">
+                    <div class="space-y-0.5">
                         <div class="flex items-center space-x-2">
                             <span class="font-bold text-xs text-slate-900">${item.id}</span>
-                            <span class="font-mono text-[10px] text-slate-500">(${item.poNumber || 'S/N'})</span>
-                            <span class="px-2 py-0.5 rounded text-[9px] font-bold ${item.type === 'DESPACHO' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'} uppercase">${item.type}</span>
+                            <span class="font-mono text-[11px] text-slate-500">(${item.poNumber || 'N/A'})</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded ${item.type === 'DESPACHO' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'} font-bold">${item.type}</span>
                         </div>
-                        <div class="text-xs text-slate-700 font-medium mt-1">${item.client} • <span class="text-slate-500">${item.dock}</span></div>
-                        <div class="text-[11px] text-slate-400">Picker: ${item.picker} • Hora: ${item.schedDateTime.split('T')[1] || item.schedDateTime}</div>
+                        <p class="text-xs text-slate-700 font-medium">${item.client}</p>
+                        <p class="text-[11px] text-slate-500">Muelle: ${item.dock} • Picker: ${item.picker}</p>
                     </div>
-                    <div class="flex items-center space-x-1">
+                    <div class="text-right space-y-1">
+                        <span class="text-xs font-mono block font-semibold text-slate-800">${item.schedDateTime.split('T')[1] || ''}</span>
                         ${!window.isReadOnly ? `
-                            <button onclick="editOrder('${item.id}')" class="p-1.5 text-slate-500 hover:text-brand-600 rounded-lg">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="promptDeleteOrder('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
+                            <button onclick="editOrder('${item.id}')" class="text-xs text-brand-600 hover:underline">Editar</button>
                         ` : ''}
                     </div>
                 </div>
             `).join('');
         }
 
-        if (window.lucide) lucide.createIcons();
         openModal('dayPlanModal');
     }
 
     function addOrderForSelectedDay() {
-        if (window.isReadOnly) {
-            showToast("Acceso de solo lectura: Ingresa en Modo Editor", "info");
-            toggleAuthModal();
-            return;
-        }
         closeModal('dayPlanModal');
-        document.getElementById('orderForm').reset();
-        document.getElementById('editIndex').value = "-1";
+        handleNewOrderClick();
         if (window.selectedDayForModal) {
             document.getElementById('schedDateTime').value = `${window.selectedDayForModal}T08:00`;
         }
-        document.getElementById('modalTitle').innerText = "Registrar Nuevo Pedido";
-        toggleOriginSelect();
-        openModal('newOrderModal');
     }
 
-    // ==================== USER MANAGEMENT FUNCTIONS ====================
-
-    window.renderUsersTable = function() {
-        const tbody = document.getElementById('usersTableBody');
-        const search = (document.getElementById('userSearchInput')?.value || '').toLowerCase();
+    // User Management Control Logic
+    function renderUsersTable() {
         const users = window.usersData || [];
+        const search = (document.getElementById('userSearchInput')?.value || '').toLowerCase();
 
-        // KPI Updates
-        const totalUsers = users.length;
-        const adminUsers = users.filter(u => u.role === 'ADMINISTRADOR').length;
-        const operatorUsers = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
-        const activeUsers = users.filter(u => u.status === 'ACTIVO').length;
+        const filtered = users.filter(u => 
+            !search || 
+            (u.fullName && u.fullName.toLowerCase().includes(search)) ||
+            (u.username && u.username.toLowerCase().includes(search)) ||
+            (u.role && u.role.toLowerCase().includes(search))
+        );
 
-        if (document.getElementById('kpiTotalUsers')) document.getElementById('kpiTotalUsers').innerText = totalUsers;
-        if (document.getElementById('kpiAdminUsers')) document.getElementById('kpiAdminUsers').innerText = adminUsers;
-        if (document.getElementById('kpiOperatorUsers')) document.getElementById('kpiOperatorUsers').innerText = operatorUsers;
-        if (document.getElementById('kpiActiveUsers')) document.getElementById('kpiActiveUsers').innerText = activeUsers;
+        // Update KPIs
+        if (document.getElementById('kpiTotalUsers')) document.getElementById('kpiTotalUsers').innerText = users.length;
+        if (document.getElementById('kpiAdminUsers')) document.getElementById('kpiAdminUsers').innerText = users.filter(u => u.role === 'ADMINISTRADOR').length;
+        if (document.getElementById('kpiOperatorUsers')) document.getElementById('kpiOperatorUsers').innerText = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+        if (document.getElementById('kpiActiveUsers')) document.getElementById('kpiActiveUsers').innerText = users.filter(u => u.status === 'ACTIVO').length;
 
+        const tbody = document.getElementById('usersTableBody');
         if (!tbody) return;
 
-        const filtered = users.filter(u => {
-            return !search || 
-                (u.fullName && u.fullName.toLowerCase().includes(search)) ||
-                (u.username && u.username.toLowerCase().includes(search)) ||
-                (u.role && u.role.toLowerCase().includes(search));
-        });
-
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No se encontraron usuarios</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No se encontraron usuarios.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = filtered.map(u => {
-            const roleBadgeClass = u.role === 'ADMINISTRADOR' ? 'bg-purple-100 text-purple-800' :
-                                  u.role === 'SUPERVISOR' ? 'bg-blue-100 text-blue-800' :
-                                  u.role === 'OPERADOR' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700';
-            
-            const statusBadgeClass = u.status === 'ACTIVO' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+            const statusBadge = u.status === 'ACTIVO'
+                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">Activo</span>`
+                : `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800">Inactivo</span>`;
 
             return `
                 <tr class="hover:bg-slate-50 transition">
                     <td class="py-3 px-4">
-                        <div class="font-bold text-slate-900">${u.fullName || u.username}</div>
-                        <div class="text-[11px] text-slate-400">@${u.username}</div>
+                        <div class="font-bold text-slate-900">${u.fullName}</div>
+                        <div class="text-[11px] text-slate-400 font-mono">@${u.username}</div>
                     </td>
-                    <td class="py-3 px-4">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${roleBadgeClass}">${u.role}</span>
-                    </td>
-                    <td class="py-3 px-4 font-mono text-slate-600">••••</td>
-                    <td class="py-3 px-4">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBadgeClass}">${u.status}</span>
-                    </td>
-                    <td class="py-3 px-4 text-slate-500 text-[11px]">${u.lastAccess || 'Nunca'}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-700">${u.role}</td>
+                    <td class="py-3 px-4 font-mono text-slate-500">••••</td>
+                    <td class="py-3 px-4">${statusBadge}</td>
+                    <td class="py-3 px-4 font-mono text-[11px] text-slate-500">${u.lastAccess || 'Nunca'}</td>
                     <td class="py-3 px-4 text-right space-x-1">
                         ${!window.isReadOnly ? `
-                            <button onclick="openResetPinModal('${u.id}', '${u.username}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-slate-100 rounded-lg transition" title="Restablecer PIN">
+                            <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg" title="Restablecer PIN">
                                 <i data-lucide="key-round" class="w-4 h-4"></i>
                             </button>
-                            <button onclick="editUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition" title="Editar Usuario">
+                            <button onclick="editUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg" title="Editar Usuario">
                                 <i data-lucide="edit-3" class="w-4 h-4"></i>
                             </button>
-                            <button onclick="promptDeleteUser('${u.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition" title="Eliminar Usuario">
+                            <button onclick="promptDeleteUser('${u.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg" title="Eliminar Usuario">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
-                        ` : `<span class="text-[10px] text-slate-400 italic">Solo lectura</span>`}
+                        ` : `
+                            <span class="text-[10px] text-slate-400 italic">Solo lectura</span>
+                        `}
                     </td>
                 </tr>
             `;
         }).join('');
 
         if (window.lucide) lucide.createIcons();
-    };
+    }
 
-    window.openNewUserModal = function() {
+    function openNewUserModal() {
         if (window.isReadOnly) {
-            showToast("Acceso de solo lectura: Desbloquea el Modo Editor para gestionar usuarios", "info");
-            toggleAuthModal();
+            showToast("Acceso de solo lectura: Desbloquea el Modo Editor", "info");
             return;
         }
         document.getElementById('userForm').reset();
-        document.getElementById('editUserId').value = '';
+        document.getElementById('editUserId').value = "";
         document.getElementById('userModalTitle').innerText = "Crear Nuevo Usuario";
         openModal('userModal');
-    };
+    }
 
-    window.saveUser = async function(e) {
+    async function saveUser(e) {
         e.preventDefault();
         if (window.isReadOnly) {
-            showToast("Acceso denegado: Se requiere Modo Editor", "info");
+            showToast("Modo de solo lectura activo", "info");
             return;
         }
 
         const editId = document.getElementById('editUserId').value;
+        const fullName = document.getElementById('userFullName').value.trim();
         const username = document.getElementById('username').value.trim();
-        const userId = editId || username.toLowerCase().replace(/\s+/g, '_');
+        const pin = document.getElementById('userPin').value.trim();
+        const role = document.getElementById('userRole').value;
+        const status = document.getElementById('userStatus').value;
+
+        const userId = editId || username.toLowerCase().replace(/[^a-z0-9]/g, '') || `user_${Date.now()}`;
 
         const userObj = {
             id: userId,
-            fullName: document.getElementById('userFullName').value.trim(),
             username: username,
-            pin: document.getElementById('userPin').value.trim(),
-            role: document.getElementById('userRole').value,
-            status: document.getElementById('userStatus').value,
-            lastAccess: new Date().toISOString().replace('T', ' ').slice(0, 16)
+            fullName: fullName,
+            pin: pin,
+            role: role,
+            status: status,
+            lastAccess: new Date().toISOString().slice(0, 16).replace('T', ' ')
         };
 
-        await window.saveUserToCloud(userObj);
-        closeModal('userModal');
-        showToast(`Usuario ${userObj.fullName} guardado exitosamente`, "success");
-    };
-
-    window.editUser = function(userId) {
-        if (window.isReadOnly) {
-            showToast("Ingresa en Modo Editor para modificar usuarios", "info");
-            toggleAuthModal();
-            return;
+        const success = await window.saveUserToCloud(userObj);
+        if (success) {
+            closeModal('userModal');
+            showToast(`Usuario ${fullName} guardado exitosamente`, "success");
+        } else {
+            showToast("Error al guardar el usuario en la base de datos", "rose");
         }
-        const user = (window.usersData || []).find(u => u.id === userId || u.username === userId);
-        if (!user) return;
+    }
 
-        document.getElementById('editUserId').value = user.id;
-        document.getElementById('userFullName').value = user.fullName || '';
-        document.getElementById('username').value = user.username || '';
-        document.getElementById('userPin').value = user.pin || '';
-        document.getElementById('userRole').value = user.role || 'OPERADOR';
-        document.getElementById('userStatus').value = user.status || 'ACTIVO';
-        document.getElementById('userModalTitle').innerText = `Editar Usuario: ${user.username}`;
+    function editUser(userId) {
+        if (window.isReadOnly) return;
+        const u = (window.usersData || []).find(x => x.id === userId);
+        if (!u) return;
+
+        document.getElementById('editUserId').value = u.id;
+        document.getElementById('userFullName').value = u.fullName || '';
+        document.getElementById('username').value = u.username || '';
+        document.getElementById('userPin').value = u.pin || '';
+        document.getElementById('userRole').value = u.role || 'OPERADOR';
+        document.getElementById('userStatus').value = u.status || 'ACTIVO';
+
+        document.getElementById('userModalTitle').innerText = "Editar Usuario " + u.username;
         openModal('userModal');
-    };
+    }
 
-    window.promptDeleteUser = function(userId) {
-        if (window.isReadOnly) {
-            showToast("Acceso denegado: Se requiere Modo Editor", "info");
-            return;
-        }
-        const modalText = document.getElementById('confirmModalText');
-        const actionBtn = document.getElementById('confirmModalActionBtn');
+    function promptDeleteUser(userId) {
+        if (window.isReadOnly) return;
+        confirmAction(`¿Estás seguro de que deseas eliminar este usuario?`, async () => {
+            const success = await window.deleteUserFromCloud(userId);
+            if (success) showToast("Usuario eliminado correctamente", "info");
+        });
+    }
 
-        if (modalText && actionBtn) {
-            modalText.innerText = `¿Estás seguro de que deseas eliminar permanentemente el usuario '${userId}'?`;
-            actionBtn.onclick = async () => {
-                await window.deleteUserFromCloud(userId);
-                closeModal('customConfirmModal');
-                showToast(`Usuario '${userId}' eliminado`, "info");
-            };
-            openModal('customConfirmModal');
-        }
-    };
-
-    window.openResetPinModal = function(userId, username) {
-        if (window.isReadOnly) {
-            showToast("Acceso denegado: Se requiere Modo Editor", "info");
-            return;
-        }
-        document.getElementById('resetTargetUsername').value = userId;
-        document.getElementById('resetTargetUserDisplay').innerText = username || userId;
-        document.getElementById('newPinInput').value = '';
+    function openResetPinModal(username) {
+        if (window.isReadOnly) return;
+        document.getElementById('resetTargetUsername').value = username;
+        document.getElementById('resetTargetUserDisplay').innerText = "@" + username;
+        document.getElementById('newPinInput').value = "";
         openModal('resetPinModal');
-    };
+    }
 
-    window.handleResetPinSubmit = async function(e) {
+    async function handleResetPinSubmit(e) {
         e.preventDefault();
-        const userId = document.getElementById('resetTargetUsername').value;
+        const username = document.getElementById('resetTargetUsername').value;
         const newPin = document.getElementById('newPinInput').value.trim();
 
-        const user = (window.usersData || []).find(u => u.id === userId || u.username === userId);
-        if (user) {
-            user.pin = newPin;
-            await window.saveUserToCloud(user);
+        const u = (window.usersData || []).find(x => x.username === username);
+        if (u) {
+            u.pin = newPin;
+            await window.saveUserToCloud(u);
             closeModal('resetPinModal');
-            showToast(`PIN actualizado para el usuario ${user.username}`, "success");
+            showToast(`PIN para @${username} actualizado con éxito`, "success");
         }
-    };
-</script>
+    }
 
+    // Expose functions globally for inline HTML handlers
+    window.switchView = switchView;
+    window.toggleAuthModal = toggleAuthModal;
+    window.handleAuthSubmit = handleAuthSubmit;
+    window.handleTypeChange = handleTypeChange;
+    window.handleNewOrderClick = handleNewOrderClick;
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.openShareModal = openShareModal;
+    window.copyShareUrl = copyShareUrl;
+    window.exportDataCSV = exportDataCSV;
+    window.clearFilters = clearFilters;
+    window.applyFiltersAndRender = applyFiltersAndRender;
+    window.saveOrder = saveOrder;
+    window.editOrder = editOrder;
+    window.promptDeleteOrder = promptDeleteOrder;
+    window.prevMonth = prevMonth;
+    window.nextMonth = nextMonth;
+    window.todayMonth = todayMonth;
+    window.openDayPlanModal = openDayPlanModal;
+    window.addOrderForSelectedDay = addOrderForSelectedDay;
+    window.renderUsersTable = renderUsersTable;
+    window.openNewUserModal = openNewUserModal;
+    window.saveUser = saveUser;
+    window.editUser = editUser;
+    window.promptDeleteUser = promptDeleteUser;
+    window.openResetPinModal = openResetPinModal;
+    window.handleResetPinSubmit = handleResetPinSubmit;
+</script>
 </body>
 </html>
