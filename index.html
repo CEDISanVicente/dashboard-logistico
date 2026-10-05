@@ -78,7 +78,7 @@
                         <span id="syncBadgeText">Conectando...</span>
                     </span>
                 </div>
-                <p class="text-[11px] text-slate-400">Control de Muelles, Pickers y Planificación OC</p>
+                <p class="text-[11px] text-slate-400">Control de Muelles, Pickers, Receptores y Planificación OC</p>
             </div>
         </div>
 
@@ -148,110 +148,123 @@
                 <span>Control de Accesos y Usuarios</span>
             </button>
         </div>
-        <span class="text-xs text-slate-500 hidden md:inline">Gestión Integral de Flotas, Muelles y Seguridad</span>
+        <span class="text-xs text-slate-500 hidden md:inline">Gestión Integral de Flotas, Pickers & Receptores</span>
     </div>
 
     <!-- ==================== VIEW 1: DASHBOARD ANALYTICS & TABLE ==================== -->
     <div id="viewDashboard" class="space-y-6">
         <!-- Key Metrics Cards Grid -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <!-- Metric 1: Tiempo Respuesta Promedio -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Tiempo Respuesta Prom.</span>
-                    <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                        <i data-lucide="clock" class="w-5 h-5"></i>
+                    <span class="text-[11px] font-semibold uppercase tracking-wider">T. Resp. Prom.</span>
+                    <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
                     </div>
                 </div>
                 <div class="flex items-baseline justify-between">
-                    <span id="kpiAvgResponse" class="text-2xl font-bold text-slate-900">-- min</span>
-                    <span id="kpiAvgResponseBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">SLA Óptimo</span>
+                    <span id="kpiAvgResponse" class="text-xl font-bold text-slate-900">-- min</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2">Desde solicitud hasta posición en muelle</p>
+                <p class="text-[10px] text-slate-500 mt-1">Llegada a muelle</p>
             </div>
 
-            <!-- Metric 2: Tiempo Preparación Promedio -->
+            <!-- Metric 2: Tiempo Preparación Promedio (Despachos) -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Tiempo Prep. Promedio</span>
-                    <div class="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                        <i data-lucide="package-check" class="w-5 h-5"></i>
+                    <span class="text-[11px] font-semibold uppercase tracking-wider">T. Prep. Despacho</span>
+                    <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
+                        <i data-lucide="package-check" class="w-4 h-4"></i>
                     </div>
                 </div>
                 <div class="flex items-baseline justify-between">
-                    <span id="kpiAvgPrep" class="text-2xl font-bold text-slate-900">-- min</span>
-                    <span id="kpiAvgPrepBadge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Carga Normal</span>
+                    <span id="kpiAvgPrep" class="text-xl font-bold text-slate-900">-- min</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2">Picking, recolección y verificación</p>
+                <p class="text-[10px] text-slate-500 mt-1">Picking y recolección</p>
             </div>
 
-            <!-- Metric 3: Pedidos Atendidos vs En Espera -->
+            <!-- Metric 3: Tiempo Descarga Promedio (Recepciones) -->
+            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition border-l-4 border-l-emerald-500">
+                <div class="flex items-center justify-between text-slate-500 mb-2">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-800">T. Prom. Descarga</span>
+                    <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+                        <i data-lucide="truck" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <span id="kpiAvgUnload" class="text-xl font-bold text-emerald-700">-- min</span>
+                    <span id="kpiAvgUnloadBadge" class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Eficiente</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-1">Recepción en patio</p>
+            </div>
+
+            <!-- Metric 4: Pedidos Atendidos vs En Espera -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Estado de Cola</span>
-                    <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
-                        <i data-lucide="layers" class="w-5 h-5"></i>
+                    <span class="text-[11px] font-semibold uppercase tracking-wider">Estado de Cola</span>
+                    <div class="p-1.5 bg-purple-50 text-purple-600 rounded-lg">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
                     </div>
                 </div>
                 <div class="flex items-baseline justify-between">
                     <div>
-                        <span id="kpiServed" class="text-2xl font-bold text-emerald-600">0</span>
-                        <span class="text-xs text-slate-400">Atendidos</span>
+                        <span id="kpiServed" class="text-lg font-bold text-emerald-600">0</span>
+                        <span class="text-[10px] text-slate-400">Atend</span>
                     </div>
                     <div class="text-right">
-                        <span id="kpiPending" class="text-2xl font-bold text-amber-600">0</span>
-                        <span class="text-xs text-slate-400">En Espera</span>
+                        <span id="kpiPending" class="text-lg font-bold text-amber-600">0</span>
+                        <span class="text-[10px] text-slate-400">Espera</span>
                     </div>
                 </div>
-                <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden flex">
+                <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden flex">
                     <div id="kpiProgressBarServed" class="bg-emerald-500 h-full" style="width: 50%"></div>
                     <div id="kpiProgressBarPending" class="bg-amber-400 h-full" style="width: 50%"></div>
                 </div>
             </div>
 
-            <!-- Metric 4: Origen de Recepciones -->
+            <!-- Metric 5: Origen de Recepciones -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Origen Recepciones</span>
-                    <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                        <i data-lucide="globe" class="w-5 h-5"></i>
+                    <span class="text-[11px] font-semibold uppercase tracking-wider">Origen Recepc.</span>
+                    <div class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
+                        <i data-lucide="globe" class="w-4 h-4"></i>
                     </div>
                 </div>
                 <div class="flex items-baseline justify-between">
                     <div>
-                        <span id="kpiNationalRecp" class="text-2xl font-bold text-indigo-600">0</span>
-                        <span class="text-xs text-slate-400">Nacional</span>
+                        <span id="kpiNationalRecp" class="text-lg font-bold text-indigo-600">0</span>
+                        <span class="text-[10px] text-slate-400">Nac</span>
                     </div>
                     <div class="text-right">
-                        <span id="kpiImportRecp" class="text-2xl font-bold text-violet-600">0</span>
-                        <span class="text-xs text-slate-400">Importada</span>
+                        <span id="kpiImportRecp" class="text-lg font-bold text-violet-600">0</span>
+                        <span class="text-[10px] text-slate-400">Imp</span>
                     </div>
                 </div>
-                <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden flex">
+                <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden flex">
                     <div id="kpiBarNational" class="bg-indigo-500 h-full" style="width: 50%"></div>
                     <div id="kpiBarImport" class="bg-violet-500 h-full" style="width: 50%"></div>
                 </div>
             </div>
 
-            <!-- Metric 5: OTIF & Eficiencia -->
+            <!-- Metric 6: OTIF & Eficiencia -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Cumplimiento OTIF</span>
-                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                        <i data-lucide="trending-up" class="w-5 h-5"></i>
+                    <span class="text-[11px] font-semibold uppercase tracking-wider">Cumplimiento OTIF</span>
+                    <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
                     </div>
                 </div>
                 <div class="flex items-baseline justify-between">
-                    <span id="kpiOTIF" class="text-2xl font-bold text-slate-900">0%</span>
-                    <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-800" id="totalOrdersCount">0 Pedidos</span>
+                    <span id="kpiOTIF" class="text-xl font-bold text-slate-900">0%</span>
+                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800" id="totalOrdersCount">0 Pedidos</span>
                 </div>
-                <p class="text-xs text-slate-500 mt-2">Cumplimiento según SLAs establecidos</p>
+                <p class="text-[10px] text-slate-500 mt-1">Conforme a SLAs</p>
             </div>
         </section>
 
         <!-- Analytical Charts Grid -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Chart 1 -->
+            <!-- Chart 1: Volume & Results by Date -->
             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
@@ -268,15 +281,16 @@
                 </div>
             </div>
 
-            <!-- Chart 2 -->
+            <!-- Chart 2: Enhanced Performance by Picker and Receptor -->
             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
-                        <h3 class="font-bold text-slate-900 text-base">Rendimiento por Picker (Tiempo Recolección)</h3>
-                        <p class="text-xs text-slate-500">Tiempo promedio de preparación/picking por personal (mins)</p>
+                        <h3 class="font-bold text-slate-900 text-base">Rendimiento por Picker y Receptor</h3>
+                        <p class="text-xs text-slate-500">Comparativa de Operaciones e Inversión de Tiempo (mins)</p>
                     </div>
-                    <div class="text-xs text-slate-400">
-                        <span>Menos mins = Mayor Eficiencia</span>
+                    <div class="flex items-center space-x-3 text-xs">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-sky-500 inline-block mr-1"></span> Pickers (Carga)</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1"></span> Receptores (Descarga)</span>
                     </div>
                 </div>
                 <div class="h-64 mt-4 relative">
@@ -307,7 +321,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 pt-2 border-t border-slate-200/80">
                     <div class="relative md:col-span-1">
                         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
-                        <input type="text" id="searchInput" oninput="applyFiltersAndRender()" placeholder="Buscar cliente, OC, ID, chófer..." 
+                        <input type="text" id="searchInput" oninput="applyFiltersAndRender()" placeholder="Buscar cliente, OC, picker, receptor..." 
                             class="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
                     </div>
 
@@ -323,7 +337,7 @@
                         <select id="statusFilter" onchange="applyFiltersAndRender()" class="w-full py-1.5 px-3 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-700 font-medium">
                             <option value="ALL">Todos los Estatus</option>
                             <option value="EN_ESPERA">En Espera</option>
-                            <option value="EN_PREPARACION">En Preparación</option>
+                            <option value="EN_PREPARACION">En Proceso</option>
                             <option value="LISTO_ATENDIDO">Atendidos / Completados</option>
                         </select>
                     </div>
@@ -352,8 +366,8 @@
                             <th class="py-3 px-4">Cliente / Proveedor</th>
                             <th class="py-3 px-4">Muelle / Chófer</th>
                             <th class="py-3 px-4">Fecha & Hora Programada</th>
-                            <th class="py-3 px-4">Picker Asignado</th>
-                            <th class="py-3 px-4">T. Resp / Prep</th>
+                            <th class="py-3 px-4">Picker / Receptor</th>
+                            <th class="py-3 px-4">T. Resp / Prep / Descarga</th>
                             <th class="py-3 px-4">Estatus</th>
                             <th class="py-3 px-4 text-right">Acciones</th>
                         </tr>
@@ -385,7 +399,7 @@
                         <i data-lucide="calendar" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h2 id="calendarMonthYear" class="text-lg font-bold text-slate-900 capitalize">Marzo 2026</h2>
+                        <h2 id="calendarMonthYear" class="text-lg font-bold text-slate-900 capitalize">Octubre 2026</h2>
                         <p class="text-xs text-slate-500">Planificación gráfica de Despachos y Recepciones por Orden de Compra</p>
                     </div>
                 </div>
@@ -607,7 +621,7 @@
                     <select id="userRole" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                         <option value="ADMINISTRADOR">Administrador (Acceso total)</option>
                         <option value="SUPERVISOR">Supervisor (Edición de patio)</option>
-                        <option value="OPERADOR">Operador / Picker</option>
+                        <option value="OPERADOR">Operador / Picker / Receptor</option>
                         <option value="LECTOR">Modo Lector (Consulta)</option>
                     </select>
                 </div>
@@ -684,7 +698,6 @@
             </button>
         </div>
 
-        <!-- Summary KPI Pill header -->
         <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center justify-between text-xs text-slate-600 shrink-0 flex-wrap gap-2">
             <div class="flex items-center space-x-4">
                 <span id="dayTotalCount" class="font-semibold text-slate-900">0 Operaciones</span>
@@ -698,7 +711,6 @@
             </button>
         </div>
 
-        <!-- Orders List for the Selected Day -->
         <div id="dayPlanList" class="p-5 overflow-y-auto space-y-3 flex-grow custom-scrollbar">
             <!-- Dynamically injected day orders -->
         </div>
@@ -707,6 +719,35 @@
             <button onclick="closeModal('dayPlanModal')" class="px-4 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition">
                 Cerrar
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Compartir Link -->
+<div id="shareModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full overflow-hidden border border-slate-200">
+        <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
+            <h3 class="font-bold text-sm flex items-center gap-2">
+                <i data-lucide="share-2" class="w-4 h-4 text-sky-400"></i>
+                <span>Compartir Dashboard</span>
+            </h3>
+            <button onclick="closeModal('shareModal')" class="text-slate-400 hover:text-white transition">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        <div class="p-5 space-y-4">
+            <p class="text-xs text-slate-600">
+                Enlace directo para compartir la vista actual con el equipo de patio o logística:
+            </p>
+            <div class="flex items-center space-x-2">
+                <input type="text" id="shareUrlInput" readonly class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-700 focus:outline-none">
+                <button onclick="copyShareUrl()" class="px-3 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium transition shrink-0">
+                    Copiar
+                </button>
+            </div>
+            <p id="shareCopyAlert" class="hidden text-[11px] text-emerald-600 font-medium text-center">
+                ¡Enlace copiado al portapapeles!
+            </p>
         </div>
     </div>
 </div>
@@ -753,6 +794,8 @@
                     <select id="dockNumber" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                         <option value="Muelle 1 (Carga)">Muelle 1 (Carga)</option>
                         <option value="Muelle 2 (Descarga)">Muelle 2 (Descarga)</option>
+                        <option value="Muelle 3 (Mixto)">Muelle 3 (Mixto)</option>
+                        <option value="Muelle 4 (Especial)">Muelle 4 (Especial)</option>
                     </select>
                 </div>
             </div>
@@ -786,9 +829,10 @@
                 </div>
             </div>
 
+            <!-- Dynamic Picker or Receptor Field -->
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Picker Asignado / Recolector *</label>
+                    <label id="pickerReceptorLabel" class="block text-xs font-semibold text-slate-700 mb-1">Picker Asignado / Recolector *</label>
                     <input type="text" id="pickerName" required placeholder="Ej: Manuel Silva" 
                         class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 </div>
@@ -806,19 +850,20 @@
             <div class="grid grid-cols-3 gap-3">
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-700 mb-1">T. Respuesta (min)</label>
-                    <input type="number" id="responseTime" required min="0" value="15" 
-                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    <input type="number" id="responseTime" min="0" value="0" readonly placeholder="Auto"
+                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-100 text-slate-500 focus:outline-none cursor-not-allowed" title="Calculado automáticamente al cambiar estatus a En Proceso">
+                </div>
+                <!-- Time prep vs Time unload -->
+                <div id="prepTimeContainer">
+                    <label id="prepTimeLabel" class="block text-[11px] font-semibold text-slate-700 mb-1">T. Prep (min)</label>
+                    <input type="number" id="prepTime" min="0" value="0" readonly placeholder="Auto"
+                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-100 text-slate-500 focus:outline-none cursor-not-allowed" title="Calculado automáticamente al cambiar estatus a Atendido">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">T. Prep (min)</label>
-                    <input type="number" id="prepTime" required min="0" value="30" 
-                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Estatus</label>
+                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Estatus *</label>
                     <select id="orderStatus" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                         <option value="EN_ESPERA">EN ESPERA</option>
-                        <option value="EN_PREPARACION">EN PREPARACIÓN</option>
+                        <option value="EN_PREPARACION">EN PROCESO</option>
                         <option value="LISTO_ATENDIDO">ATENDIDO</option>
                     </select>
                 </div>
@@ -828,1221 +873,1041 @@
                 <button type="button" onclick="closeModal('newOrderModal')" class="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
                     Cancelar
                 </button>
-                <button type="submit" class="px-4 py-2 text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-lg transition shadow-sm">
-                    Guardar Pedido
+                <button type="submit" class="px-5 py-2 text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-lg shadow-sm transition">
+                    Guardar Registro
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal: Compartir Dashboard -->
-<div id="shareModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-        <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
-            <h3 class="font-bold text-sm flex items-center gap-2">
-                <i data-lucide="share-2" class="w-4 h-4 text-emerald-400"></i>
-                <span>Compartir Enlace en Modo Solo Lectura</span>
-            </h3>
-            <button onclick="closeModal('shareModal')" class="text-slate-400 hover:text-white transition">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-        </div>
-        <div class="p-5 space-y-4">
-            <p class="text-xs text-slate-600">
-                Este enlace incluye el parámetro de <strong>Solo Lectura</strong>. Los usuarios podrán consultar los KPI y la planificación en tiempo real.
-            </p>
-            <div class="flex items-center space-x-2">
-                <input type="text" id="shareUrlInput" readonly class="w-full text-xs p-2.5 bg-slate-100 border border-slate-300 rounded-lg font-mono text-slate-700 select-all">
-                <button onclick="copyShareUrl()" class="px-3 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium shrink-0 flex items-center space-x-1">
-                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                    <span>Copiar</span>
-                </button>
-            </div>
-            <div id="copyAlert" class="hidden text-xs text-emerald-600 bg-emerald-50 p-2.5 rounded-lg flex items-center space-x-2">
-                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
-                <span>¡Enlace de solo lectura copiado con éxito!</span>
-            </div>
-        </div>
-        <div class="bg-slate-100 px-5 py-3 text-right">
-            <button onclick="closeModal('shareModal')" class="px-4 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg">
-                Cerrar
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Confirmation Modal -->
-<div id="customConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full overflow-hidden border border-slate-200">
-        <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center">
-            <h3 class="font-bold text-sm flex items-center gap-2">
-                <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
-                <span>Confirmación de Acción</span>
-            </h3>
-            <button onclick="closeModal('customConfirmModal')" class="text-slate-400 hover:text-white transition">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-        </div>
-        <div class="p-5 space-y-3">
-            <p id="confirmModalText" class="text-xs text-slate-700 leading-relaxed">
-                ¿Estás seguro de que deseas realizar esta acción?
-            </p>
-        </div>
-        <div class="bg-slate-50 px-5 py-3 text-right flex justify-end space-x-2 border-t border-slate-100">
-            <button onclick="closeModal('customConfirmModal')" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-200 hover:bg-slate-300 rounded-lg transition">
-                Cancelar
-            </button>
-            <button id="confirmModalActionBtn" class="px-4 py-1.5 text-xs font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-lg shadow-sm transition">
-                Confirmar
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Notification Toast -->
-<div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-lg border border-slate-800 flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
-    <i data-lucide="info" class="w-4 h-4 text-brand-500" id="toastIcon"></i>
-    <span id="toastMessage">Operación realizada</span>
-</div>
-
-<!-- Firebase Realtime Firestore & Main Logic -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    // Global Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyDs5Xj3TJyJZxI5kKUcsIMferOoGyHHHTg",
-        authDomain: "dashboard-logistico-2e36c.firebaseapp.com",
-        projectId: "dashboard-logistico-2e36c",
-        storageBucket: "dashboard-logistico-2e36c.firebasestorage.app",
-        messagingSenderId: "810584249063",
-        appId: "1:810584249063:web:7a774fd8cf67fc5c500842",
-        measurementId: "G-J7DE1CWT3Q"
-    };
-
-    window.isReadOnly = true; 
-    window.ordersData = [];
-    window.usersData = [];
-    window.db = null;
-    window.auth = null;
-    window.appId = typeof __app_id !== 'undefined' ? __app_id : 'dashboard-logistico-dock';
-    window.selectedDayForModal = null;
-
-    const initialSeedUsers = [
-        { id: "admin", username: "admin", fullName: "Administrador General", role: "ADMINISTRADOR", pin: "1234", status: "ACTIVO", lastAccess: "2026-03-30 14:15" },
-        { id: "supervisor1", username: "supervisor", fullName: "Manuel Silva (Jefe Patio)", role: "SUPERVISOR", pin: "5678", status: "ACTIVO", lastAccess: "2026-03-30 11:30" },
-        { id: "picker1", username: "cmendoza", fullName: "Carlos Mendoza (Picker)", role: "OPERADOR", pin: "1111", status: "ACTIVO", lastAccess: "2026-03-29 16:45" },
-        { id: "guest", username: "lector", fullName: "Usuario Consulta / Cliente", role: "LECTOR", pin: "0000", status: "ACTIVO", lastAccess: "2026-03-30 09:10" }
-    ];
-
-    const initialSeedOrders = [
-        { id: "DESP-801", poNumber: "OC-2026-001", type: "DESPACHO", origin: "N/A", client: "Supermercados El Rey", dock: "Muelle 1 (Carga)", driver: "Juan Delgado (A21-XX)", schedDateTime: "2026-03-30T08:00", picker: "Manuel Silva", respTime: 18, prepTime: 32, status: "LISTO_ATENDIDO", priority: "Alta" },
-        { id: "RECP-304", poNumber: "OC-2026-042", type: "RECEPCION", origin: "IMPORTADA", client: "Proveedor Nestlé S.A.", dock: "Muelle 2 (Descarga)", driver: "Roberto Gómez (B88-ZZ)", schedDateTime: "2026-03-30T08:30", picker: "Carlos Mendoza", respTime: 22, prepTime: 45, status: "LISTO_ATENDIDO", priority: "Media" },
-        { id: "DESP-802", poNumber: "OC-2026-015", type: "DESPACHO", origin: "N/A", client: "FarmaSalud C.A.", dock: "Muelle 1 (Carga)", driver: "Marcos Ríos (C12-YY)", schedDateTime: "2026-03-30T09:15", picker: "Manuel Silva", respTime: 12, prepTime: 28, status: "EN_PREPARACION", priority: "Crítica" },
-        { id: "DESP-803", poNumber: "OC-2026-020", type: "DESPACHO", origin: "N/A", client: "Cadena Express", dock: "Muelle 1 (Carga)", driver: "Jesús Torres (D45-AA)", schedDateTime: "2026-03-31T09:45", picker: "Andrés Rojas", respTime: 25, prepTime: 38, status: "EN_ESPERA", priority: "Media" },
-        { id: "RECP-305", poNumber: "OC-2026-088", type: "RECEPCION", origin: "NACIONAL", client: "Alimentos Polar", dock: "Muelle 2 (Descarga)", driver: "Pedro Infante (E77-BB)", schedDateTime: "2026-03-31T10:10", picker: "Carlos Mendoza", respTime: 10, prepTime: 20, status: "EN_PREPARACION", priority: "Alta" },
-        { id: "DESP-804", poNumber: "OC-2026-054", type: "DESPACHO", origin: "N/A", client: "Comercializadora Sur", dock: "Muelle 1 (Carga)", driver: "Manuel Blanco (F90-CC)", schedDateTime: "2026-04-02T10:30", picker: "Andrés Rojas", respTime: 30, prepTime: 50, status: "EN_ESPERA", priority: "Baja" },
-        { id: "RECP-306", poNumber: "OC-2026-101", type: "RECEPCION", origin: "IMPORTADA", client: "Empaques Nacionales", dock: "Muelle 2 (Descarga)", driver: "Gustavo Silva (G11-DD)", schedDateTime: "2026-04-05T11:00", picker: "José Vargas", respTime: 15, prepTime: 35, status: "EN_ESPERA", priority: "Media" }
-    ];
-
-    async function initCloudSync() {
-        try {
-            let configToUse = firebaseConfig;
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                try {
-                    configToUse = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
-                } catch (e) {}
-            }
-
-            const app = initializeApp(configToUse);
-            window.auth = getAuth(app);
-            window.db = getFirestore(app);
-
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(window.auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(window.auth);
-            }
-
-            if (window.auth.currentUser) {
-                subscribeToRealtimeOrders();
-                subscribeToRealtimeUsers();
-            }
-        } catch (err) {
-            console.warn("Nube en modo sin conexión o fallback local:", err);
-            window.ordersData = [...initialSeedOrders];
-            window.usersData = [...initialSeedUsers];
-            window.updateSyncBadge("Modo Local", "offline");
-            window.applyFiltersAndRender();
-            if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
-        }
-    }
-
-    function subscribeToRealtimeOrders() {
-        if (!window.db || !window.auth?.currentUser) return;
-        const ordersCollection = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'orders');
-
-        onSnapshot(ordersCollection, async (snapshot) => {
-            if (!snapshot.empty) {
-                const loaded = [];
-                snapshot.forEach((docSnap) => {
-                    loaded.push({ docId: docSnap.id, ...docSnap.data() });
-                });
-                loaded.sort((a, b) => (b.schedDateTime || '').localeCompare(a.schedDateTime || ''));
-                window.ordersData = loaded;
-                window.updateSyncBadge("Sincronizado en Vivo", "active");
-            } else {
-                await seedInitialDataToCloud();
-            }
-            window.applyFiltersAndRender();
-        }, (error) => {
-            console.error("Error en snapshot Firestore (Orders):", error);
-            window.updateSyncBadge("Error Sincronización", "offline");
-            if (window.ordersData.length === 0) {
-                window.ordersData = [...initialSeedOrders];
-                window.applyFiltersAndRender();
-            }
-        });
-    }
-
-    function subscribeToRealtimeUsers() {
-        if (!window.db || !window.auth?.currentUser) return;
-        const usersCollection = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'users');
-
-        onSnapshot(usersCollection, async (snapshot) => {
-            if (!snapshot.empty) {
-                const loaded = [];
-                snapshot.forEach((docSnap) => {
-                    loaded.push({ docId: docSnap.id, ...docSnap.data() });
-                });
-                window.usersData = loaded;
-            } else {
-                await seedInitialUsersToCloud();
-            }
-            if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
-        }, (error) => {
-            console.error("Error en snapshot Usuarios Firestore:", error);
-            if (window.usersData.length === 0) {
-                window.usersData = [...initialSeedUsers];
-                if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
-            }
-        });
-    }
-
-    async function seedInitialDataToCloud() {
-        try {
-            for (const item of initialSeedOrders) {
-                const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', item.id);
-                await setDoc(docRef, item);
-            }
-        } catch (e) {
-            console.error("Error sembrando datos iniciales:", e);
-        }
-    }
-
-    async function seedInitialUsersToCloud() {
-        try {
-            for (const user of initialSeedUsers) {
-                const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', user.id);
-                await setDoc(docRef, user);
-            }
-        } catch (e) {
-            console.error("Error sembrando usuarios iniciales:", e);
-        }
-    }
-
-    window.saveOrderToCloud = async function(orderObj) {
-        // Fallback or Firestore sync
-        const sanitizedId = String(orderObj.id).trim().replace(/[/]/g, '_');
-        orderObj.id = sanitizedId;
-
-        if (!window.db || !window.auth?.currentUser) {
-            const idx = (window.ordersData || []).findIndex(o => o.id === orderObj.id);
-            if (idx >= 0) window.ordersData[idx] = orderObj;
-            else window.ordersData.unshift(orderObj);
-            window.applyFiltersAndRender();
-            return true;
-        }
-        try {
-            const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', sanitizedId);
-            await setDoc(docRef, orderObj, { merge: true });
-            return true;
-        } catch (err) {
-            console.error("Error guardando orden en la nube:", err);
-            // Local update on error
-            const idx = (window.ordersData || []).findIndex(o => o.id === orderObj.id);
-            if (idx >= 0) window.ordersData[idx] = orderObj;
-            else window.ordersData.unshift(orderObj);
-            window.applyFiltersAndRender();
-            return true;
-        }
-    };
-
-    window.deleteOrderFromCloud = async function(orderId) {
-        if (!window.db || !window.auth?.currentUser) {
-            window.ordersData = (window.ordersData || []).filter(o => o.id !== orderId);
-            window.applyFiltersAndRender();
-            return true;
-        }
-        try {
-            const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'orders', orderId);
-            await deleteDoc(docRef);
-            return true;
-        } catch (err) {
-            console.error("Error borrando orden de la nube:", err);
-            window.ordersData = (window.ordersData || []).filter(o => o.id !== orderId);
-            window.applyFiltersAndRender();
-            return true;
-        }
-    };
-
-    window.saveUserToCloud = async function(userObj) {
-        const sanitizedId = String(userObj.id).trim().replace(/[/]/g, '_');
-        userObj.id = sanitizedId;
-
-        if (!window.db || !window.auth?.currentUser) {
-            const idx = (window.usersData || []).findIndex(u => u.id === userObj.id || u.username === userObj.username);
-            if (idx >= 0) window.usersData[idx] = userObj;
-            else window.usersData.push(userObj);
-            if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
-            return true;
-        }
-        try {
-            const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', sanitizedId);
-            await setDoc(docRef, userObj, { merge: true });
-            return true;
-        } catch (err) {
-            console.error("Error guardando usuario:", err);
-            const idx = (window.usersData || []).findIndex(u => u.id === userObj.id || u.username === userObj.username);
-            if (idx >= 0) window.usersData[idx] = userObj;
-            else window.usersData.push(userObj);
-            if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
-            return true;
-        }
-    };
-
-    window.deleteUserFromCloud = async function(userId) {
-        if (!window.db || !window.auth?.currentUser) {
-            window.usersData = (window.usersData || []).filter(u => u.id !== userId && u.username !== userId);
-            if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
-            return true;
-        }
-        try {
-            const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'users', userId);
-            await deleteDoc(docRef);
-            return true;
-        } catch (err) {
-            console.error("Error eliminando usuario:", err);
-            window.usersData = (window.usersData || []).filter(u => u.id !== userId && u.username !== userId);
-            if (typeof window.renderUsersTable === 'function') window.renderUsersTable();
-            return true;
-        }
-    };
-
-    window.addEventListener('DOMContentLoaded', () => {
-        initCloudSync();
-        checkUrlRole();
-    });
-</script>
-
-<!-- UI Interaction and Application Logic Script -->
 <script>
-    let dateChartInstance = null;
-    let pickerChartInstance = null;
-    let currentCalendarDate = new Date(2026, 2, 1); // March 2026
-    let pendingConfirmAction = null;
+// Core State
+let currentRole = 'LECTOR'; // 'LECTOR', 'SUPERVISOR', 'ADMINISTRADOR'
+let activeTab = 'dashboard';
+let calendarCurrentDate = new Date(2026, 9, 1); // October 2026
+let selectedDayForPlan = null;
 
-    function switchView(viewName) {
-        const dashboardView = document.getElementById('viewDashboard');
-        const calendarView = document.getElementById('viewCalendar');
-        const accessView = document.getElementById('viewAccessControl');
-
-        const tabDash = document.getElementById('tabDashboardBtn');
-        const tabCal = document.getElementById('tabCalendarBtn');
-        const tabAcc = document.getElementById('tabAccessBtn');
-
-        dashboardView.classList.add('hidden');
-        calendarView.classList.add('hidden');
-        accessView.classList.add('hidden');
-
-        const defaultClass = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
-        const activeClass = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
-
-        tabDash.className = defaultClass;
-        tabCal.className = defaultClass;
-        tabAcc.className = defaultClass;
-
-        if (viewName === 'calendar') {
-            calendarView.classList.remove('hidden');
-            tabCal.className = activeClass;
-            renderCalendarView();
-        } else if (viewName === 'access') {
-            accessView.classList.remove('hidden');
-            tabAcc.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-indigo-600 text-white shadow-sm";
-            renderUsersTable();
-        } else {
-            dashboardView.classList.remove('hidden');
-            tabDash.className = activeClass;
-            applyFiltersAndRender();
-        }
-        if (window.lucide) lucide.createIcons();
+// Initial Mock Orders with automatic timestamp fields
+let orders = [
+    {
+        id: "DESP-1001",
+        poNumber: "OC-2026-101",
+        type: "DESPACHO",
+        dock: "Muelle 1 (Carga)",
+        client: "Distribuidora Central C.A.",
+        driver: "Juan Delgado (A21-XX)",
+        origin: "N/A",
+        schedDateTime: "2026-10-01T08:30",
+        picker: "Manuel Silva",
+        receptor: "",
+        priority: "Alta",
+        responseTime: 12,
+        prepTime: 25,
+        unloadTime: 0,
+        status: "LISTO_ATENDIDO",
+        timeCreated: "2026-10-01T08:00:00.000Z",
+        timeInProcess: "2026-10-01T08:12:00.000Z",
+        timeCompleted: "2026-10-01T08:37:00.000Z"
+    },
+    {
+        id: "RECP-2001",
+        poNumber: "OC-2026-204",
+        type: "RECEPCION",
+        dock: "Muelle 2 (Descarga)",
+        client: "Importadora Logística Global",
+        driver: "Carlos Pérez (B88-YY)",
+        origin: "IMPORTADA",
+        schedDateTime: "2026-10-01T10:00",
+        picker: "",
+        receptor: "Roberto Gómez",
+        priority: "Crítica",
+        responseTime: 18,
+        prepTime: 0,
+        unloadTime: 35,
+        status: "LISTO_ATENDIDO",
+        timeCreated: "2026-10-01T09:30:00.000Z",
+        timeInProcess: "2026-10-01T09:48:00.000Z",
+        timeCompleted: "2026-10-01T10:23:00.000Z"
+    },
+    {
+        id: "DESP-1002",
+        poNumber: "OC-2026-105",
+        type: "DESPACHO",
+        dock: "Muelle 1 (Carga)",
+        client: "Mercado San José",
+        driver: "Pedro Ramírez (C44-ZZ)",
+        origin: "N/A",
+        schedDateTime: "2026-10-02T11:15",
+        picker: "Carlos Mendoza",
+        receptor: "",
+        priority: "Media",
+        responseTime: 15,
+        prepTime: 30,
+        unloadTime: 0,
+        status: "LISTO_ATENDIDO",
+        timeCreated: "2026-10-02T10:30:00.000Z",
+        timeInProcess: "2026-10-02T10:45:00.000Z",
+        timeCompleted: "2026-10-02T11:15:00.000Z"
+    },
+    {
+        id: "RECP-2002",
+        poNumber: "OC-2026-208",
+        type: "RECEPCION",
+        dock: "Muelle 2 (Descarga)",
+        client: "Alimentos del Norte C.A.",
+        driver: "Luis Torres (D99-WW)",
+        origin: "NACIONAL",
+        schedDateTime: "2026-10-03T09:00",
+        picker: "",
+        receptor: "Andrés Blanco",
+        priority: "Alta",
+        responseTime: 10,
+        prepTime: 0,
+        unloadTime: 28,
+        status: "LISTO_ATENDIDO",
+        timeCreated: "2026-10-03T08:20:00.000Z",
+        timeInProcess: "2026-10-03T08:30:00.000Z",
+        timeCompleted: "2026-10-03T08:58:00.000Z"
+    },
+    {
+        id: "DESP-1003",
+        poNumber: "OC-2026-112",
+        type: "DESPACHO",
+        dock: "Muelle 3 (Mixto)",
+        client: "Cervecería Nacional",
+        driver: "Marcos Medina (E12-AA)",
+        origin: "N/A",
+        schedDateTime: "2026-10-05T08:00",
+        picker: "Manuel Silva",
+        receptor: "",
+        priority: "Crítica",
+        responseTime: 8,
+        prepTime: 20,
+        unloadTime: 0,
+        status: "EN_PREPARACION",
+        timeCreated: "2026-10-05T07:40:00.000Z",
+        timeInProcess: "2026-10-05T07:48:00.000Z",
+        timeCompleted: null
+    },
+    {
+        id: "RECP-2003",
+        poNumber: "OC-2026-215",
+        type: "RECEPCION",
+        dock: "Muelle 2 (Descarga)",
+        client: "Suministros Industriales",
+        driver: "Hernán López (F33-BB)",
+        origin: "IMPORTADA",
+        schedDateTime: "2026-10-05T14:30",
+        picker: "",
+        receptor: "Roberto Gómez",
+        priority: "Media",
+        responseTime: 0,
+        prepTime: 0,
+        unloadTime: 0,
+        status: "EN_ESPERA",
+        timeCreated: "2026-10-05T14:00:00.000Z",
+        timeInProcess: null,
+        timeCompleted: null
+    },
+    {
+        id: "DESP-1004",
+        poNumber: "OC-2026-118",
+        type: "DESPACHO",
+        dock: "Muelle 1 (Carga)",
+        client: "Comercializadora Sur",
+        driver: "José Rivas (G55-CC)",
+        origin: "N/A",
+        schedDateTime: "2026-10-05T16:00",
+        picker: "Carlos Mendoza",
+        receptor: "",
+        priority: "Baja",
+        responseTime: 0,
+        prepTime: 0,
+        unloadTime: 0,
+        status: "EN_ESPERA",
+        timeCreated: "2026-10-05T15:30:00.000Z",
+        timeInProcess: null,
+        timeCompleted: null
     }
+];
 
-    function checkUrlRole() {
-        const params = new URLSearchParams(window.location.search);
-        const mode = params.get('mode');
-        if (mode === 'admin' || mode === 'editor') {
-            window.isReadOnly = false;
-        } else {
-            window.isReadOnly = true;
-        }
-        updateRoleUI();
-    }
+// System Users Directory
+let users = [
+    { id: "U1", name: "Carlos Mendoza", username: "cmendoza", role: "ADMINISTRADOR", pin: "1234", status: "ACTIVO", lastAccess: "Hace 5 min" },
+    { id: "U2", name: "Manuel Silva", username: "msilva", role: "SUPERVISOR", pin: "2222", status: "ACTIVO", lastAccess: "Hace 2 horas" },
+    { id: "U3", name: "Roberto Gómez", username: "rgomez", role: "OPERADOR", pin: "3333", status: "ACTIVO", lastAccess: "Ayer" },
+    { id: "U4", name: "Andrés Blanco", username: "ablanco", role: "OPERADOR", pin: "4444", status: "ACTIVO", lastAccess: "Hace 1 día" },
+    { id: "U5", name: "Elena Rostova", username: "erostova", role: "LECTOR", pin: "0000", status: "ACTIVO", lastAccess: "Hace 10 min" }
+];
 
-    function updateRoleUI() {
-        const roleBadgeText = document.getElementById('roleBadgeText');
-        const roleBadge = document.getElementById('roleBadge');
-        const authBtnText = document.getElementById('authBtnText');
-        const authBtnIcon = document.getElementById('authBtnIcon');
-        const readOnlyBanner = document.getElementById('readOnlyBanner');
+// Chart Instances
+let dateChartInstance = null;
+let pickerChartInstance = null;
 
-        if (window.isReadOnly) {
-            if (roleBadgeText) roleBadgeText.innerText = "Modo Lector";
-            if (roleBadge) roleBadge.className = "text-xs px-2.5 py-1 rounded-lg bg-blue-950/80 text-blue-300 border border-blue-800 flex items-center gap-1.5";
-            if (authBtnText) authBtnText.innerText = "Desbloquear Editor";
-            if (authBtnIcon) authBtnIcon.setAttribute('data-lucide', 'lock');
-            if (readOnlyBanner) readOnlyBanner.classList.remove('hidden');
-        } else {
-            if (roleBadgeText) roleBadgeText.innerText = "Modo Editor";
-            if (roleBadge) roleBadge.className = "text-xs px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-800 flex items-center gap-1.5";
-            if (authBtnText) authBtnText.innerText = "Modo Lectura";
-            if (authBtnIcon) authBtnIcon.setAttribute('data-lucide', 'unlock');
-            if (readOnlyBanner) readOnlyBanner.classList.add('hidden');
-        }
-        if (window.lucide) lucide.createIcons();
-        if (document.getElementById('viewAccessControl') && !document.getElementById('viewAccessControl').classList.contains('hidden')) {
-            renderUsersTable();
-        }
-    }
+window.onload = function() {
+    lucide.createIcons();
+    initSystemData();
+    updateUIForRole();
+    renderAllViews();
 
-    function updateSyncBadge(statusText, type) {
-        const textEl = document.getElementById('syncBadgeText');
+    // Simulate connection status
+    setTimeout(() => {
         const badge = document.getElementById('syncBadge');
-        if (!badge || !textEl) return;
-
-        textEl.innerText = statusText;
-        if (type === 'active') {
+        const badgeText = document.getElementById('syncBadgeText');
+        if (badge && badgeText) {
             badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1";
-        } else {
-            badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-900/80 text-amber-300 border border-amber-700/50 flex items-center space-x-1";
+            badgeText.textContent = "Sincronizado";
         }
+    }, 800);
+};
+
+function initSystemData() {
+    // Set default datetime in order modal
+    const now = new Date();
+    const formatted = now.toISOString().slice(0,16);
+    const dateInput = document.getElementById('schedDateTime');
+    if (dateInput) dateInput.value = formatted;
+}
+
+function switchView(tab) {
+    activeTab = tab;
+    
+    // Hide all view containers
+    document.getElementById('viewDashboard').classList.add('hidden');
+    document.getElementById('viewCalendar').classList.add('hidden');
+    document.getElementById('viewAccessControl').classList.add('hidden');
+
+    // Reset button styles
+    const tabDashboardBtn = document.getElementById('tabDashboardBtn');
+    const tabCalendarBtn = document.getElementById('tabCalendarBtn');
+    const tabAccessBtn = document.getElementById('tabAccessBtn');
+
+    tabDashboardBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+    tabCalendarBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+    tabAccessBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+
+    if (tab === 'dashboard') {
+        document.getElementById('viewDashboard').classList.remove('hidden');
+        tabDashboardBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
+        renderCharts();
+    } else if (tab === 'calendar') {
+        document.getElementById('viewCalendar').classList.remove('hidden');
+        tabCalendarBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
+        renderCalendar();
+    } else if (tab === 'access') {
+        document.getElementById('viewAccessControl').classList.remove('hidden');
+        tabAccessBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-indigo-600 text-white shadow-sm";
+        renderAccessControl();
     }
+}
 
-    function toggleAuthModal() {
-        if (!window.isReadOnly) {
-            window.isReadOnly = true;
-            updateRoleUI();
-            showToast("Cambiado a Modo Lector (Solo Vista)", "info");
-        } else {
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinError').classList.add('hidden');
-            openModal('authModal');
-        }
+function updateUIForRole() {
+    const roleBadgeText = document.getElementById('roleBadgeText');
+    const authBtnText = document.getElementById('authBtnText');
+    const authBtnIcon = document.getElementById('authBtnIcon');
+    const readOnlyBanner = document.getElementById('readOnlyBanner');
+
+    if (currentRole === 'LECTOR') {
+        roleBadgeText.textContent = 'Modo Lector';
+        authBtnText.textContent = 'Desbloquear Editor';
+        authBtnIcon.setAttribute('data-lucide', 'lock');
+        readOnlyBanner.classList.remove('hidden');
+    } else if (currentRole === 'SUPERVISOR') {
+        roleBadgeText.textContent = 'Supervisor';
+        authBtnText.textContent = 'Bloquear / Salir';
+        authBtnIcon.setAttribute('data-lucide', 'unlock');
+        readOnlyBanner.classList.add('hidden');
+    } else if (currentRole === 'ADMINISTRADOR') {
+        roleBadgeText.textContent = 'Administrador';
+        authBtnText.textContent = 'Bloquear / Salir';
+        authBtnIcon.setAttribute('data-lucide', 'shield-check');
+        readOnlyBanner.classList.add('hidden');
     }
+    lucide.createIcons();
+    applyFiltersAndRender();
+}
 
-    function handleAuthSubmit(e) {
-        e.preventDefault();
-        const inputPin = document.getElementById('pinInput').value.trim();
-        const users = window.usersData || [];
-
-        const matchedUser = users.find(u => u.pin === inputPin && u.status === 'ACTIVO');
-
-        if (matchedUser || inputPin === '1234' || inputPin === 'admin' || inputPin === '5678') {
-            window.isReadOnly = false;
-            closeModal('authModal');
-            updateRoleUI();
-            
-            const userName = matchedUser ? matchedUser.fullName : 'Supervisor';
-            showToast(`¡Bienvenido ${userName}! Modo Editor desbloqueado`, "success");
-        } else {
-            document.getElementById('pinError').classList.remove('hidden');
-        }
+function toggleAuthModal() {
+    if (currentRole !== 'LECTOR') {
+        currentRole = 'LECTOR';
+        updateUIForRole();
+    } else {
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinError').classList.add('hidden');
+        openModal('authModal');
     }
+}
 
-    function handleTypeChange() {
-        const type = document.getElementById('orderType').value;
-        const originSelect = document.getElementById('receptionOrigin');
-        if (type === 'RECEPCION') {
-            originSelect.disabled = false;
-            originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-white";
-            if (originSelect.value === 'N/A') originSelect.value = 'NACIONAL';
-        } else {
-            originSelect.value = 'N/A';
-            originSelect.disabled = true;
-            originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-slate-100";
-        }
+function handleAuthSubmit(e) {
+    e.preventDefault();
+    const pin = document.getElementById('pinInput').value;
+    const foundUser = users.find(u => u.pin === pin && u.status === 'ACTIVO');
+
+    if (foundUser) {
+        currentRole = foundUser.role;
+        closeModal('authModal');
+        updateUIForRole();
+    } else {
+        document.getElementById('pinError').classList.remove('hidden');
     }
+}
 
-    function handleNewOrderClick() {
-        if (window.isReadOnly) {
-            showToast("Acceso de solo lectura: Desbloquea el Modo Editor para registrar pedidos", "info");
-            toggleAuthModal();
-        } else {
-            document.getElementById('orderForm').reset();
-            document.getElementById('editIndex').value = "-1";
-            document.getElementById('modalTitle').innerText = "Registrar Nuevo Pedido / Planificación";
-            
-            // Set default date to now
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const mins = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('schedDateTime').value = `${year}-${month}-${day}T${hours}:${mins}`;
-            
-            handleTypeChange();
-            openModal('newOrderModal');
-        }
+function handleTypeChange() {
+    const typeSelect = document.getElementById('orderType');
+    const originSelect = document.getElementById('receptionOrigin');
+    const pickerReceptorLabel = document.getElementById('pickerReceptorLabel');
+    const pickerInput = document.getElementById('pickerName');
+    const prepTimeLabel = document.getElementById('prepTimeLabel');
+
+    if (typeSelect.value === 'RECEPCION') {
+        originSelect.disabled = false;
+        originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-white";
+        if (originSelect.value === 'N/A') originSelect.value = 'NACIONAL';
+
+        // Receptions use "Receptor" instead of "Picker"
+        pickerReceptorLabel.textContent = "Receptor Asignado / Personal de Recepción *";
+        pickerInput.placeholder = "Ej: Roberto Gómez";
+
+        // Preparation time label changes to Descarga (min)
+        prepTimeLabel.textContent = "T. Descarga (min)";
+        prepTimeLabel.className = "block text-[11px] font-semibold text-emerald-800 mb-1";
+    } else {
+        originSelect.value = 'N/A';
+        originSelect.disabled = true;
+        originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-slate-100";
+
+        // Dispatch uses "Picker"
+        pickerReceptorLabel.textContent = "Picker Asignado / Recolector *";
+        pickerInput.placeholder = "Ej: Manuel Silva";
+
+        prepTimeLabel.textContent = "T. Prep (min)";
+        prepTimeLabel.className = "block text-[11px] font-semibold text-slate-700 mb-1";
     }
+}
 
-    function openModal(id) {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('hidden');
+function handleNewOrderClick() {
+    if (currentRole === 'LECTOR') {
+        toggleAuthModal();
+        return;
     }
+    openNewOrderModal();
+}
 
-    function closeModal(id) {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('hidden');
-    }
-
-    function openShareModal() {
-        setupShareUrl();
-        openModal('shareModal');
-    }
-
-    function setupShareUrl() {
-        const shareUrlInput = document.getElementById('shareUrlInput');
-        if (shareUrlInput) {
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('mode', 'reader');
-            shareUrlInput.value = currentUrl.toString();
-        }
-    }
-
-    function copyShareUrl() {
-        const shareUrlInput = document.getElementById('shareUrlInput');
-        if (shareUrlInput) {
-            shareUrlInput.select();
-            try {
-                document.execCommand('copy');
-            } catch (err) {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(shareUrlInput.value);
-                }
-            }
-            const copyAlert = document.getElementById('copyAlert');
-            if (copyAlert) {
-                copyAlert.classList.remove('hidden');
-                setTimeout(() => copyAlert.classList.add('hidden'), 3000);
-            }
-            showToast("¡Enlace de solo lectura copiado al portapapeles!", "success");
-        }
-    }
-
-    function exportDataCSV() {
-        const data = getFilteredData();
-        if (!data || data.length === 0) {
-            showToast("No hay datos disponibles para exportar", "info");
-            return;
-        }
-
-        const headers = ["ID_Pedido", "Orden_Compra", "Tipo", "Origen", "Cliente_Proveedor", "Muelle", "Chofer", "Fecha_Hora_Programada", "Picker", "Tiempo_Respuesta_Min", "Tiempo_Preparacion_Min", "Estatus", "Prioridad"];
-        
-        const csvRows = [];
-        csvRows.push(headers.join(","));
-
-        data.forEach(item => {
-            const row = [
-                `"${item.id || ''}"`,
-                `"${item.poNumber || ''}"`,
-                `"${item.type || ''}"`,
-                `"${item.origin || ''}"`,
-                `"${(item.client || '').replace(/"/g, '""')}"`,
-                `"${item.dock || ''}"`,
-                `"${(item.driver || '').replace(/"/g, '""')}"`,
-                `"${item.schedDateTime || ''}"`,
-                `"${(item.picker || '').replace(/"/g, '""')}"`,
-                item.respTime || 0,
-                item.prepTime || 0,
-                `"${item.status || ''}"`,
-                `"${item.priority || ''}"`
-            ];
-            csvRows.push(row.join(","));
-        });
-
-        const csvContent = csvRows.join("\n");
-        const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.setAttribute('href', url);
-        a.setAttribute('download', `Reporte_Logistico_Control_${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        showToast("Reporte CSV descargado con éxito", "success");
-    }
-
-    function showToast(message, type = "info") {
-        const toast = document.getElementById('toast');
-        const toastMsg = document.getElementById('toastMessage');
-        if (toast && toastMsg) {
-            toastMsg.innerText = message;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3500);
-        }
-    }
-
-    function confirmAction(message, onConfirm) {
-        document.getElementById('confirmModalText').innerText = message;
-        pendingConfirmAction = onConfirm;
-        const btn = document.getElementById('confirmModalActionBtn');
-        btn.onclick = async () => {
-            closeModal('customConfirmModal');
-            if (pendingConfirmAction) await pendingConfirmAction();
-            pendingConfirmAction = null;
-        };
-        openModal('customConfirmModal');
-    }
-
-    function getFilteredData() {
-        const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
-        const type = document.getElementById('typeFilter')?.value || 'ALL';
-        const status = document.getElementById('statusFilter')?.value || 'ALL';
-        const dateFrom = document.getElementById('dateFromFilter')?.value || '';
-        const dateTo = document.getElementById('dateToFilter')?.value || '';
-
-        return (window.ordersData || []).filter(item => {
-            const matchSearch = !search || 
-                (item.id && item.id.toLowerCase().includes(search)) ||
-                (item.poNumber && item.poNumber.toLowerCase().includes(search)) ||
-                (item.client && item.client.toLowerCase().includes(search)) ||
-                (item.driver && item.driver.toLowerCase().includes(search)) ||
-                (item.picker && item.picker.toLowerCase().includes(search));
-
-            const matchType = type === 'ALL' || item.type === type;
-            const matchStatus = status === 'ALL' || item.status === status;
-
-            const rawDate = item.schedDateTime ? item.schedDateTime.split('T')[0] : '';
-            const matchFrom = !dateFrom || (rawDate >= dateFrom);
-            const matchTo = !dateTo || (rawDate <= dateTo);
-
-            return matchSearch && matchType && matchStatus && matchFrom && matchTo;
-        });
-    }
-
-    function clearFilters() {
-        if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
-        if (document.getElementById('typeFilter')) document.getElementById('typeFilter').value = 'ALL';
-        if (document.getElementById('statusFilter')) document.getElementById('statusFilter').value = 'ALL';
-        if (document.getElementById('dateFromFilter')) document.getElementById('dateFromFilter').value = '';
-        if (document.getElementById('dateToFilter')) document.getElementById('dateToFilter').value = '';
-        applyFiltersAndRender();
-    }
-
-    function applyFiltersAndRender() {
-        const filtered = getFilteredData();
-        
-        // 1. Calculate KPIs
-        const total = filtered.length;
-        if (document.getElementById('totalOrdersCount')) document.getElementById('totalOrdersCount').innerText = `${total} Pedidos`;
-        if (document.getElementById('tableBadgeCount')) document.getElementById('tableBadgeCount').innerText = total;
-
-        const served = filtered.filter(i => i.status === 'LISTO_ATENDIDO').length;
-        const pending = filtered.filter(i => i.status === 'EN_ESPERA' || i.status === 'EN_PREPARACION').length;
-        
-        if (document.getElementById('kpiServed')) document.getElementById('kpiServed').innerText = served;
-        if (document.getElementById('kpiPending')) document.getElementById('kpiPending').innerText = pending;
-
-        const servedPct = total > 0 ? (served / total) * 100 : 0;
-        const pendingPct = total > 0 ? (pending / total) * 100 : 0;
-        
-        if (document.getElementById('kpiProgressBarServed')) document.getElementById('kpiProgressBarServed').style.width = `${servedPct}%`;
-        if (document.getElementById('kpiProgressBarPending')) document.getElementById('kpiProgressBarPending').style.width = `${pendingPct}%`;
-
-        // Avg Response & Prep Times
-        const totalResp = filtered.reduce((acc, curr) => acc + Number(curr.respTime || 0), 0);
-        const totalPrep = filtered.reduce((acc, curr) => acc + Number(curr.prepTime || 0), 0);
-        const avgResp = total > 0 ? Math.round(totalResp / total) : 0;
-        const avgPrep = total > 0 ? Math.round(totalPrep / total) : 0;
-
-        if (document.getElementById('kpiAvgResponse')) document.getElementById('kpiAvgResponse').innerText = `${avgResp} min`;
-        if (document.getElementById('kpiAvgPrep')) document.getElementById('kpiAvgPrep').innerText = `${avgPrep} min`;
-
-        // Origins
-        const national = filtered.filter(i => i.type === 'RECEPCION' && i.origin === 'NACIONAL').length;
-        const imported = filtered.filter(i => i.type === 'RECEPCION' && i.origin === 'IMPORTADA').length;
-        
-        if (document.getElementById('kpiNationalRecp')) document.getElementById('kpiNationalRecp').innerText = national;
-        if (document.getElementById('kpiImportRecp')) document.getElementById('kpiImportRecp').innerText = imported;
-        
-        const totalRecp = national + imported;
-        if (document.getElementById('kpiBarNational')) document.getElementById('kpiBarNational').style.width = totalRecp > 0 ? `${(national / totalRecp) * 100}%` : '50%';
-        if (document.getElementById('kpiBarImport')) document.getElementById('kpiBarImport').style.width = totalRecp > 0 ? `${(imported / totalRecp) * 100}%` : '50%';
-
-        // OTIF Compliance
-        const otifRate = total > 0 ? Math.round((served / total) * 100) : 0;
-        if (document.getElementById('kpiOTIF')) document.getElementById('kpiOTIF').innerText = `${otifRate}%`;
-
-        // 2. Render Table
-        const tbody = document.getElementById('ordersTableBody');
-        const emptyState = document.getElementById('emptyState');
-
-        if (!tbody) return;
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = '';
-            if (emptyState) emptyState.classList.remove('hidden');
-            renderCharts([]);
-            return;
-        } else {
-            if (emptyState) emptyState.classList.add('hidden');
-        }
-
-        tbody.innerHTML = filtered.map(item => {
-            const isDesp = item.type === 'DESPACHO';
-            const typeBadge = isDesp 
-                ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 uppercase">Despacho</span>`
-                : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase">Recepción (${item.origin || 'N/A'})</span>`;
-
-            let statusBadge = '';
-            if (item.status === 'LISTO_ATENDIDO') {
-                statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">Completado</span>`;
-            } else if (item.status === 'EN_PREPARACION') {
-                statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">En Preparación</span>`;
-            } else {
-                statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">En Espera</span>`;
-            }
-
-            const formattedDate = (item.schedDateTime || '').replace('T', ' ');
-
-            return `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="py-3 px-4">
-                        <div class="font-bold text-slate-900">${item.id}</div>
-                        <div class="mt-0.5">${typeBadge}</div>
-                    </td>
-                    <td class="py-3 px-4 font-mono font-semibold text-slate-800">${item.poNumber || 'N/A'}</td>
-                    <td class="py-3 px-4">
-                        <div class="font-medium text-slate-900">${item.client}</div>
-                        <div class="text-[11px] text-slate-400">Prioridad: ${item.priority || 'Media'}</div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <div class="text-slate-800 font-medium">${item.dock}</div>
-                        <div class="text-[11px] text-slate-400">${item.driver || 'Chófer sin asignar'}</div>
-                    </td>
-                    <td class="py-3 px-4 font-mono text-[11px] text-slate-600">${formattedDate}</td>
-                    <td class="py-3 px-4 font-medium text-slate-800">${item.picker}</td>
-                    <td class="py-3 px-4 text-slate-600">
-                        <div>Resp: <strong class="text-slate-800">${item.respTime}m</strong></div>
-                        <div>Prep: <strong class="text-slate-800">${item.prepTime}m</strong></div>
-                    </td>
-                    <td class="py-3 px-4">${statusBadge}</td>
-                    <td class="py-3 px-4 text-right space-x-1">
-                        ${!window.isReadOnly ? `
-                            <button onclick="editOrder('${item.id}')" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar Pedido">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="promptDeleteOrder('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition" title="Eliminar Pedido">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        ` : `
-                            <span class="text-[10px] text-slate-400 italic">Solo lectura</span>
-                        `}
-                    </td>
-                </tr>
-            `;
-        }).join('');
-
-        if (window.lucide) lucide.createIcons();
-        renderCharts(filtered);
-    }
-
-    function renderCharts(data) {
-        // Chart 1: Date Volume Performance
-        const dateMap = {};
-        data.forEach(item => {
-            const dateKey = item.schedDateTime ? item.schedDateTime.split('T')[0] : 'S/F';
-            if (!dateMap[dateKey]) dateMap[dateKey] = { desp: 0, recp: 0 };
-            if (item.type === 'DESPACHO') dateMap[dateKey].desp++;
-            else dateMap[dateKey].recp++;
-        });
-
-        const labels = Object.keys(dateMap).sort();
-        const despData = labels.map(l => dateMap[l].desp);
-        const recpData = labels.map(l => dateMap[l].recp);
-
-        const ctx1 = document.getElementById('datePerformanceChart')?.getContext('2d');
-        if (ctx1) {
-            if (dateChartInstance) dateChartInstance.destroy();
-            dateChartInstance = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Despachos', data: despData, backgroundColor: '#0284c7', borderRadius: 6 },
-                        { label: 'Recepciones', data: recpData, backgroundColor: '#10b981', borderRadius: 6 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                }
-            });
-        }
-
-        // Chart 2: Picker Prep Time Performance
-        const pickerMap = {};
-        data.forEach(item => {
-            const picker = item.picker || 'Sin Asignar';
-            if (!pickerMap[picker]) pickerMap[picker] = { totalPrep: 0, count: 0 };
-            pickerMap[picker].totalPrep += Number(item.prepTime || 0);
-            pickerMap[picker].count++;
-        });
-
-        const pickerLabels = Object.keys(pickerMap);
-        const pickerAvgData = pickerLabels.map(p => Math.round(pickerMap[p].totalPrep / pickerMap[p].count));
-
-        const ctx2 = document.getElementById('pickerPerformanceChart')?.getContext('2d');
-        if (ctx2) {
-            if (pickerChartInstance) pickerChartInstance.destroy();
-            pickerChartInstance = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: pickerLabels,
-                    datasets: [{
-                        label: 'Mins Promedio por Pedido',
-                        data: pickerAvgData,
-                        backgroundColor: '#f59e0b',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
-    }
-
-    // Save & Edit Order Logic
-    async function saveOrder(e) {
-        e.preventDefault();
-        if (window.isReadOnly) {
-            showToast("Acceso de solo lectura: Desbloquea el Modo Editor", "info");
-            return;
-        }
-
-        const orderId = document.getElementById('orderId').value.trim();
-        const poNumber = document.getElementById('poNumber').value.trim();
-        const type = document.getElementById('orderType').value;
-        const dock = document.getElementById('dockNumber').value;
-        const client = document.getElementById('clientName').value.trim();
-        const driver = document.getElementById('driverInfo').value.trim();
-        const origin = type === 'RECEPCION' ? document.getElementById('receptionOrigin').value : 'N/A';
-        const schedDateTime = document.getElementById('schedDateTime').value;
-        const picker = document.getElementById('pickerName').value.trim();
-        const priority = document.getElementById('orderPriority').value;
-        const respTime = Number(document.getElementById('responseTime').value || 0);
-        const prepTime = Number(document.getElementById('prepTime').value || 0);
-        const status = document.getElementById('orderStatus').value;
-
-        const orderObj = {
-            id: orderId,
-            poNumber: poNumber,
-            type: type,
-            origin: origin,
-            client: client,
-            dock: dock,
-            driver: driver,
-            schedDateTime: schedDateTime,
-            picker: picker,
-            respTime: respTime,
-            prepTime: prepTime,
-            status: status,
-            priority: priority
-        };
-
-        const success = await window.saveOrderToCloud(orderObj);
-        if (success) {
-            closeModal('newOrderModal');
-            closeModal('dayPlanModal');
-            showToast(`Pedido ${orderId} guardado con éxito`, "success");
-        } else {
-            showToast("Error al guardar la orden en la base de datos", "rose");
-        }
-    }
-
-    function editOrder(orderId) {
-        if (window.isReadOnly) {
-            showToast("Acceso de solo lectura: Desbloquea el Modo Editor", "info");
-            return;
-        }
-        const item = (window.ordersData || []).find(o => o.id === orderId);
-        if (!item) return;
-
-        document.getElementById('orderId').value = item.id;
-        document.getElementById('poNumber').value = item.poNumber || '';
-        document.getElementById('orderType').value = item.type || 'DESPACHO';
-        document.getElementById('dockNumber').value = item.dock || 'Muelle 1 (Carga)';
-        document.getElementById('clientName').value = item.client || '';
-        document.getElementById('driverInfo').value = item.driver || '';
-        
+function openNewOrderModal(editIdx = -1) {
+    document.getElementById('editIndex').value = editIdx;
+    const modalTitle = document.getElementById('modalTitle');
+    
+    if (editIdx >= 0) {
+        modalTitle.innerHTML = `<i data-lucide="edit-3" class="w-5 h-5 text-brand-500"></i><span>Editar Registro de Pedido</span>`;
+        const o = orders[editIdx];
+        document.getElementById('orderId').value = o.id;
+        document.getElementById('poNumber').value = o.poNumber;
+        document.getElementById('orderType').value = o.type;
         handleTypeChange();
-        if (item.type === 'RECEPCION') {
-            document.getElementById('receptionOrigin').value = item.origin || 'NACIONAL';
-        }
+        document.getElementById('dockNumber').value = o.dock;
+        document.getElementById('clientName').value = o.client;
+        document.getElementById('driverInfo').value = o.driver;
+        document.getElementById('receptionOrigin').value = o.origin;
+        document.getElementById('schedDateTime').value = o.schedDateTime;
         
-        document.getElementById('schedDateTime').value = item.schedDateTime || '';
-        document.getElementById('pickerName').value = item.picker || '';
-        document.getElementById('orderPriority').value = item.priority || 'Media';
-        document.getElementById('responseTime').value = item.respTime || 15;
-        document.getElementById('prepTime').value = item.prepTime || 30;
-        document.getElementById('orderStatus').value = item.status || 'EN_ESPERA';
+        document.getElementById('pickerName').value = o.type === 'RECEPCION' ? o.receptor : o.picker;
+        document.getElementById('orderPriority').value = o.priority;
+        document.getElementById('responseTime').value = o.responseTime || 0;
+        document.getElementById('prepTime').value = o.type === 'RECEPCION' ? (o.unloadTime || o.prepTime || 0) : (o.prepTime || 0);
+        document.getElementById('orderStatus').value = o.status;
+    } else {
+        modalTitle.innerHTML = `<i data-lucide="clipboard-plus" class="w-5 h-5 text-brand-500"></i><span>Registrar Nuevo Pedido / Planificación</span>`;
+        document.getElementById('orderForm').reset();
+        document.getElementById('editIndex').value = -1;
+        document.getElementById('orderId').value = "ORD-" + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('poNumber').value = "OC-2026-" + Math.floor(100 + Math.random() * 900);
+        document.getElementById('responseTime').value = 0;
+        document.getElementById('prepTime').value = 0;
+        initSystemData();
+        handleTypeChange();
+    }
+    lucide.createIcons();
+    openModal('newOrderModal');
+}
 
-        document.getElementById('modalTitle').innerText = "Editar Pedido " + item.id;
-        openModal('newOrderModal');
+function saveOrder(e) {
+    e.preventDefault();
+    if (currentRole === 'LECTOR') return;
+
+    const idx = parseInt(document.getElementById('editIndex').value);
+    const type = document.getElementById('orderType').value;
+    const assignedPerson = document.getElementById('pickerName').value;
+    const newStatus = document.getElementById('orderStatus').value;
+    const nowISO = new Date().toISOString();
+
+    let existingOrder = idx >= 0 ? orders[idx] : null;
+
+    let timeCreated = existingOrder ? existingOrder.timeCreated : nowISO;
+    let timeInProcess = existingOrder ? existingOrder.timeInProcess : null;
+    let timeCompleted = existingOrder ? existingOrder.timeCompleted : null;
+
+    let responseTime = existingOrder ? existingOrder.responseTime : 0;
+    let prepTimeVal = existingOrder ? (type === 'DESPACHO' ? existingOrder.prepTime : existingOrder.unloadTime) : 0;
+
+    // Transition to EN_PREPARACION -> Record start of preparation time and calculate response time
+    if (newStatus === 'EN_PREPARACION') {
+        if (!timeInProcess) {
+            timeInProcess = nowISO;
+        }
+        if (timeCreated) {
+            const diffMs = new Date(timeInProcess) - new Date(timeCreated);
+            responseTime = Math.max(0, Math.round(diffMs / (1000 * 60)));
+        }
+    } 
+    // Transition to LISTO_ATENDIDO -> Record end of preparation time and calculate preparation/unload time
+    else if (newStatus === 'LISTO_ATENDIDO') {
+        if (!timeInProcess) {
+            timeInProcess = nowISO;
+            if (timeCreated) {
+                const diffMsResp = new Date(timeInProcess) - new Date(timeCreated);
+                responseTime = Math.max(0, Math.round(diffMsResp / (1000 * 60)));
+            }
+        }
+        if (!timeCompleted) {
+            timeCompleted = nowISO;
+        }
+        if (timeInProcess) {
+            const diffMsPrep = new Date(timeCompleted) - new Date(timeInProcess);
+            prepTimeVal = Math.max(0, Math.round(diffMsPrep / (1000 * 60)));
+        }
     }
 
-    function promptDeleteOrder(orderId) {
-        if (window.isReadOnly) {
-            showToast("Acceso de solo lectura", "info");
-            return;
+    const orderData = {
+        id: document.getElementById('orderId').value,
+        poNumber: document.getElementById('poNumber').value,
+        type: type,
+        dock: document.getElementById('dockNumber').value,
+        client: document.getElementById('clientName').value,
+        driver: document.getElementById('driverInfo').value,
+        origin: type === 'RECEPCION' ? document.getElementById('receptionOrigin').value : 'N/A',
+        schedDateTime: document.getElementById('schedDateTime').value,
+        picker: type === 'DESPACHO' ? assignedPerson : '',
+        receptor: type === 'RECEPCION' ? assignedPerson : '',
+        priority: document.getElementById('orderPriority').value,
+        responseTime: responseTime,
+        prepTime: type === 'DESPACHO' ? prepTimeVal : 0,
+        unloadTime: type === 'RECEPCION' ? prepTimeVal : 0,
+        status: newStatus,
+        timeCreated: timeCreated,
+        timeInProcess: timeInProcess,
+        timeCompleted: timeCompleted
+    };
+
+    if (idx >= 0) {
+        orders[idx] = orderData;
+    } else {
+        orders.unshift(orderData);
+    }
+
+    closeModal('newOrderModal');
+    if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
+    renderAllViews();
+}
+
+function deleteOrder(idx) {
+    if (currentRole === 'LECTOR') {
+        toggleAuthModal();
+        return;
+    }
+    if (confirm('¿Está seguro de eliminar esta orden?')) {
+        orders.splice(idx, 1);
+        renderAllViews();
+        if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
+    }
+}
+
+function renderAllViews() {
+    calculateMetrics();
+    applyFiltersAndRender();
+    renderCharts();
+    renderCalendar();
+    renderAccessControl();
+}
+
+function calculateMetrics() {
+    let totalResp = 0, countResp = 0;
+    let totalPrep = 0, countPrep = 0;
+    let totalUnload = 0, countUnload = 0;
+    let served = 0, pending = 0;
+    let national = 0, imported = 0;
+
+    orders.forEach(o => {
+        if (o.status === 'LISTO_ATENDIDO') served++;
+        else pending++;
+
+        if (o.type === 'RECEPCION') {
+            if (o.origin === 'NACIONAL') national++;
+            if (o.origin === 'IMPORTADA') imported++;
+            if (o.unloadTime > 0) {
+                totalUnload += o.unloadTime;
+                countUnload++;
+            }
         }
-        confirmAction(`¿Estás seguro de que deseas eliminar el pedido ${orderId}?`, async () => {
-            const success = await window.deleteOrderFromCloud(orderId);
-            if (success) showToast(`Pedido ${orderId} eliminado`, "info");
+
+        if (o.responseTime > 0) {
+            totalResp += o.responseTime;
+            countResp++;
+        }
+
+        if (o.type === 'DESPACHO' && o.prepTime > 0) {
+            totalPrep += o.prepTime;
+            countPrep++;
+        }
+    });
+
+    const avgResp = countResp ? Math.round(totalResp / countResp) : 0;
+    const avgPrep = countPrep ? Math.round(totalPrep / countPrep) : 0;
+    const avgUnload = countUnload ? Math.round(totalUnload / countUnload) : 0;
+    const totalOrders = orders.length;
+    const otifRate = totalOrders ? Math.round((served / totalOrders) * 100) : 0;
+
+    document.getElementById('kpiAvgResponse').textContent = `${avgResp} min`;
+    document.getElementById('kpiAvgPrep').textContent = `${avgPrep} min`;
+    document.getElementById('kpiAvgUnload').textContent = `${avgUnload} min`;
+    
+    document.getElementById('kpiServed').textContent = served;
+    document.getElementById('kpiPending').textContent = pending;
+    
+    const servedPct = totalOrders ? (served / totalOrders) * 100 : 0;
+    document.getElementById('kpiProgressBarServed').style.width = `${servedPct}%`;
+    document.getElementById('kpiProgressBarPending').style.width = `${100 - servedPct}%`;
+
+    document.getElementById('kpiNationalRecp').textContent = national;
+    document.getElementById('kpiImportRecp').textContent = imported;
+    const recpTotal = national + imported || 1;
+    document.getElementById('kpiBarNational').style.width = `${(national / recpTotal) * 100}%`;
+    document.getElementById('kpiBarImport').style.width = `${(imported / recpTotal) * 100}%`;
+
+    document.getElementById('kpiOTIF').textContent = `${otifRate}%`;
+    document.getElementById('totalOrdersCount').textContent = `${totalOrders} Pedidos`;
+}
+
+function applyFiltersAndRender() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const type = document.getElementById('typeFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const dateFrom = document.getElementById('dateFromFilter').value;
+    const dateTo = document.getElementById('dateToFilter').value;
+
+    const filtered = orders.filter((o, idx) => {
+        o._originalIndex = idx;
+        const matchesSearch = 
+            o.id.toLowerCase().includes(search) ||
+            o.poNumber.toLowerCase().includes(search) ||
+            o.client.toLowerCase().includes(search) ||
+            o.driver.toLowerCase().includes(search) ||
+            o.picker.toLowerCase().includes(search) ||
+            o.receptor.toLowerCase().includes(search);
+
+        const matchesType = (type === 'ALL') || (o.type === type);
+        const matchesStatus = (status === 'ALL') || (o.status === status);
+
+        let matchesDate = true;
+        const orderDate = o.schedDateTime.split('T')[0];
+        if (dateFrom && orderDate < dateFrom) matchesDate = false;
+        if (dateTo && orderDate > dateTo) matchesDate = false;
+
+        return matchesSearch && matchesType && matchesStatus && matchesDate;
+    });
+
+    document.getElementById('tableBadgeCount').textContent = filtered.length;
+    const tbody = document.getElementById('ordersTableBody');
+    const emptyState = document.getElementById('emptyState');
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+    }
+
+    emptyState.classList.add('hidden');
+    let html = '';
+
+    filtered.forEach(o => {
+        const isDesp = o.type === 'DESPACHO';
+        const badgeType = isDesp ? 
+            `<span class="px-2 py-0.5 rounded-md bg-sky-100 text-sky-800 font-semibold text-[10px]">DESPACHO</span>` : 
+            `<span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-semibold text-[10px]">RECEPCIÓN</span>`;
+
+        let statusBadge = '';
+        if (o.status === 'EN_ESPERA') {
+            statusBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>En Espera</span>`;
+        } else if (o.status === 'EN_PREPARACION') {
+            statusBadge = `<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>En Proceso</span>`;
+        } else {
+            statusBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Atendido</span>`;
+        }
+
+        const dateObj = new Date(o.schedDateTime);
+        const dateFormatted = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) + ' ' + dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+        const personDisplay = isDesp ? 
+            `<span class="flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5 text-sky-600"></i> Picker: ${o.picker || 'Sin Asignar'}</span>` :
+            `<span class="flex items-center gap-1"><i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-600"></i> Receptor: ${o.receptor || 'Sin Asignar'}</span>`;
+
+        const timingDisplay = isDesp ? 
+            `Resp: <strong>${o.responseTime}m</strong> | Prep: <strong>${o.prepTime}m</strong>` : 
+            `Resp: <strong>${o.responseTime}m</strong> | Descarga: <strong class="text-emerald-700">${o.unloadTime || o.prepTime || 0}m</strong>`;
+
+        html += `
+            <tr class="hover:bg-slate-50 transition">
+                <td class="py-3 px-4 font-semibold text-slate-900">
+                    <div>${o.id}</div>
+                    <div class="mt-0.5">${badgeType}</div>
+                </td>
+                <td class="py-3 px-4 font-mono font-medium text-slate-800">${o.poNumber}</td>
+                <td class="py-3 px-4">
+                    <div class="font-medium text-slate-900">${o.client}</div>
+                    ${!isDesp ? `<div class="text-[10px] text-slate-500 uppercase">Origen: ${o.origin}</div>` : ''}
+                </td>
+                <td class="py-3 px-4">
+                    <div class="font-medium text-slate-800">${o.dock}</div>
+                    <div class="text-[11px] text-slate-500">${o.driver || 'N/A'}</div>
+                </td>
+                <td class="py-3 px-4 text-slate-700 whitespace-nowrap">${dateFormatted}</td>
+                <td class="py-3 px-4 font-medium text-slate-800">${personDisplay}</td>
+                <td class="py-3 px-4 text-[11px] text-slate-600">${timingDisplay}</td>
+                <td class="py-3 px-4">${statusBadge}</td>
+                <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                    <button onclick="openNewOrderModal(${o._originalIndex})" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar">
+                        <i data-lucide="edit" class="w-4 h-4"></i>
+                    </button>
+                    ${currentRole !== 'LECTOR' ? `
+                    <button onclick="deleteOrder(${o._originalIndex})" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>` : ''}
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+    lucide.createIcons();
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('typeFilter').value = 'ALL';
+    document.getElementById('statusFilter').value = 'ALL';
+    document.getElementById('dateFromFilter').value = '';
+    document.getElementById('dateToFilter').value = '';
+    applyFiltersAndRender();
+}
+
+function renderCharts() {
+    if (activeTab !== 'dashboard') return;
+
+    // 1. Chart 1: Volume & Results by Date
+    const datesMap = {};
+    orders.forEach(o => {
+        const dateStr = o.schedDateTime.split('T')[0];
+        if (!datesMap[dateStr]) datesMap[dateStr] = { despachos: 0, recepciones: 0 };
+        if (o.type === 'DESPACHO') datesMap[dateStr].despachos++;
+        else datesMap[dateStr].recepciones++;
+    });
+
+    const sortedDates = Object.keys(datesMap).sort();
+    const despData = sortedDates.map(d => datesMap[d].despachos);
+    const recpData = sortedDates.map(d => datesMap[d].recepciones);
+
+    const ctx1 = document.getElementById('datePerformanceChart');
+    if (ctx1) {
+        if (dateChartInstance) dateChartInstance.destroy();
+        dateChartInstance = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: sortedDates.map(d => {
+                    const parts = d.split('-');
+                    return `${parts[2]}/${parts[1]}`;
+                }),
+                datasets: [
+                    {
+                        label: 'Despachos',
+                        data: despData,
+                        backgroundColor: '#38bdf8',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Recepciones',
+                        data: recpData,
+                        backgroundColor: '#34d399',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                }
+            }
         });
     }
 
-    // Calendar View Logic
-    function renderCalendarView() {
-        const calendarGrid = document.getElementById('calendarGrid');
-        const monthYearTitle = document.getElementById('calendarMonthYear');
-        if (!calendarGrid || !monthYearTitle) return;
+    // 2. Chart 2: Rendimiento por Picker y Receptor
+    const personMap = {};
+    orders.forEach(o => {
+        if (o.type === 'DESPACHO' && o.picker) {
+            const name = o.picker + " (Picker)";
+            if (!personMap[name]) personMap[name] = { count: 0, timeTotal: 0, role: 'PICKER' };
+            personMap[name].count++;
+            personMap[name].timeTotal += (o.prepTime || 0);
+        } else if (o.type === 'RECEPCION' && o.receptor) {
+            const name = o.receptor + " (Receptor)";
+            if (!personMap[name]) personMap[name] = { count: 0, timeTotal: 0, role: 'RECEPTOR' };
+            personMap[name].count++;
+            personMap[name].timeTotal += (o.unloadTime || o.prepTime || 0);
+        }
+    });
 
-        const year = currentCalendarDate.getFullYear();
-        const month = currentCalendarDate.getMonth();
+    const personNames = Object.keys(personMap);
+    const countData = personNames.map(p => personMap[p].count);
+    const avgTimeData = personNames.map(p => personMap[p].count ? Math.round(personMap[p].timeTotal / personMap[p].count) : 0);
+    const barColors = personNames.map(p => personMap[p].role === 'PICKER' ? '#0284c7' : '#10b981');
 
-        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        monthYearTitle.innerText = `${monthNames[month]} ${year}`;
+    const ctx2 = document.getElementById('pickerPerformanceChart');
+    if (ctx2) {
+        if (pickerChartInstance) pickerChartInstance.destroy();
+        pickerChartInstance = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: personNames,
+                datasets: [
+                    {
+                        label: 'Operaciones Atendidas',
+                        data: countData,
+                        backgroundColor: barColors,
+                        borderRadius: 6,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Tiempo Prom. (min)',
+                        data: avgTimeData,
+                        type: 'line',
+                        borderColor: '#f59e0b',
+                        backgroundColor: '#f59e0b',
+                        tension: 0.3,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { precision: 0 },
+                        title: { display: true, text: 'Cant. Operaciones' }
+                    },
+                    y1: {
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'Mins Promedio' }
+                    }
+                }
+            }
+        });
+    }
+}
 
-        const firstDayIndex = new Date(year, month, 1).getDay();
-        const lastDay = new Date(year, month + 1, 0).getDate();
+function renderCalendar() {
+    if (activeTab !== 'calendar') return;
 
-        let html = '';
+    const year = calendarCurrentDate.getFullYear();
+    const month = calendarCurrentDate.getMonth();
 
-        // Blanks for prior month
-        for (let i = 0; i < firstDayIndex; i++) {
-            html += `<div class="bg-slate-50/50 rounded-lg p-2 min-h-[90px] border border-slate-100 opacity-40"></div>`;
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const calendarGrid = document.getElementById('calendarGrid');
+    calendarGrid.innerHTML = '';
+
+    // Empty lead cells
+    for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'min-h-[90px] bg-slate-50/50 rounded-xl border border-slate-100/50';
+        calendarGrid.appendChild(empty);
+    }
+
+    // Days cells
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayOrders = orders.filter(o => o.schedDateTime.startsWith(dateStr));
+
+        const isToday = (new Date().toISOString().split('T')[0] === dateStr);
+
+        const cell = document.createElement('div');
+        cell.className = `min-h-[90px] p-2 bg-white rounded-xl border ${isToday ? 'border-brand-500 ring-2 ring-brand-500/20' : 'border-slate-200'} hover:border-brand-400 transition cursor-pointer flex flex-col justify-between`;
+        cell.onclick = () => openDayPlanModal(dateStr);
+
+        let pillsHtml = '';
+        dayOrders.slice(0, 3).forEach(o => {
+            const isDesp = o.type === 'DESPACHO';
+            const color = isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800';
+            pillsHtml += `<div class="text-[10px] truncate font-medium px-1.5 py-0.5 rounded ${color} mb-1" title="${o.poNumber} - ${o.client}">${o.poNumber}</div>`;
+        });
+
+        if (dayOrders.length > 3) {
+            pillsHtml += `<div class="text-[10px] text-slate-500 font-semibold">+${dayOrders.length - 3} más</div>`;
         }
 
-        const allOrders = window.ordersData || [];
+        cell.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold ${isToday ? 'text-brand-600' : 'text-slate-800'}">${day}</span>
+                ${dayOrders.length ? `<span class="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600">${dayOrders.length}</span>` : ''}
+            </div>
+            <div class="mt-1 flex-grow">${pillsHtml}</div>
+        `;
 
-        for (let day = 1; day <= lastDay; day++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const dayOrders = allOrders.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+        calendarGrid.appendChild(cell);
+    }
+}
 
-            const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
-            const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
+function prevMonth() {
+    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+    renderCalendar();
+}
 
-            const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
-            const borderClass = isToday ? 'border-2 border-brand-500 bg-brand-50/20' : 'border border-slate-200 bg-white';
+function nextMonth() {
+    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+    renderCalendar();
+}
+
+function todayMonth() {
+    calendarCurrentDate = new Date(2026, 9, 1);
+    renderCalendar();
+}
+
+function openDayPlanModal(dateStr) {
+    selectedDayForPlan = dateStr;
+    const dayOrders = orders.filter(o => o.schedDateTime.startsWith(dateStr));
+    
+    document.getElementById('dayPlanTitle').textContent = `Plan del Día: ${dateStr}`;
+    document.getElementById('dayTotalCount').textContent = `${dayOrders.length} Operaciones`;
+    
+    const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
+    const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
+    document.getElementById('dayDespCount').textContent = despCount;
+    document.getElementById('dayRecpCount').textContent = recpCount;
+
+    const list = document.getElementById('dayPlanList');
+    if (dayOrders.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-xs text-slate-500">No hay operaciones programadas para este día.</div>`;
+    } else {
+        let html = '';
+        dayOrders.forEach((o) => {
+            const origIdx = orders.indexOf(o);
+            const isDesp = o.type === 'DESPACHO';
+            const badge = isDesp ? 
+                `<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold text-[10px]">DESPACHO</span>` : 
+                `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">RECEPCIÓN</span>`;
 
             html += `
-                <div onclick="openDayPlanModal('${dateStr}')" class="${borderClass} rounded-lg p-2 min-h-[90px] hover:shadow-md transition cursor-pointer flex flex-col justify-between group">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-bold ${isToday ? 'text-brand-600' : 'text-slate-700'}">${day}</span>
-                        ${dayOrders.length > 0 ? `<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full font-semibold">${dayOrders.length}</span>` : ''}
-                    </div>
-                    <div class="space-y-1 my-1">
-                        ${despCount > 0 ? `<div class="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-medium truncate">Despachos: ${despCount}</div>` : ''}
-                        ${recpCount > 0 ? `<div class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-medium truncate">Recepciones: ${recpCount}</div>` : ''}
-                    </div>
-                    <div class="text-[10px] text-slate-400 group-hover:text-brand-600 text-right font-medium">Ver detalle &rarr;</div>
-                </div>
-            `;
-        }
-
-        calendarGrid.innerHTML = html;
-    }
-
-    function prevMonth() {
-        currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-        renderCalendarView();
-    }
-
-    function nextMonth() {
-        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-        renderCalendarView();
-    }
-
-    function todayMonth() {
-        currentCalendarDate = new Date();
-        renderCalendarView();
-    }
-
-    function openDayPlanModal(dateStr) {
-        window.selectedDayForModal = dateStr;
-        const allOrders = window.ordersData || [];
-        const dayOrders = allOrders.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
-
-        const titleEl = document.getElementById('dayPlanTitle');
-        if (titleEl) titleEl.innerText = `Plan del Día: ${dateStr}`;
-
-        const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
-        const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
-
-        document.getElementById('dayTotalCount').innerText = `${dayOrders.length} Operaciones`;
-        document.getElementById('dayDespCount').innerText = despCount;
-        document.getElementById('dayRecpCount').innerText = recpCount;
-
-        const listContainer = document.getElementById('dayPlanList');
-        if (dayOrders.length === 0) {
-            listContainer.innerHTML = `
-                <div class="text-center py-8 text-slate-400 text-xs">
-                    No hay operaciones programadas para esta fecha.
-                </div>
-            `;
-        } else {
-            listContainer.innerHTML = dayOrders.map(item => `
-                <div class="p-3 border border-slate-200 rounded-lg flex items-center justify-between hover:bg-slate-50 transition">
-                    <div class="space-y-0.5">
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs gap-3">
+                    <div class="space-y-1">
                         <div class="flex items-center space-x-2">
-                            <span class="font-bold text-xs text-slate-900">${item.id}</span>
-                            <span class="font-mono text-[11px] text-slate-500">(${item.poNumber || 'N/A'})</span>
-                            <span class="text-[10px] px-1.5 py-0.5 rounded ${item.type === 'DESPACHO' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'} font-bold">${item.type}</span>
+                            ${badge}
+                            <span class="font-mono font-bold text-slate-900">${o.poNumber} (${o.id})</span>
                         </div>
-                        <p class="text-xs text-slate-700 font-medium">${item.client}</p>
-                        <p class="text-[11px] text-slate-500">Muelle: ${item.dock} • Picker: ${item.picker}</p>
+                        <div class="font-medium text-slate-800">${o.client} • <span class="text-slate-500">${o.dock}</span></div>
+                        <div class="text-[11px] text-slate-500">${isDesp ? `Picker: ${o.picker || 'N/A'}` : `Receptor: ${o.receptor || 'N/A'}`}</div>
                     </div>
-                    <div class="text-right space-y-1">
-                        <span class="text-xs font-mono block font-semibold text-slate-800">${item.schedDateTime.split('T')[1] || ''}</span>
-                        ${!window.isReadOnly ? `
-                            <button onclick="editOrder('${item.id}')" class="text-xs text-brand-600 hover:underline">Editar</button>
-                        ` : ''}
+                    <div class="text-right space-y-1 shrink-0">
+                        <div class="font-semibold text-slate-700">${o.schedDateTime.split('T')[1]}</div>
+                        <button onclick="openNewOrderModal(${origIdx})" class="px-2.5 py-1 text-[11px] bg-white border border-slate-300 rounded-lg hover:bg-slate-100 text-slate-700 font-medium">
+                            Editar
+                        </button>
                     </div>
                 </div>
-            `).join('');
-        }
-
-        openModal('dayPlanModal');
-    }
-
-    function addOrderForSelectedDay() {
-        closeModal('dayPlanModal');
-        handleNewOrderClick();
-        if (window.selectedDayForModal) {
-            document.getElementById('schedDateTime').value = `${window.selectedDayForModal}T08:00`;
-        }
-    }
-
-    // User Management Control Logic
-    function renderUsersTable() {
-        const users = window.usersData || [];
-        const search = (document.getElementById('userSearchInput')?.value || '').toLowerCase();
-
-        const filtered = users.filter(u => 
-            !search || 
-            (u.fullName && u.fullName.toLowerCase().includes(search)) ||
-            (u.username && u.username.toLowerCase().includes(search)) ||
-            (u.role && u.role.toLowerCase().includes(search))
-        );
-
-        // Update KPIs
-        if (document.getElementById('kpiTotalUsers')) document.getElementById('kpiTotalUsers').innerText = users.length;
-        if (document.getElementById('kpiAdminUsers')) document.getElementById('kpiAdminUsers').innerText = users.filter(u => u.role === 'ADMINISTRADOR').length;
-        if (document.getElementById('kpiOperatorUsers')) document.getElementById('kpiOperatorUsers').innerText = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
-        if (document.getElementById('kpiActiveUsers')) document.getElementById('kpiActiveUsers').innerText = users.filter(u => u.status === 'ACTIVO').length;
-
-        const tbody = document.getElementById('usersTableBody');
-        if (!tbody) return;
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No se encontraron usuarios.</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = filtered.map(u => {
-            const statusBadge = u.status === 'ACTIVO'
-                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">Activo</span>`
-                : `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800">Inactivo</span>`;
-
-            return `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="py-3 px-4">
-                        <div class="font-bold text-slate-900">${u.fullName}</div>
-                        <div class="text-[11px] text-slate-400 font-mono">@${u.username}</div>
-                    </td>
-                    <td class="py-3 px-4 font-semibold text-slate-700">${u.role}</td>
-                    <td class="py-3 px-4 font-mono text-slate-500">••••</td>
-                    <td class="py-3 px-4">${statusBadge}</td>
-                    <td class="py-3 px-4 font-mono text-[11px] text-slate-500">${u.lastAccess || 'Nunca'}</td>
-                    <td class="py-3 px-4 text-right space-x-1">
-                        ${!window.isReadOnly ? `
-                            <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg" title="Restablecer PIN">
-                                <i data-lucide="key-round" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="editUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg" title="Editar Usuario">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="promptDeleteUser('${u.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg" title="Eliminar Usuario">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        ` : `
-                            <span class="text-[10px] text-slate-400 italic">Solo lectura</span>
-                        `}
-                    </td>
-                </tr>
             `;
-        }).join('');
-
-        if (window.lucide) lucide.createIcons();
-    }
-
-    function openNewUserModal() {
-        if (window.isReadOnly) {
-            showToast("Acceso de solo lectura: Desbloquea el Modo Editor", "info");
-            return;
-        }
-        document.getElementById('userForm').reset();
-        document.getElementById('editUserId').value = "";
-        document.getElementById('userModalTitle').innerText = "Crear Nuevo Usuario";
-        openModal('userModal');
-    }
-
-    async function saveUser(e) {
-        e.preventDefault();
-        if (window.isReadOnly) {
-            showToast("Modo de solo lectura activo", "info");
-            return;
-        }
-
-        const editId = document.getElementById('editUserId').value;
-        const fullName = document.getElementById('userFullName').value.trim();
-        const username = document.getElementById('username').value.trim();
-        const pin = document.getElementById('userPin').value.trim();
-        const role = document.getElementById('userRole').value;
-        const status = document.getElementById('userStatus').value;
-
-        const userId = editId || username.toLowerCase().replace(/[^a-z0-9]/g, '') || `user_${Date.now()}`;
-
-        const userObj = {
-            id: userId,
-            username: username,
-            fullName: fullName,
-            pin: pin,
-            role: role,
-            status: status,
-            lastAccess: new Date().toISOString().slice(0, 16).replace('T', ' ')
-        };
-
-        const success = await window.saveUserToCloud(userObj);
-        if (success) {
-            closeModal('userModal');
-            showToast(`Usuario ${fullName} guardado exitosamente`, "success");
-        } else {
-            showToast("Error al guardar el usuario en la base de datos", "rose");
-        }
-    }
-
-    function editUser(userId) {
-        if (window.isReadOnly) return;
-        const u = (window.usersData || []).find(x => x.id === userId);
-        if (!u) return;
-
-        document.getElementById('editUserId').value = u.id;
-        document.getElementById('userFullName').value = u.fullName || '';
-        document.getElementById('username').value = u.username || '';
-        document.getElementById('userPin').value = u.pin || '';
-        document.getElementById('userRole').value = u.role || 'OPERADOR';
-        document.getElementById('userStatus').value = u.status || 'ACTIVO';
-
-        document.getElementById('userModalTitle').innerText = "Editar Usuario " + u.username;
-        openModal('userModal');
-    }
-
-    function promptDeleteUser(userId) {
-        if (window.isReadOnly) return;
-        confirmAction(`¿Estás seguro de que deseas eliminar este usuario?`, async () => {
-            const success = await window.deleteUserFromCloud(userId);
-            if (success) showToast("Usuario eliminado correctamente", "info");
         });
+        list.innerHTML = html;
+    }
+    openModal('dayPlanModal');
+}
+
+function addOrderForSelectedDay() {
+    closeModal('dayPlanModal');
+    openNewOrderModal();
+    if (selectedDayForPlan) {
+        document.getElementById('schedDateTime').value = `${selectedDayForPlan}T09:00`;
+    }
+}
+
+function renderAccessControl() {
+    if (activeTab !== 'access') return;
+
+    const search = document.getElementById('userSearchInput').value.toLowerCase();
+    const filtered = users.filter(u => 
+        u.name.toLowerCase().includes(search) || 
+        u.username.toLowerCase().includes(search) || 
+        u.role.toLowerCase().includes(search)
+    );
+
+    document.getElementById('kpiTotalUsers').textContent = users.length;
+    document.getElementById('kpiAdminUsers').textContent = users.filter(u => u.role === 'ADMINISTRADOR').length;
+    document.getElementById('kpiOperatorUsers').textContent = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+    document.getElementById('kpiActiveUsers').textContent = users.filter(u => u.status === 'ACTIVO').length;
+
+    const tbody = document.getElementById('usersTableBody');
+    let html = '';
+
+    filtered.forEach(u => {
+        let roleBadge = '';
+        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-bold text-[10px]">ADMINISTRADOR</span>`;
+        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-bold text-[10px]">SUPERVISOR</span>`;
+        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-bold text-[10px]">OPERADOR</span>`;
+        else roleBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold text-[10px]">LECTOR</span>`;
+
+        const statusBadge = u.status === 'ACTIVO' ? 
+            `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[10px]">ACTIVO</span>` : 
+            `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-medium text-[10px]">INACTIVO</span>`;
+
+        html += `
+            <tr class="hover:bg-slate-50 transition">
+                <td class="py-3 px-4 font-semibold text-slate-900">
+                    <div>${u.name}</div>
+                    <div class="text-[11px] font-normal text-slate-500">@${u.username}</div>
+                </td>
+                <td class="py-3 px-4">${roleBadge}</td>
+                <td class="py-3 px-4 font-mono text-slate-500">••••</td>
+                <td class="py-3 px-4">${statusBadge}</td>
+                <td class="py-3 px-4 text-slate-500">${u.lastAccess}</td>
+                <td class="py-3 px-4 text-right space-x-1">
+                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Restablecer PIN">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="editUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition" title="Editar Usuario">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+    lucide.createIcons();
+}
+
+function openNewUserModal() {
+    document.getElementById('editUserId').value = '';
+    document.getElementById('userForm').reset();
+    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>Crear Nuevo Usuario</span>`;
+    openModal('userModal');
+}
+
+function editUser(userId) {
+    const u = users.find(x => x.id === userId);
+    if (!u) return;
+    document.getElementById('editUserId').value = u.id;
+    document.getElementById('userFullName').value = u.name;
+    document.getElementById('username').value = u.username;
+    document.getElementById('userPin').value = u.pin;
+    document.getElementById('userRole').value = u.role;
+    document.getElementById('userStatus').value = u.status;
+    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-cog" class="w-4 h-4 text-indigo-400"></i><span>Editar Usuario</span>`;
+    openModal('userModal');
+}
+
+function saveUser(e) {
+    e.preventDefault();
+    const editId = document.getElementById('editUserId').value;
+    
+    const userData = {
+        id: editId || ("U" + (users.length + 1)),
+        name: document.getElementById('userFullName').value,
+        username: document.getElementById('username').value,
+        pin: document.getElementById('userPin').value,
+        role: document.getElementById('userRole').value,
+        status: document.getElementById('userStatus').value,
+        lastAccess: "Reciente"
+    };
+
+    if (editId) {
+        const idx = users.findIndex(u => u.id === editId);
+        if (idx >= 0) users[idx] = userData;
+    } else {
+        users.push(userData);
     }
 
-    function openResetPinModal(username) {
-        if (window.isReadOnly) return;
-        document.getElementById('resetTargetUsername').value = username;
-        document.getElementById('resetTargetUserDisplay').innerText = "@" + username;
-        document.getElementById('newPinInput').value = "";
-        openModal('resetPinModal');
+    closeModal('userModal');
+    renderAccessControl();
+}
+
+function openResetPinModal(username) {
+    const u = users.find(x => x.username === username);
+    if (!u) return;
+    document.getElementById('resetTargetUsername').value = u.username;
+    document.getElementById('resetTargetUserDisplay').textContent = `${u.name} (@${u.username})`;
+    document.getElementById('newPinInput').value = '';
+    openModal('resetPinModal');
+}
+
+function handleResetPinSubmit(e) {
+    e.preventDefault();
+    const username = document.getElementById('resetTargetUsername').value;
+    const newPin = document.getElementById('newPinInput').value;
+    const u = users.find(x => x.username === username);
+    if (u) {
+        u.pin = newPin;
+        alert(`PIN para @${username} actualizado con éxito.`);
     }
+    closeModal('resetPinModal');
+    renderAccessControl();
+}
 
-    async function handleResetPinSubmit(e) {
-        e.preventDefault();
-        const username = document.getElementById('resetTargetUsername').value;
-        const newPin = document.getElementById('newPinInput').value.trim();
+function openShareModal() {
+    document.getElementById('shareUrlInput').value = window.location.href;
+    document.getElementById('shareCopyAlert').classList.add('hidden');
+    openModal('shareModal');
+}
 
-        const u = (window.usersData || []).find(x => x.username === username);
-        if (u) {
-            u.pin = newPin;
-            await window.saveUserToCloud(u);
-            closeModal('resetPinModal');
-            showToast(`PIN para @${username} actualizado con éxito`, "success");
-        }
-    }
+function copyShareUrl() {
+    const input = document.getElementById('shareUrlInput');
+    input.select();
+    document.execCommand('copy');
+    document.getElementById('shareCopyAlert').classList.remove('hidden');
+}
 
-    // Expose functions globally for inline HTML handlers
-    window.switchView = switchView;
-    window.toggleAuthModal = toggleAuthModal;
-    window.handleAuthSubmit = handleAuthSubmit;
-    window.handleTypeChange = handleTypeChange;
-    window.handleNewOrderClick = handleNewOrderClick;
-    window.openModal = openModal;
-    window.closeModal = closeModal;
-    window.openShareModal = openShareModal;
-    window.copyShareUrl = copyShareUrl;
-    window.exportDataCSV = exportDataCSV;
-    window.clearFilters = clearFilters;
-    window.applyFiltersAndRender = applyFiltersAndRender;
-    window.saveOrder = saveOrder;
-    window.editOrder = editOrder;
-    window.promptDeleteOrder = promptDeleteOrder;
-    window.prevMonth = prevMonth;
-    window.nextMonth = nextMonth;
-    window.todayMonth = todayMonth;
-    window.openDayPlanModal = openDayPlanModal;
-    window.addOrderForSelectedDay = addOrderForSelectedDay;
-    window.renderUsersTable = renderUsersTable;
-    window.openNewUserModal = openNewUserModal;
-    window.saveUser = saveUser;
-    window.editUser = editUser;
-    window.promptDeleteUser = promptDeleteUser;
-    window.openResetPinModal = openResetPinModal;
-    window.handleResetPinSubmit = handleResetPinSubmit;
+function exportDataCSV() {
+    let csv = "ID,PO_Number,Type,Dock,Client,Driver,Origin,Scheduled,Picker,Receptor,Priority,ResponseMin,PrepMin,UnloadMin,Status,TimeCreated,TimeInProcess,TimeCompleted\n";
+    orders.forEach(o => {
+        csv += `"${o.id}","${o.poNumber}","${o.type}","${o.dock}","${o.client}","${o.driver}","${o.origin}","${o.schedDateTime}","${o.picker}","${o.receptor}","${o.priority}",${o.responseTime},${o.prepTime},${o.unloadTime},"${o.status}","${o.timeCreated || ''}","${o.timeInProcess || ''}","${o.timeCompleted || ''}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `logistica_corporativa_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
 </script>
 </body>
 </html>
