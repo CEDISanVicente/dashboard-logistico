@@ -155,35 +155,8 @@
     <div id="viewDashboard" class="space-y-6">
         <!-- Key Metrics Cards Grid -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            <!-- Metric 1: Tiempo Respuesta Promedio -->
-            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
-                <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider">T. Resp. Prom.</span>
-                    <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
-                        <i data-lucide="clock" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                <div class="flex items-baseline justify-between">
-                    <span id="kpiAvgResponse" class="text-xl font-bold text-slate-900">-- min</span>
-                </div>
-                <p class="text-[10px] text-slate-500 mt-1">Llegada a muelle</p>
-            </div>
 
-            <!-- Metric 2: Tiempo Preparación Promedio (Despachos) -->
-            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
-                <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider">T. Prep. Despacho</span>
-                    <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
-                        <i data-lucide="package-check" class="w-4 h-4"></i>
-                    </div>
-                </div>
-                <div class="flex items-baseline justify-between">
-                    <span id="kpiAvgPrep" class="text-xl font-bold text-slate-900">-- min</span>
-                </div>
-                <p class="text-[10px] text-slate-500 mt-1">Picking y recolección</p>
-            </div>
-
-            <!-- Metric 3: Tiempo Descarga Promedio (Recepciones) -->
+            <!-- Metric 1: Tiempo Descarga Promedio (Recepciones) -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition border-l-4 border-l-emerald-500">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
                     <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-800">T. Prom. Descarga</span>
@@ -198,6 +171,36 @@
                 <p class="text-[10px] text-slate-500 mt-1">Recepción en patio</p>
             </div>
 
+                        
+            <!-- Metric 2: Tiempo Respuesta Promedio -->
+            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="flex items-center justify-between text-slate-500 mb-2">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider">T. Resp. Prom.</span>
+                    <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <span id="kpiAvgResponse" class="text-xl font-bold text-slate-900">-- min</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-1">Llegada a muelle</p>
+            </div>
+
+            <!-- Metric 3: Tiempo Preparación Promedio (Despachos) -->
+            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="flex items-center justify-between text-slate-500 mb-2">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider">T. Prep. Despacho</span>
+                    <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg">
+                        <i data-lucide="package-check" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <span id="kpiAvgPrep" class="text-xl font-bold text-slate-900">-- min</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-1">Picking y recolección</p>
+            </div>
+
+            
             <!-- Metric 4: Pedidos Atendidos vs En Espera -->
             <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
@@ -910,135 +913,11 @@ let orders = [
         timeInProcess: "2026-10-01T08:12:00.000Z",
         timeCompleted: "2026-10-01T08:37:00.000Z"
     },
-    {
-        id: "RECP-2001",
-        poNumber: "OC-2026-204",
-        type: "RECEPCION",
-        dock: "Muelle 2 (Descarga)",
-        client: "Importadora Logística Global",
-        driver: "Carlos Pérez (B88-YY)",
-        origin: "IMPORTADA",
-        schedDateTime: "2026-10-01T10:00",
-        picker: "",
-        receptor: "Roberto Gómez",
-        priority: "Crítica",
-        responseTime: 18,
-        prepTime: 0,
-        unloadTime: 35,
-        status: "LISTO_ATENDIDO",
-        timeCreated: "2026-10-01T09:30:00.000Z",
-        timeInProcess: "2026-10-01T09:48:00.000Z",
-        timeCompleted: "2026-10-01T10:23:00.000Z"
-    },
-    {
-        id: "DESP-1002",
-        poNumber: "OC-2026-105",
-        type: "DESPACHO",
-        dock: "Muelle 1 (Carga)",
-        client: "Mercado San José",
-        driver: "Pedro Ramírez (C44-ZZ)",
-        origin: "N/A",
-        schedDateTime: "2026-10-02T11:15",
-        picker: "Carlos Mendoza",
-        receptor: "",
-        priority: "Media",
-        responseTime: 15,
-        prepTime: 30,
-        unloadTime: 0,
-        status: "LISTO_ATENDIDO",
-        timeCreated: "2026-10-02T10:30:00.000Z",
-        timeInProcess: "2026-10-02T10:45:00.000Z",
-        timeCompleted: "2026-10-02T11:15:00.000Z"
-    },
-    {
-        id: "RECP-2002",
-        poNumber: "OC-2026-208",
-        type: "RECEPCION",
-        dock: "Muelle 2 (Descarga)",
-        client: "Alimentos del Norte C.A.",
-        driver: "Luis Torres (D99-WW)",
-        origin: "NACIONAL",
-        schedDateTime: "2026-10-03T09:00",
-        picker: "",
-        receptor: "Andrés Blanco",
-        priority: "Alta",
-        responseTime: 10,
-        prepTime: 0,
-        unloadTime: 28,
-        status: "LISTO_ATENDIDO",
-        timeCreated: "2026-10-03T08:20:00.000Z",
-        timeInProcess: "2026-10-03T08:30:00.000Z",
-        timeCompleted: "2026-10-03T08:58:00.000Z"
-    },
-    {
-        id: "DESP-1003",
-        poNumber: "OC-2026-112",
-        type: "DESPACHO",
-        dock: "Muelle 3 (Mixto)",
-        client: "Cervecería Nacional",
-        driver: "Marcos Medina (E12-AA)",
-        origin: "N/A",
-        schedDateTime: "2026-10-05T08:00",
-        picker: "Manuel Silva",
-        receptor: "",
-        priority: "Crítica",
-        responseTime: 8,
-        prepTime: 20,
-        unloadTime: 0,
-        status: "EN_PREPARACION",
-        timeCreated: "2026-10-05T07:40:00.000Z",
-        timeInProcess: "2026-10-05T07:48:00.000Z",
-        timeCompleted: null
-    },
-    {
-        id: "RECP-2003",
-        poNumber: "OC-2026-215",
-        type: "RECEPCION",
-        dock: "Muelle 2 (Descarga)",
-        client: "Suministros Industriales",
-        driver: "Hernán López (F33-BB)",
-        origin: "IMPORTADA",
-        schedDateTime: "2026-10-05T14:30",
-        picker: "",
-        receptor: "Roberto Gómez",
-        priority: "Media",
-        responseTime: 0,
-        prepTime: 0,
-        unloadTime: 0,
-        status: "EN_ESPERA",
-        timeCreated: "2026-10-05T14:00:00.000Z",
-        timeInProcess: null,
-        timeCompleted: null
-    },
-    {
-        id: "DESP-1004",
-        poNumber: "OC-2026-118",
-        type: "DESPACHO",
-        dock: "Muelle 1 (Carga)",
-        client: "Comercializadora Sur",
-        driver: "José Rivas (G55-CC)",
-        origin: "N/A",
-        schedDateTime: "2026-10-05T16:00",
-        picker: "Carlos Mendoza",
-        receptor: "",
-        priority: "Baja",
-        responseTime: 0,
-        prepTime: 0,
-        unloadTime: 0,
-        status: "EN_ESPERA",
-        timeCreated: "2026-10-05T15:30:00.000Z",
-        timeInProcess: null,
-        timeCompleted: null
-    }
 ];
 
 // System Users Directory
 let users = [
-    { id: "U1", name: "Carlos Mendoza", username: "cmendoza", role: "ADMINISTRADOR", pin: "1234", status: "ACTIVO", lastAccess: "Hace 5 min" },
-    { id: "U2", name: "Manuel Silva", username: "msilva", role: "SUPERVISOR", pin: "2222", status: "ACTIVO", lastAccess: "Hace 2 horas" },
-    { id: "U3", name: "Roberto Gómez", username: "rgomez", role: "OPERADOR", pin: "3333", status: "ACTIVO", lastAccess: "Ayer" },
-    { id: "U4", name: "Andrés Blanco", username: "ablanco", role: "OPERADOR", pin: "4444", status: "ACTIVO", lastAccess: "Hace 1 día" },
-    { id: "U5", name: "Elena Rostova", username: "erostova", role: "LECTOR", pin: "0000", status: "ACTIVO", lastAccess: "Hace 10 min" }
+    { id: "U1", name: "Pedro Marval", username: "pmarval", role: "ADMINISTRADOR", pin: "1234", status: "ACTIVO", lastAccess: "Hace 5 min" },
 ];
 
 // Chart Instances
