@@ -45,111 +45,122 @@
             border-radius: 4px;
         }
     </style>
-</head>
 
-<!-- Firebase SDKs & Realtime Synchronization Logic -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getFirestore, 
-    collection, 
-    onSnapshot, 
-    addDoc, 
-    doc, 
-    updateDoc, 
-    deleteDoc 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- Firebase SDKs & Realtime Synchronization Logic -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { 
+        getFirestore, 
+        collection, 
+        onSnapshot, 
+        addDoc, 
+        doc, 
+        updateDoc, 
+        deleteDoc 
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Configuración de proyecto Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyDs5Xj3TJyJZxI5kKUcsIMferOoGyHHHTg",
-    authDomain: "dashboard-logistico-2e36c.firebaseapp.com",
-    projectId: "dashboard-logistico-2e36c",
-    storageBucket: "dashboard-logistico-2e36c.firebasestorage.app",
-    messagingSenderId: "810584249063",
-    appId: "1:810584249063:web:7a774fd8cf67fc5c500842",
-    measurementId: "G-J7DE1CWT3Q"
-  };
+      // Configuración de proyecto Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyDs5Xj3TJyJZxI5kKUcsIMferOoGyHHHTg",
+        authDomain: "dashboard-logistico-2e36c.firebaseapp.com",
+        projectId: "dashboard-logistico-2e36c",
+        storageBucket: "dashboard-logistico-2e36c.firebasestorage.app",
+        messagingSenderId: "810584249063",
+        appId: "1:810584249063:web:7a774fd8cf67fc5c500842",
+        measurementId: "G-J7DE1CWT3Q"
+      };
 
-  // Inicializar Firebase y Firestore
-  let db = null;
-  let ordersCollection = null;
+      let db = null;
+      let ordersCollection = null;
 
-  try {
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    ordersCollection = collection(db, "pedidos");
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        ordersCollection = collection(db, "pedidos");
 
-    // Escuchar cambios en tiempo real desde Firestore
-    onSnapshot(ordersCollection, (snapshot) => {
-      if (!snapshot.empty) {
-        window.orders = snapshot.docs.map(doc => ({
-          docId: doc.id,
-          ...doc.data()
-        }));
-      } else {
-        // Si Firestore está vacío, usar los datos iniciales de la app
-        if (!window.orders || window.orders.length === 0) {
-            window.orders = window.initialOrdersData || [];
+        // Escuchar cambios en tiempo real desde Firestore
+        onSnapshot(ordersCollection, (snapshot) => {
+          if (!snapshot.empty) {
+            window.orders = snapshot.docs.map(doc => ({
+              docId: doc.id,
+              ...doc.data()
+            }));
+          } else {
+            if (!window.orders || window.orders.length === 0) {
+                window.orders = window.initialOrdersData ? [...window.initialOrdersData] : [];
+            }
+          }
+          
+          if (typeof window.renderAllViews === 'function') {
+            window.renderAllViews();
+          }
+          
+          const badge = document.getElementById('syncBadge');
+          const badgeText = document.getElementById('syncBadgeText');
+          if (badge && badgeText) {
+            badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1";
+            badgeText.textContent = "Firebase Sincronizado";
+          }
+        }, (error) => {
+          console.warn("Error o modo offline en Firebase, usando almacenamiento local:", error);
+          const badge = document.getElementById('syncBadge');
+          const badgeText = document.getElementById('syncBadgeText');
+          if (badge && badgeText) {
+            badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-900/80 text-amber-300 border border-amber-700/50 flex items-center space-x-1";
+            badgeText.textContent = "Modo Local";
+          }
+        });
+      } catch (e) {
+        console.warn("No se pudo conectar a Firebase. Se usará el estado local.", e);
+      }
+
+      // Exponer las funciones para guardar/eliminar en Firestore de forma sincrónica con estado local
+      window.saveOrderToFirebase = async function(orderData, docId, localIndex) {
+        if (db && ordersCollection) {
+          try {
+            if (docId && !docId.startsWith("LOCAL-")) {
+              const orderRef = doc(db, "pedidos", docId);
+              await updateDoc(orderRef, orderData);
+            } else {
+              const newDoc = await addDoc(ordersCollection, orderData);
+              orderData.docId = newDoc.id;
+            }
+          } catch (err) {
+            console.warn("Error al guardar en Firebase, guardando en memoria local:", err);
+            saveLocalFallback(orderData, localIndex);
+          }
+        } else {
+          saveLocalFallback(orderData, localIndex);
         }
-      }
-      
-      // Actualizar la interfaz automáticamente
-      if (typeof window.renderAllViews === 'function') {
-        window.renderAllViews();
-      }
-      
-      // Actualizar indicador visual de sincronización
-      const badge = document.getElementById('syncBadge');
-      const badgeText = document.getElementById('syncBadgeText');
-      if (badge && badgeText) {
-        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1";
-        badgeText.textContent = "Firebase Sincronizado";
-      }
-    }, (error) => {
-      console.warn("Error o modo offline en Firebase, usando almacenamiento local:", error);
-      const badge = document.getElementById('syncBadge');
-      const badgeText = document.getElementById('syncBadgeText');
-      if (badge && badgeText) {
-        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-900/80 text-amber-300 border border-amber-700/50 flex items-center space-x-1";
-        badgeText.textContent = "Modo Local";
-      }
-    });
-  } catch (e) {
-    console.warn("No se pudo conectar a Firebase. Se usará el estado local.", e);
-  }
+      };
 
-  // Exponer las funciones para guardar/eliminar en Firestore
-  window.saveOrderToFirebase = async function(orderData, docId) {
-    if (db && ordersCollection) {
-      if (docId) {
-        const orderRef = doc(db, "pedidos", docId);
-        await updateDoc(orderRef, orderData);
-      } else {
-        await addDoc(ordersCollection, orderData);
+      function saveLocalFallback(orderData, localIndex) {
+        if (localIndex !== undefined && localIndex >= 0 && localIndex < window.orders.length) {
+          window.orders[localIndex] = { ...window.orders[localIndex], ...orderData };
+        } else {
+          if (!orderData.docId) orderData.docId = "LOCAL-" + Date.now();
+          window.orders.push(orderData);
+        }
+        if (typeof window.renderAllViews === 'function') window.renderAllViews();
       }
-    } else {
-      // Fallback local
-      if (docId) {
-        const idx = window.orders.findIndex(o => o.docId === docId);
-        if (idx !== -1) window.orders[idx] = { docId, ...orderData };
-      } else {
-        window.orders.push({ docId: "LOCAL-" + Date.now(), ...orderData });
-      }
-      if (typeof window.renderAllViews === 'function') window.renderAllViews();
-    }
-  };
 
-  window.deleteOrderFromFirebase = async function(docId) {
-    if (db && docId && !docId.startsWith("LOCAL-")) {
-      const orderRef = doc(db, "pedidos", docId);
-      await deleteDoc(orderRef);
-    } else {
-      window.orders = window.orders.filter(o => o.docId !== docId);
-      if (typeof window.renderAllViews === 'function') window.renderAllViews();
-    }
-  };
-</script>
+      window.deleteOrderFromFirebase = async function(docId, localIndex) {
+        if (db && docId && !docId.startsWith("LOCAL-")) {
+          try {
+            const orderRef = doc(db, "pedidos", docId);
+            await deleteDoc(orderRef);
+          } catch (e) {
+            console.warn("Error al borrar de Firestore, borrando localmente:", e);
+            if (localIndex >= 0) window.orders.splice(localIndex, 1);
+            if (typeof window.renderAllViews === 'function') window.renderAllViews();
+          }
+        } else {
+          if (localIndex >= 0) window.orders.splice(localIndex, 1);
+          if (typeof window.renderAllViews === 'function') window.renderAllViews();
+        }
+      };
+    </script>
+</head>
 
 <body class="min-h-full flex flex-col font-sans antialiased text-slate-800 bg-slate-100">
 
@@ -1167,6 +1178,16 @@ window.renderAllViews = function() {
     renderAccessControl();
 };
 
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('hidden');
+}
+
 function initSystemData() {
     const now = new Date();
     const formatted = now.toISOString().slice(0,16);
@@ -1340,7 +1361,7 @@ async function saveOrder(e) {
     const newStatus = document.getElementById('orderStatus').value;
     const nowISO = new Date().toISOString();
 
-    let existingOrder = idx >= 0 ? window.orders[idx] : null;
+    let existingOrder = (idx >= 0 && idx < window.orders.length) ? window.orders[idx] : null;
 
     let timeCreated = existingOrder ? existingOrder.timeCreated : nowISO;
     let timeInProcess = existingOrder ? existingOrder.timeInProcess : null;
@@ -1399,7 +1420,7 @@ async function saveOrder(e) {
     try {
         const docId = existingOrder ? existingOrder.docId : null;
         if (window.saveOrderToFirebase) {
-            await window.saveOrderToFirebase(orderData, docId);
+            await window.saveOrderToFirebase(orderData, docId, idx);
         } else {
             if (idx >= 0) window.orders[idx] = { ...existingOrder, ...orderData };
             else window.orders.push(orderData);
@@ -1420,8 +1441,8 @@ async function deleteOrder(idx) {
     if (confirm('¿Está seguro de eliminar esta orden?')) {
         try {
             const target = window.orders[idx];
-            if (target && target.docId && window.deleteOrderFromFirebase) {
-                await window.deleteOrderFromFirebase(target.docId);
+            if (target && window.deleteOrderFromFirebase) {
+                await window.deleteOrderFromFirebase(target.docId, idx);
             } else {
                 window.orders.splice(idx, 1);
                 window.renderAllViews();
@@ -1494,7 +1515,10 @@ function calculateMetrics() {
 }
 
 function applyFiltersAndRender() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+
+    const search = searchInput.value.toLowerCase();
     const type = document.getElementById('typeFilter').value;
     const status = document.getElementById('statusFilter').value;
     const dateFrom = document.getElementById('dateFromFilter').value;
@@ -1684,8 +1708,7 @@ function renderCharts() {
 
     const personNames = Object.keys(personMap);
     const countData = personNames.map(p => personMap[p].count);
-    const avgTimeData = personNames.map(p => personMap[p].count ? Math.round(personMap[p].timeTotal / personMap[p].count) : 0);
-    const barColors = personNames.map(p => personMap[p].role === 'PICKER' ? '#0284c7' : '#10b981');
+    const colors = personNames.map(p => personMap[p].role === 'PICKER' ? '#38bdf8' : '#34d399');
 
     const ctx2 = document.getElementById('pickerPerformanceChart');
     if (ctx2) {
@@ -1698,18 +1721,8 @@ function renderCharts() {
                     {
                         label: 'Operaciones Atendidas',
                         data: countData,
-                        backgroundColor: barColors,
-                        borderRadius: 6,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Tiempo Prom. (min)',
-                        data: avgTimeData,
-                        type: 'line',
-                        borderColor: '#f59e0b',
-                        backgroundColor: '#f59e0b',
-                        tension: 0.3,
-                        yAxisID: 'y1'
+                        backgroundColor: colors,
+                        borderRadius: 6
                     }
                 ]
             },
@@ -1719,77 +1732,70 @@ function renderCharts() {
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { display: false } },
-                    y: { 
-                        beginAtZero: true, 
-                        ticks: { precision: 0 },
-                        title: { display: true, text: 'Cant. Operaciones' }
-                    },
-                    y1: {
-                        position: 'right',
-                        beginAtZero: true,
-                        grid: { drawOnChartArea: false },
-                        title: { display: true, text: 'Mins Promedio' }
-                    }
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
                 }
             }
         });
     }
 }
 
+// Monthly Calendar Functions
 function renderCalendar() {
-    if (activeTab !== 'calendar') return;
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarMonthYear = document.getElementById('calendarMonthYear');
+    if (!calendarGrid || !calendarMonthYear) return;
 
     const year = calendarCurrentDate.getFullYear();
     const month = calendarCurrentDate.getMonth();
 
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
+    calendarMonthYear.textContent = `${monthNames[month]} ${year}`;
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
 
-    const calendarGrid = document.getElementById('calendarGrid');
     calendarGrid.innerHTML = '';
 
-    for (let i = 0; i < firstDay; i++) {
-        const empty = document.createElement('div');
-        empty.className = 'min-h-[90px] bg-slate-50/50 rounded-xl border border-slate-100/50';
-        calendarGrid.appendChild(empty);
+    // Empty cells before first day
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = "bg-slate-50/50 rounded-xl min-h-[90px] border border-slate-100/50";
+        calendarGrid.appendChild(emptyCell);
     }
 
     const ordersList = window.orders || [];
 
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+    for (let day = 1; day <= totalDays; day++) {
+        const monthStr = String(month + 1).padStart(2, '0');
+        const dayStr = String(day).padStart(2, '0');
+        const formattedDate = `${year}-${monthStr}-${dayStr}`;
 
-        const isToday = (new Date().toISOString().split('T')[0] === dateStr);
+        const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(formattedDate));
+        const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
+        const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
 
-        const cell = document.createElement('div');
-        cell.className = `min-h-[90px] p-2 bg-white rounded-xl border ${isToday ? 'border-brand-500 ring-2 ring-brand-500/20' : 'border-slate-200'} hover:border-brand-400 transition cursor-pointer flex flex-col justify-between`;
-        cell.onclick = () => openDayPlanModal(dateStr);
+        const dayCell = document.createElement('div');
+        dayCell.className = "bg-white hover:bg-slate-50 rounded-xl p-2 min-h-[90px] border border-slate-200 cursor-pointer flex flex-col justify-between transition shadow-sm";
+        dayCell.onclick = () => openDayPlanModal(formattedDate);
 
-        let pillsHtml = '';
-        dayOrders.slice(0, 3).forEach(o => {
-            const isDesp = o.type === 'DESPACHO';
-            const color = isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800';
-            pillsHtml += `<div class="text-[10px] truncate font-medium px-1.5 py-0.5 rounded ${color} mb-1" title="${o.poNumber} - ${o.client}">${o.poNumber}</div>`;
-        });
-
-        if (dayOrders.length > 3) {
-            pillsHtml += `<div class="text-[10px] text-slate-500 font-semibold">+${dayOrders.length - 3} más</div>`;
+        let badgesHtml = '';
+        if (despCount > 0) {
+            badgesHtml += `<span class="text-[10px] bg-sky-100 text-sky-800 font-semibold px-1.5 py-0.5 rounded">${despCount} Desp.</span>`;
+        }
+        if (recpCount > 0) {
+            badgesHtml += `<span class="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-1.5 py-0.5 rounded">${recpCount} Recp.</span>`;
         }
 
-        cell.innerHTML = `
-            <div>
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-bold ${isToday ? 'text-brand-600' : 'text-slate-800'}">${day}</span>
-                    ${dayOrders.length ? `<span class="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600">${dayOrders.length}</span>` : ''}
-                </div>
-                <div>${pillsHtml}</div>
+        dayCell.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-xs text-slate-700">${day}</span>
+                ${dayOrders.length > 0 ? `<span class="text-[10px] font-bold text-slate-400">${dayOrders.length}</span>` : ''}
+            </div>
+            <div class="flex flex-col gap-1 mt-1">
+                ${badgesHtml}
             </div>
         `;
-        calendarGrid.appendChild(cell);
+        calendarGrid.appendChild(dayCell);
     }
 }
 
@@ -1804,7 +1810,7 @@ function nextMonth() {
 }
 
 function todayMonth() {
-    calendarCurrentDate = new Date();
+    calendarCurrentDate = new Date(2026, 9, 1);
     renderCalendar();
 }
 
@@ -1813,73 +1819,33 @@ function openDayPlanModal(dateStr) {
     const ordersList = window.orders || [];
     const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
 
-    const parts = dateStr.split('-');
-    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-    const formattedDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-    document.getElementById('dayPlanTitle').textContent = `Plan del ${formattedDate}`;
-    document.getElementById('dayPlanSubtitle').textContent = `${dayOrders.length} operación(es) programada(s)`;
-
-    const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
-    const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
-
+    document.getElementById('dayPlanTitle').textContent = `Plan de Operaciones: ${dateStr}`;
     document.getElementById('dayTotalCount').textContent = `${dayOrders.length} Operaciones`;
-    document.getElementById('dayDespCount').textContent = despCount;
-    document.getElementById('dayRecpCount').textContent = recpCount;
+    document.getElementById('dayDespCount').textContent = dayOrders.filter(o => o.type === 'DESPACHO').length;
+    document.getElementById('dayRecpCount').textContent = dayOrders.filter(o => o.type === 'RECEPCION').length;
 
     const listContainer = document.getElementById('dayPlanList');
     if (dayOrders.length === 0) {
-        listContainer.innerHTML = `
-            <div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                <p class="text-xs text-slate-500 font-medium">No hay recepciones ni despachos programados para este día.</p>
-                <button onclick="addOrderForSelectedDay()" class="mt-3 bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition">
-                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                    <span>Añadir Operación</span>
-                </button>
-            </div>
-        `;
+        listContainer.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">No hay pedidos programados para esta fecha.</div>`;
     } else {
         let html = '';
-        dayOrders.forEach(o => {
+        dayOrders.forEach((o) => {
             const isDesp = o.type === 'DESPACHO';
-            const badge = isDesp ? 
-                `<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-bold text-[10px]">DESPACHO</span>` : 
-                `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">RECEPCIÓN</span>`;
-
-            const timeStr = o.schedDateTime.split('T')[1] || '--:--';
-
             html += `
-                <div class="p-3.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between hover:border-brand-300 transition shadow-sm">
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2">
-                            ${badge}
-                            <span class="font-mono font-bold text-slate-900 text-xs">${o.poNumber}</span>
-                            <span class="text-slate-400">•</span>
-                            <span class="text-xs text-slate-600 font-medium">${timeStr} hs</span>
-                        </div>
-                        <div class="text-xs font-semibold text-slate-800">${o.client}</div>
-                        <div class="text-[11px] text-slate-500 flex items-center gap-3">
-                            <span>Muelle: <strong>${o.dock}</strong></span>
-                            <span>${isDesp ? 'Picker' : 'Receptor'}: <strong>${(isDesp ? o.picker : o.receptor) || 'N/A'}</strong></span>
-                        </div>
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between text-xs">
+                    <div>
+                        <div class="font-bold text-slate-900">${o.id} - ${o.poNumber} <span class="ml-2 font-normal text-slate-500">(${o.dock})</span></div>
+                        <div class="text-slate-600">${o.client} - Chófer: ${o.driver || 'N/A'}</div>
+                        <div class="text-slate-400 text-[10px]">${isDesp ? 'Picker: ' + (o.picker || 'N/A') : 'Receptor: ' + (o.receptor || 'N/A')}</div>
                     </div>
-
-                    <div class="flex items-center space-x-2">
-                        <button onclick="openNewOrderModal(${o._originalIndex})" class="p-1.5 text-slate-600 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar">
-                            <i data-lucide="edit-3" class="w-4 h-4"></i>
-                        </button>
-                        ${currentRole !== 'LECTOR' ? `
-                        <button onclick="deleteOrder(${o._originalIndex})" class="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>` : ''}
+                    <div>
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${o.type}</span>
                     </div>
                 </div>
             `;
         });
         listContainer.innerHTML = html;
     }
-
-    lucide.createIcons();
     openModal('dayPlanModal');
 }
 
@@ -1891,146 +1857,93 @@ function addOrderForSelectedDay() {
     }
 }
 
+// User & Access Control
 function renderAccessControl() {
     if (activeTab !== 'access') return;
 
-    const total = users.length;
-    const admins = users.filter(u => u.role === 'ADMINISTRADOR').length;
-    const operators = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
-    const active = users.filter(u => u.status === 'ACTIVO').length;
-
-    document.getElementById('kpiTotalUsers').textContent = total;
-    document.getElementById('kpiAdminUsers').textContent = admins;
-    document.getElementById('kpiOperatorUsers').textContent = operators;
-    document.getElementById('kpiActiveUsers').textContent = active;
+    document.getElementById('kpiTotalUsers').textContent = users.length;
+    document.getElementById('kpiAdminUsers').textContent = users.filter(u => u.role === 'ADMINISTRADOR').length;
+    document.getElementById('kpiOperatorUsers').textContent = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+    document.getElementById('kpiActiveUsers').textContent = users.filter(u => u.status === 'ACTIVO').length;
 
     renderUsersTable();
 }
 
 function renderUsersTable() {
-    const search = document.getElementById('userSearchInput').value.toLowerCase();
+    const search = (document.getElementById('userSearchInput')?.value || '').toLowerCase();
     const tbody = document.getElementById('usersTableBody');
+    if (!tbody) return;
 
     const filtered = users.filter(u => 
-        u.name.toLowerCase().includes(search) ||
-        u.username.toLowerCase().includes(search) ||
+        u.name.toLowerCase().includes(search) || 
+        u.username.toLowerCase().includes(search) || 
         u.role.toLowerCase().includes(search)
     );
 
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No se encontraron usuarios</td></tr>`;
-        return;
-    }
-
     let html = '';
     filtered.forEach(u => {
-        let roleBadge = '';
-        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-bold text-[10px]">ADMINISTRADOR</span>`;
-        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px]">SUPERVISOR</span>`;
-        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">OPERADOR</span>`;
-        else roleBadge = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px]">LECTOR</span>`;
-
-        const statusBadge = u.status === 'ACTIVO' ? 
-            `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px]">Activo</span>` : 
-            `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-medium text-[11px]">Inactivo</span>`;
-
         html += `
             <tr class="hover:bg-slate-50 transition">
-                <td class="py-3 px-4 font-semibold text-slate-900">
-                    <div>${u.name}</div>
-                    <div class="text-[10px] text-slate-400 font-mono">@${u.username}</div>
+                <td class="py-3 px-4">
+                    <div class="font-bold text-slate-900">${u.name}</div>
+                    <div class="text-[11px] text-slate-400">@${u.username}</div>
                 </td>
-                <td class="py-3 px-4">${roleBadge}</td>
+                <td class="py-3 px-4 font-medium text-slate-700">${u.role}</td>
                 <td class="py-3 px-4 font-mono text-slate-500">••••</td>
-                <td class="py-3 px-4">${statusBadge}</td>
-                <td class="py-3 px-4 text-slate-500 text-[11px]">${u.lastAccess}</td>
-                <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
-                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Restablecer PIN">
-                        <i data-lucide="key-round" class="w-4 h-4"></i>
+                <td class="py-3 px-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.status === 'ACTIVO' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${u.status}</span>
+                </td>
+                <td class="py-3 px-4 text-slate-500">${u.lastAccess}</td>
+                <td class="py-3 px-4 text-right space-x-1">
+                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded" title="Cambiar PIN">
+                        <i data-lucide="key" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="editUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Editar Usuario">
-                        <i data-lucide="edit" class="w-4 h-4"></i>
+                    <button onclick="toggleUserStatus('${u.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Activar/Desactivar">
+                        <i data-lucide="power" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="deleteUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar Usuario">
+                    <button onclick="deleteUser('${u.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded" title="Eliminar">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                 </td>
             </tr>
         `;
     });
-
     tbody.innerHTML = html;
     lucide.createIcons();
 }
 
-function openNewUserModal() {
-    document.getElementById('editUserId').value = '';
+function openNewUserModal(userId = null) {
     document.getElementById('userForm').reset();
-    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>Crear Nuevo Usuario</span>`;
-    lucide.createIcons();
-    openModal('userModal');
-}
-
-function editUser(userId) {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-
-    document.getElementById('editUserId').value = user.id;
-    document.getElementById('userFullName').value = user.name;
-    document.getElementById('username').value = user.username;
-    document.getElementById('userPin').value = user.pin;
-    document.getElementById('userRole').value = user.role;
-    document.getElementById('userStatus').value = user.status;
-
-    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-cog" class="w-4 h-4 text-indigo-400"></i><span>Editar Usuario</span>`;
-    lucide.createIcons();
+    document.getElementById('editUserId').value = userId || '';
+    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>${userId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</span>`;
     openModal('userModal');
 }
 
 function saveUser(e) {
     e.preventDefault();
-    const id = document.getElementById('editUserId').value;
+    const id = document.getElementById('editUserId').value || "U" + (users.length + 1);
     const name = document.getElementById('userFullName').value;
     const username = document.getElementById('username').value;
     const pin = document.getElementById('userPin').value;
     const role = document.getElementById('userRole').value;
     const status = document.getElementById('userStatus').value;
 
-    if (id) {
-        const idx = users.findIndex(u => u.id === id);
-        if (idx !== -1) {
-            users[idx] = { ...users[idx], name, username, pin, role, status };
-        }
+    const existingIdx = users.findIndex(u => u.id === id);
+    if (existingIdx >= 0) {
+        users[existingIdx] = { ...users[existingIdx], name, username, pin, role, status };
     } else {
-        const newUser = {
-            id: "U" + (users.length + 1),
-            name,
-            username,
-            pin,
-            role,
-            status,
-            lastAccess: "Nunca"
-        };
-        users.push(newUser);
+        users.push({ id, name, username, pin, role, status, lastAccess: "Ahora" });
     }
 
     closeModal('userModal');
     renderAccessControl();
 }
 
-function deleteUser(userId) {
-    if (confirm('¿Está seguro de eliminar este usuario?')) {
-        users = users.filter(u => u.id !== userId);
-        renderAccessControl();
-    }
-}
-
 function openResetPinModal(username) {
-    const user = users.find(u => u.username === username);
-    if (!user) return;
-
-    document.getElementById('resetTargetUsername').value = user.username;
-    document.getElementById('resetTargetUserDisplay').textContent = `${user.name} (@${user.username})`;
+    const target = users.find(u => u.username === username);
+    if (!target) return;
+    document.getElementById('resetTargetUsername').value = target.username;
+    document.getElementById('resetTargetUserDisplay').textContent = target.name;
     document.getElementById('newPinInput').value = '';
     openModal('resetPinModal');
 }
@@ -2039,55 +1952,30 @@ function handleResetPinSubmit(e) {
     e.preventDefault();
     const username = document.getElementById('resetTargetUsername').value;
     const newPin = document.getElementById('newPinInput').value;
+    const target = users.find(u => u.username === username);
+    if (target) {
+        target.pin = newPin;
+    }
+    closeModal('resetPinModal');
+    renderAccessControl();
+}
 
-    const user = users.find(u => u.username === username);
-    if (user) {
-        user.pin = newPin;
-        closeModal('resetPinModal');
+function toggleUserStatus(id) {
+    const target = users.find(u => u.id === id);
+    if (target) {
+        target.status = target.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
         renderAccessControl();
     }
 }
 
-function exportDataCSV() {
-    const ordersList = window.orders || [];
-    if (ordersList.length === 0) {
-        alert("No hay datos para exportar.");
-        return;
+function deleteUser(id) {
+    if (confirm('¿Desea eliminar este usuario del directorio?')) {
+        users = users.filter(u => u.id !== id);
+        renderAccessControl();
     }
-
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "ID,N_OC,Tipo,Muelle,Cliente,Chofer,Origen,FechaProgramada,Picker,Receptor,Prioridad,TRespuesta_min,TPrep_min,TDescarga_min,Estatus\n";
-
-    ordersList.forEach(o => {
-        const row = [
-            `"${o.id || ''}"`,
-            `"${o.poNumber || ''}"`,
-            `"${o.type || ''}"`,
-            `"${o.dock || ''}"`,
-            `"${o.client || ''}"`,
-            `"${o.driver || ''}"`,
-            `"${o.origin || ''}"`,
-            `"${o.schedDateTime || ''}"`,
-            `"${o.picker || ''}"`,
-            `"${o.receptor || ''}"`,
-            `"${o.priority || ''}"`,
-            o.responseTime || 0,
-            o.prepTime || 0,
-            o.unloadTime || 0,
-            `"${o.status || ''}"`
-        ];
-        csvContent += row.join(",") + "\n";
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `logistica_pedidos_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
 
+// Utilities
 function openShareModal() {
     document.getElementById('shareUrlInput').value = window.location.href;
     document.getElementById('shareCopyAlert').classList.add('hidden');
@@ -2097,18 +1985,29 @@ function openShareModal() {
 function copyShareUrl() {
     const input = document.getElementById('shareUrlInput');
     input.select();
-    document.execCommand('copy');
+    navigator.clipboard.writeText(input.value);
     document.getElementById('shareCopyAlert').classList.remove('hidden');
 }
 
-function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove('hidden');
-}
+function exportDataCSV() {
+    const ordersList = window.orders || [];
+    if (ordersList.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+    }
 
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.add('hidden');
+    let csvContent = "data:text/csv;charset=utf-8,ID,OC,Tipo,Muelle,Cliente,Chofer,Origen,Fecha,Picker,Receptor,Prioridad,T_Respuesta,T_Prep,Estatus\n";
+    ordersList.forEach(o => {
+        csvContent += `"${o.id}","${o.poNumber}","${o.type}","${o.dock}","${o.client}","${o.driver || ''}","${o.origin || ''}","${o.schedDateTime}","${o.picker || ''}","${o.receptor || ''}","${o.priority}",${o.responseTime || 0},${o.prepTime || o.unloadTime || 0},"${o.status}"\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `pedidos_logistica_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 </script>
 </body>
