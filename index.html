@@ -45,6 +45,76 @@
             border-radius: 4px;
         }
     </style>
+<!-- Firebase SDKs -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getFirestore, 
+    collection, 
+    onSnapshot, 
+    addDoc, 
+    doc, 
+    updateDoc, 
+    deleteDoc 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // Reemplaza con tus credenciales de proyecto de Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5Xj3TJyJZxI5kKUcsIMferOoGyHHHTg",
+    authDomain: "dashboard-logistico-2e36c.firebaseapp.com",
+    projectId: "dashboard-logistico-2e36c",
+    storageBucket: "dashboard-logistico-2e36c.firebasestorage.app",
+    messagingSenderId: "810584249063",
+    appId: "1:810584249063:web:7a774fd8cf67fc5c500842",
+    measurementId: "G-J7DE1CWT3Q"
+     };
+
+  // Inicializar Firebase y Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const ordersCollection = collection(db, "pedidos");
+
+  // Escuchar cambios en tiempo real desde Firestore
+  onSnapshot(ordersCollection, (snapshot) => {
+    window.orders = snapshot.docs.map(doc => ({
+      docId: doc.id,
+      ...doc.data()
+    }));
+    
+    // Actualizar la interfaz automáticamente
+    if (typeof renderAllViews === 'function') {
+      renderAllViews();
+    }
+    
+    // Actualizar indicador visual de sincronización
+    const badge = document.getElementById('syncBadge');
+    const badgeText = document.getElementById('syncBadgeText');
+    if (badge && badgeText) {
+      badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1";
+      badgeText.textContent = "Firebase Sincronizado";
+    }
+  }, (error) => {
+    console.error("Error conectando a Firebase:", error);
+    const badgeText = document.getElementById('syncBadgeText');
+    if (badgeText) badgeText.textContent = "Error de Conexión";
+  });
+
+  // Exponer las funciones para guardar/eliminar en Firestore
+  window.saveOrderToFirebase = async function(orderData, docId) {
+    if (docId) {
+      const orderRef = doc(db, "pedidos", docId);
+      await updateDoc(orderRef, orderData);
+    } else {
+      await addDoc(ordersCollection, orderData);
+    }
+  };
+
+  window.deleteOrderFromFirebase = async function(docId) {
+    const orderRef = doc(db, "pedidos", docId);
+    await deleteDoc(orderRef);
+  };
+</script>
+
 </head>
 <body class="min-h-full flex flex-col font-sans antialiased text-slate-800 bg-slate-100">
 
@@ -1231,7 +1301,7 @@ function openNewOrderModal(editIdx = -1) {
     openModal('newOrderModal');
 }
 
-function saveOrder(e) {
+async function saveOrder(e) {
     e.preventDefault();
     if (currentRole === 'LECTOR') return;
 
@@ -1250,7 +1320,7 @@ function saveOrder(e) {
     let responseTime = existingOrder ? existingOrder.responseTime : 0;
     let prepTimeVal = existingOrder ? (type === 'DESPACHO' ? existingOrder.prepTime : existingOrder.unloadTime) : 0;
 
-    // Transition to EN_PREPARACION -> Record start of preparation time and calculate response time
+    // Transición a EN_PREPARACION -> Registro inicio y cálculo tiempo de respuesta
     if (newStatus === 'EN_PREPARACION') {
         if (!timeInProcess) {
             timeInProcess = nowISO;
@@ -1260,7 +1330,7 @@ function saveOrder(e) {
             responseTime = Math.max(0, Math.round(diffMs / (1000 * 60)));
         }
     } 
-    // Transition to LISTO_ATENDIDO -> Record end of preparation time and calculate preparation/unload time
+    // Transición a LISTO_ATENDIDO -> Registro fin y cálculo tiempo de preparación/descarga
     else if (newStatus === 'LISTO_ATENDIDO') {
         if (!timeInProcess) {
             timeInProcess = nowISO;
@@ -1299,30 +1369,40 @@ function saveOrder(e) {
         timeCompleted: timeCompleted
     };
 
-    if (idx >= 0) {
-        orders[idx] = orderData;
-    } else {
-        orders.unshift(orderData);
+    try {
+        const docId = existingOrder ? existingOrder.docId : null;
+        await window.saveOrderToFirebase(orderData, docId);
+        closeModal('newOrderModal');
+        if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
+    } catch (err) {
+        console.error("Error guardando pedido en Firebase:", err);
+        alert("Ocurrió un error al guardar en la base de datos.");
     }
-
-    closeModal('newOrderModal');
-    if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
-    renderAllViews();
 }
 
-function deleteOrder(idx) {
+async function deleteOrder(idx) {
     if (currentRole === 'LECTOR') {
         toggleAuthModal();
         return;
     }
     if (confirm('¿Está seguro de eliminar esta orden?')) {
-        orders.splice(idx, 1);
-        renderAllViews();
-        if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
+        try {
+            const target = orders[idx];
+            if (target && target.docId) {
+                await window.deleteOrderFromFirebase(target.docId);
+            } else {
+                orders.splice(idx, 1);
+                renderAllViews();
+            }
+            if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
+        } catch (err) {
+            console.error("Error al eliminar de Firebase:", err);
+            alert("No se pudo eliminar el registro en la base de datos.");
+        }
     }
 }
-
-function renderAllViews() {
+    
+ function renderAllViews() {
     calculateMetrics();
     applyFiltersAndRender();
     renderCharts();
