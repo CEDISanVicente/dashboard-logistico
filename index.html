@@ -45,9 +45,9 @@
             border-radius: 4px;
         }
     </style>
-
 </head>
-<!-- Firebase SDKs -->
+
+<!-- Firebase SDKs & Realtime Synchronization Logic -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { 
@@ -60,7 +60,7 @@
     deleteDoc 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Reemplaza con tus credenciales de proyecto de Firebase
+  // Configuración de proyecto Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDs5Xj3TJyJZxI5kKUcsIMferOoGyHHHTg",
     authDomain: "dashboard-logistico-2e36c.firebaseapp.com",
@@ -69,55 +69,88 @@
     messagingSenderId: "810584249063",
     appId: "1:810584249063:web:7a774fd8cf67fc5c500842",
     measurementId: "G-J7DE1CWT3Q"
-     };
+  };
 
   // Inicializar Firebase y Firestore
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const ordersCollection = collection(db, "pedidos");
+  let db = null;
+  let ordersCollection = null;
 
-  // Escuchar cambios en tiempo real desde Firestore
-  onSnapshot(ordersCollection, (snapshot) => {
-    window.orders = snapshot.docs.map(doc => ({
-      docId: doc.id,
-      ...doc.data()
-    }));
-    
-    // Actualizar la interfaz automáticamente
-    if (typeof renderAllViews === 'function') {
-      renderAllViews();
-    }
-    
-    // Actualizar indicador visual de sincronización
-    const badge = document.getElementById('syncBadge');
-    const badgeText = document.getElementById('syncBadgeText');
-    if (badge && badgeText) {
-      badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1";
-      badgeText.textContent = "Firebase Sincronizado";
-    }
-  }, (error) => {
-    console.error("Error conectando a Firebase:", error);
-    const badgeText = document.getElementById('syncBadgeText');
-    if (badgeText) badgeText.textContent = "Error de Conexión";
-  });
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    ordersCollection = collection(db, "pedidos");
+
+    // Escuchar cambios en tiempo real desde Firestore
+    onSnapshot(ordersCollection, (snapshot) => {
+      if (!snapshot.empty) {
+        window.orders = snapshot.docs.map(doc => ({
+          docId: doc.id,
+          ...doc.data()
+        }));
+      } else {
+        // Si Firestore está vacío, usar los datos iniciales de la app
+        if (!window.orders || window.orders.length === 0) {
+            window.orders = window.initialOrdersData || [];
+        }
+      }
+      
+      // Actualizar la interfaz automáticamente
+      if (typeof window.renderAllViews === 'function') {
+        window.renderAllViews();
+      }
+      
+      // Actualizar indicador visual de sincronización
+      const badge = document.getElementById('syncBadge');
+      const badgeText = document.getElementById('syncBadgeText');
+      if (badge && badgeText) {
+        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1";
+        badgeText.textContent = "Firebase Sincronizado";
+      }
+    }, (error) => {
+      console.warn("Error o modo offline en Firebase, usando almacenamiento local:", error);
+      const badge = document.getElementById('syncBadge');
+      const badgeText = document.getElementById('syncBadgeText');
+      if (badge && badgeText) {
+        badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-amber-900/80 text-amber-300 border border-amber-700/50 flex items-center space-x-1";
+        badgeText.textContent = "Modo Local";
+      }
+    });
+  } catch (e) {
+    console.warn("No se pudo conectar a Firebase. Se usará el estado local.", e);
+  }
 
   // Exponer las funciones para guardar/eliminar en Firestore
   window.saveOrderToFirebase = async function(orderData, docId) {
-    if (docId) {
-      const orderRef = doc(db, "pedidos", docId);
-      await updateDoc(orderRef, orderData);
+    if (db && ordersCollection) {
+      if (docId) {
+        const orderRef = doc(db, "pedidos", docId);
+        await updateDoc(orderRef, orderData);
+      } else {
+        await addDoc(ordersCollection, orderData);
+      }
     } else {
-      await addDoc(ordersCollection, orderData);
+      // Fallback local
+      if (docId) {
+        const idx = window.orders.findIndex(o => o.docId === docId);
+        if (idx !== -1) window.orders[idx] = { docId, ...orderData };
+      } else {
+        window.orders.push({ docId: "LOCAL-" + Date.now(), ...orderData });
+      }
+      if (typeof window.renderAllViews === 'function') window.renderAllViews();
     }
   };
 
   window.deleteOrderFromFirebase = async function(docId) {
-    const orderRef = doc(db, "pedidos", docId);
-    await deleteDoc(orderRef);
+    if (db && docId && !docId.startsWith("LOCAL-")) {
+      const orderRef = doc(db, "pedidos", docId);
+      await deleteDoc(orderRef);
+    } else {
+      window.orders = window.orders.filter(o => o.docId !== docId);
+      if (typeof window.renderAllViews === 'function') window.renderAllViews();
+    }
   };
 </script>
 
-    
 <body class="min-h-full flex flex-col font-sans antialiased text-slate-800 bg-slate-100">
 
 <!-- Top Header / Bar -->
@@ -954,14 +987,14 @@
 </div>
 
 <script>
-// Core State
+// Core Application State
 let currentRole = 'LECTOR'; // 'LECTOR', 'SUPERVISOR', 'ADMINISTRADOR'
 let activeTab = 'dashboard';
-let calendarCurrentDate = new Date(2026, 9, 1); // October 2026
+let calendarCurrentDate = new Date(2026, 9, 1); // Octubre 2026
 let selectedDayForPlan = null;
 
-// Initial Mock Orders with automatic timestamp fields
-let orders = [
+// Initial Default Orders Data
+window.initialOrdersData = [
     {
         id: "DESP-1001",
         poNumber: "OC-2026-101",
@@ -1104,6 +1137,8 @@ let orders = [
     }
 ];
 
+window.orders = [...window.initialOrdersData];
+
 // System Users Directory
 let users = [
     { id: "U1", name: "Carlos Mendoza", username: "cmendoza", role: "ADMINISTRADOR", pin: "1234", status: "ACTIVO", lastAccess: "Hace 5 min" },
@@ -1122,20 +1157,17 @@ window.onload = function() {
     initSystemData();
     updateUIForRole();
     renderAllViews();
+};
 
-    // Simulate connection status
-    setTimeout(() => {
-        const badge = document.getElementById('syncBadge');
-        const badgeText = document.getElementById('syncBadgeText');
-        if (badge && badgeText) {
-            badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center space-x-1";
-            badgeText.textContent = "Sincronizado";
-        }
-    }, 800);
+window.renderAllViews = function() {
+    calculateMetrics();
+    applyFiltersAndRender();
+    renderCharts();
+    renderCalendar();
+    renderAccessControl();
 };
 
 function initSystemData() {
-    // Set default datetime in order modal
     const now = new Date();
     const formatted = now.toISOString().slice(0,16);
     const dateInput = document.getElementById('schedDateTime');
@@ -1145,12 +1177,10 @@ function initSystemData() {
 function switchView(tab) {
     activeTab = tab;
     
-    // Hide all view containers
     document.getElementById('viewDashboard').classList.add('hidden');
     document.getElementById('viewCalendar').classList.add('hidden');
     document.getElementById('viewAccessControl').classList.add('hidden');
 
-    // Reset button styles
     const tabDashboardBtn = document.getElementById('tabDashboardBtn');
     const tabCalendarBtn = document.getElementById('tabCalendarBtn');
     const tabAccessBtn = document.getElementById('tabAccessBtn');
@@ -1237,11 +1267,9 @@ function handleTypeChange() {
         originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-white";
         if (originSelect.value === 'N/A') originSelect.value = 'NACIONAL';
 
-        // Receptions use "Receptor" instead of "Picker"
         pickerReceptorLabel.textContent = "Receptor Asignado / Personal de Recepción *";
         pickerInput.placeholder = "Ej: Roberto Gómez";
 
-        // Preparation time label changes to Descarga (min)
         prepTimeLabel.textContent = "T. Descarga (min)";
         prepTimeLabel.className = "block text-[11px] font-semibold text-emerald-800 mb-1";
     } else {
@@ -1249,7 +1277,6 @@ function handleTypeChange() {
         originSelect.disabled = true;
         originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-slate-100";
 
-        // Dispatch uses "Picker"
         pickerReceptorLabel.textContent = "Picker Asignado / Recolector *";
         pickerInput.placeholder = "Ej: Manuel Silva";
 
@@ -1272,7 +1299,7 @@ function openNewOrderModal(editIdx = -1) {
     
     if (editIdx >= 0) {
         modalTitle.innerHTML = `<i data-lucide="edit-3" class="w-5 h-5 text-brand-500"></i><span>Editar Registro de Pedido</span>`;
-        const o = orders[editIdx];
+        const o = window.orders[editIdx];
         document.getElementById('orderId').value = o.id;
         document.getElementById('poNumber').value = o.poNumber;
         document.getElementById('orderType').value = o.type;
@@ -1313,7 +1340,7 @@ async function saveOrder(e) {
     const newStatus = document.getElementById('orderStatus').value;
     const nowISO = new Date().toISOString();
 
-    let existingOrder = idx >= 0 ? orders[idx] : null;
+    let existingOrder = idx >= 0 ? window.orders[idx] : null;
 
     let timeCreated = existingOrder ? existingOrder.timeCreated : nowISO;
     let timeInProcess = existingOrder ? existingOrder.timeInProcess : null;
@@ -1322,7 +1349,6 @@ async function saveOrder(e) {
     let responseTime = existingOrder ? existingOrder.responseTime : 0;
     let prepTimeVal = existingOrder ? (type === 'DESPACHO' ? existingOrder.prepTime : existingOrder.unloadTime) : 0;
 
-    // Transición a EN_PREPARACION -> Registro inicio y cálculo tiempo de respuesta
     if (newStatus === 'EN_PREPARACION') {
         if (!timeInProcess) {
             timeInProcess = nowISO;
@@ -1332,7 +1358,6 @@ async function saveOrder(e) {
             responseTime = Math.max(0, Math.round(diffMs / (1000 * 60)));
         }
     } 
-    // Transición a LISTO_ATENDIDO -> Registro fin y cálculo tiempo de preparación/descarga
     else if (newStatus === 'LISTO_ATENDIDO') {
         if (!timeInProcess) {
             timeInProcess = nowISO;
@@ -1373,12 +1398,17 @@ async function saveOrder(e) {
 
     try {
         const docId = existingOrder ? existingOrder.docId : null;
-        await window.saveOrderToFirebase(orderData, docId);
+        if (window.saveOrderToFirebase) {
+            await window.saveOrderToFirebase(orderData, docId);
+        } else {
+            if (idx >= 0) window.orders[idx] = { ...existingOrder, ...orderData };
+            else window.orders.push(orderData);
+            window.renderAllViews();
+        }
         closeModal('newOrderModal');
         if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
     } catch (err) {
-        console.error("Error guardando pedido en Firebase:", err);
-        alert("Ocurrió un error al guardar en la base de datos.");
+        console.error("Error guardando pedido:", err);
     }
 }
 
@@ -1389,27 +1419,18 @@ async function deleteOrder(idx) {
     }
     if (confirm('¿Está seguro de eliminar esta orden?')) {
         try {
-            const target = orders[idx];
-            if (target && target.docId) {
+            const target = window.orders[idx];
+            if (target && target.docId && window.deleteOrderFromFirebase) {
                 await window.deleteOrderFromFirebase(target.docId);
             } else {
-                orders.splice(idx, 1);
-                renderAllViews();
+                window.orders.splice(idx, 1);
+                window.renderAllViews();
             }
             if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
         } catch (err) {
-            console.error("Error al eliminar de Firebase:", err);
-            alert("No se pudo eliminar el registro en la base de datos.");
+            console.error("Error al eliminar orden:", err);
         }
     }
-}
-    
- function renderAllViews() {
-    calculateMetrics();
-    applyFiltersAndRender();
-    renderCharts();
-    renderCalendar();
-    renderAccessControl();
 }
 
 function calculateMetrics() {
@@ -1419,7 +1440,9 @@ function calculateMetrics() {
     let served = 0, pending = 0;
     let national = 0, imported = 0;
 
-    orders.forEach(o => {
+    const ordersList = window.orders || [];
+
+    ordersList.forEach(o => {
         if (o.status === 'LISTO_ATENDIDO') served++;
         else pending++;
 
@@ -1446,7 +1469,7 @@ function calculateMetrics() {
     const avgResp = countResp ? Math.round(totalResp / countResp) : 0;
     const avgPrep = countPrep ? Math.round(totalPrep / countPrep) : 0;
     const avgUnload = countUnload ? Math.round(totalUnload / countUnload) : 0;
-    const totalOrders = orders.length;
+    const totalOrders = ordersList.length;
     const otifRate = totalOrders ? Math.round((served / totalOrders) * 100) : 0;
 
     document.getElementById('kpiAvgResponse').textContent = `${avgResp} min`;
@@ -1477,23 +1500,27 @@ function applyFiltersAndRender() {
     const dateFrom = document.getElementById('dateFromFilter').value;
     const dateTo = document.getElementById('dateToFilter').value;
 
-    const filtered = orders.filter((o, idx) => {
+    const ordersList = window.orders || [];
+
+    const filtered = ordersList.filter((o, idx) => {
         o._originalIndex = idx;
         const matchesSearch = 
-            o.id.toLowerCase().includes(search) ||
-            o.poNumber.toLowerCase().includes(search) ||
-            o.client.toLowerCase().includes(search) ||
-            o.driver.toLowerCase().includes(search) ||
-            o.picker.toLowerCase().includes(search) ||
-            o.receptor.toLowerCase().includes(search);
+            (o.id && o.id.toLowerCase().includes(search)) ||
+            (o.poNumber && o.poNumber.toLowerCase().includes(search)) ||
+            (o.client && o.client.toLowerCase().includes(search)) ||
+            (o.driver && o.driver.toLowerCase().includes(search)) ||
+            (o.picker && o.picker.toLowerCase().includes(search)) ||
+            (o.receptor && o.receptor.toLowerCase().includes(search));
 
         const matchesType = (type === 'ALL') || (o.type === type);
         const matchesStatus = (status === 'ALL') || (o.status === status);
 
         let matchesDate = true;
-        const orderDate = o.schedDateTime.split('T')[0];
-        if (dateFrom && orderDate < dateFrom) matchesDate = false;
-        if (dateTo && orderDate > dateTo) matchesDate = false;
+        if (o.schedDateTime) {
+            const orderDate = o.schedDateTime.split('T')[0];
+            if (dateFrom && orderDate < dateFrom) matchesDate = false;
+            if (dateTo && orderDate > dateTo) matchesDate = false;
+        }
 
         return matchesSearch && matchesType && matchesStatus && matchesDate;
     });
@@ -1527,15 +1554,15 @@ function applyFiltersAndRender() {
         }
 
         const dateObj = new Date(o.schedDateTime);
-        const dateFormatted = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) + ' ' + dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const dateFormatted = isNaN(dateObj.getTime()) ? o.schedDateTime : (dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) + ' ' + dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
 
         const personDisplay = isDesp ? 
             `<span class="flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5 text-sky-600"></i> Picker: ${o.picker || 'Sin Asignar'}</span>` :
             `<span class="flex items-center gap-1"><i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-600"></i> Receptor: ${o.receptor || 'Sin Asignar'}</span>`;
 
         const timingDisplay = isDesp ? 
-            `Resp: <strong>${o.responseTime}m</strong> | Prep: <strong>${o.prepTime}m</strong>` : 
-            `Resp: <strong>${o.responseTime}m</strong> | Descarga: <strong class="text-emerald-700">${o.unloadTime || o.prepTime || 0}m</strong>`;
+            `Resp: <strong>${o.responseTime || 0}m</strong> | Prep: <strong>${o.prepTime || 0}m</strong>` : 
+            `Resp: <strong>${o.responseTime || 0}m</strong> | Descarga: <strong class="text-emerald-700">${o.unloadTime || o.prepTime || 0}m</strong>`;
 
         html += `
             <tr class="hover:bg-slate-50 transition">
@@ -1546,7 +1573,7 @@ function applyFiltersAndRender() {
                 <td class="py-3 px-4 font-mono font-medium text-slate-800">${o.poNumber}</td>
                 <td class="py-3 px-4">
                     <div class="font-medium text-slate-900">${o.client}</div>
-                    ${!isDesp ? `<div class="text-[10px] text-slate-500 uppercase">Origen: ${o.origin}</div>` : ''}
+                    ${!isDesp ? `<div class="text-[10px] text-slate-500 uppercase">Origen: ${o.origin || 'NACIONAL'}</div>` : ''}
                 </td>
                 <td class="py-3 px-4">
                     <div class="font-medium text-slate-800">${o.dock}</div>
@@ -1585,13 +1612,17 @@ function clearFilters() {
 function renderCharts() {
     if (activeTab !== 'dashboard') return;
 
-    // 1. Chart 1: Volume & Results by Date
+    const ordersList = window.orders || [];
+
+    // Chart 1: Volume by Date
     const datesMap = {};
-    orders.forEach(o => {
-        const dateStr = o.schedDateTime.split('T')[0];
-        if (!datesMap[dateStr]) datesMap[dateStr] = { despachos: 0, recepciones: 0 };
-        if (o.type === 'DESPACHO') datesMap[dateStr].despachos++;
-        else datesMap[dateStr].recepciones++;
+    ordersList.forEach(o => {
+        if (o.schedDateTime) {
+            const dateStr = o.schedDateTime.split('T')[0];
+            if (!datesMap[dateStr]) datesMap[dateStr] = { despachos: 0, recepciones: 0 };
+            if (o.type === 'DESPACHO') datesMap[dateStr].despachos++;
+            else datesMap[dateStr].recepciones++;
+        }
     });
 
     const sortedDates = Object.keys(datesMap).sort();
@@ -1635,9 +1666,9 @@ function renderCharts() {
         });
     }
 
-    // 2. Chart 2: Rendimiento por Picker y Receptor
+    // Chart 2: Performance by Operator
     const personMap = {};
-    orders.forEach(o => {
+    ordersList.forEach(o => {
         if (o.type === 'DESPACHO' && o.picker) {
             const name = o.picker + " (Picker)";
             if (!personMap[name]) personMap[name] = { count: 0, timeTotal: 0, role: 'PICKER' };
@@ -1720,17 +1751,17 @@ function renderCalendar() {
     const calendarGrid = document.getElementById('calendarGrid');
     calendarGrid.innerHTML = '';
 
-    // Empty lead cells
     for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement('div');
         empty.className = 'min-h-[90px] bg-slate-50/50 rounded-xl border border-slate-100/50';
         calendarGrid.appendChild(empty);
     }
 
-    // Days cells
+    const ordersList = window.orders || [];
+
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const dayOrders = orders.filter(o => o.schedDateTime.startsWith(dateStr));
+        const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
 
         const isToday = (new Date().toISOString().split('T')[0] === dateStr);
 
@@ -1750,13 +1781,14 @@ function renderCalendar() {
         }
 
         cell.innerHTML = `
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold ${isToday ? 'text-brand-600' : 'text-slate-800'}">${day}</span>
-                ${dayOrders.length ? `<span class="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600">${dayOrders.length}</span>` : ''}
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold ${isToday ? 'text-brand-600' : 'text-slate-800'}">${day}</span>
+                    ${dayOrders.length ? `<span class="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600">${dayOrders.length}</span>` : ''}
+                </div>
+                <div>${pillsHtml}</div>
             </div>
-            <div class="mt-1 flex-grow">${pillsHtml}</div>
         `;
-
         calendarGrid.appendChild(cell);
     }
 }
@@ -1772,55 +1804,82 @@ function nextMonth() {
 }
 
 function todayMonth() {
-    calendarCurrentDate = new Date(2026, 9, 1);
+    calendarCurrentDate = new Date();
     renderCalendar();
 }
 
 function openDayPlanModal(dateStr) {
     selectedDayForPlan = dateStr;
-    const dayOrders = orders.filter(o => o.schedDateTime.startsWith(dateStr));
-    
-    document.getElementById('dayPlanTitle').textContent = `Plan del Día: ${dateStr}`;
-    document.getElementById('dayTotalCount').textContent = `${dayOrders.length} Operaciones`;
-    
+    const ordersList = window.orders || [];
+    const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+
+    const parts = dateStr.split('-');
+    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+    const formattedDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    document.getElementById('dayPlanTitle').textContent = `Plan del ${formattedDate}`;
+    document.getElementById('dayPlanSubtitle').textContent = `${dayOrders.length} operación(es) programada(s)`;
+
     const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
     const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
+
+    document.getElementById('dayTotalCount').textContent = `${dayOrders.length} Operaciones`;
     document.getElementById('dayDespCount').textContent = despCount;
     document.getElementById('dayRecpCount').textContent = recpCount;
 
-    const list = document.getElementById('dayPlanList');
+    const listContainer = document.getElementById('dayPlanList');
     if (dayOrders.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-xs text-slate-500">No hay operaciones programadas para este día.</div>`;
+        listContainer.innerHTML = `
+            <div class="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <p class="text-xs text-slate-500 font-medium">No hay recepciones ni despachos programados para este día.</p>
+                <button onclick="addOrderForSelectedDay()" class="mt-3 bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Añadir Operación</span>
+                </button>
+            </div>
+        `;
     } else {
         let html = '';
-        dayOrders.forEach((o) => {
-            const origIdx = orders.indexOf(o);
+        dayOrders.forEach(o => {
             const isDesp = o.type === 'DESPACHO';
             const badge = isDesp ? 
-                `<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold text-[10px]">DESPACHO</span>` : 
-                `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">RECEPCIÓN</span>`;
+                `<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-bold text-[10px]">DESPACHO</span>` : 
+                `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">RECEPCIÓN</span>`;
+
+            const timeStr = o.schedDateTime.split('T')[1] || '--:--';
 
             html += `
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs gap-3">
+                <div class="p-3.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between hover:border-brand-300 transition shadow-sm">
                     <div class="space-y-1">
                         <div class="flex items-center space-x-2">
                             ${badge}
-                            <span class="font-mono font-bold text-slate-900">${o.poNumber} (${o.id})</span>
+                            <span class="font-mono font-bold text-slate-900 text-xs">${o.poNumber}</span>
+                            <span class="text-slate-400">•</span>
+                            <span class="text-xs text-slate-600 font-medium">${timeStr} hs</span>
                         </div>
-                        <div class="font-medium text-slate-800">${o.client} • <span class="text-slate-500">${o.dock}</span></div>
-                        <div class="text-[11px] text-slate-500">${isDesp ? `Picker: ${o.picker || 'N/A'}` : `Receptor: ${o.receptor || 'N/A'}`}</div>
+                        <div class="text-xs font-semibold text-slate-800">${o.client}</div>
+                        <div class="text-[11px] text-slate-500 flex items-center gap-3">
+                            <span>Muelle: <strong>${o.dock}</strong></span>
+                            <span>${isDesp ? 'Picker' : 'Receptor'}: <strong>${(isDesp ? o.picker : o.receptor) || 'N/A'}</strong></span>
+                        </div>
                     </div>
-                    <div class="text-right space-y-1 shrink-0">
-                        <div class="font-semibold text-slate-700">${o.schedDateTime.split('T')[1]}</div>
-                        <button onclick="openNewOrderModal(${origIdx})" class="px-2.5 py-1 text-[11px] bg-white border border-slate-300 rounded-lg hover:bg-slate-100 text-slate-700 font-medium">
-                            Editar
+
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openNewOrderModal(${o._originalIndex})" class="p-1.5 text-slate-600 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
                         </button>
+                        ${currentRole !== 'LECTOR' ? `
+                        <button onclick="deleteOrder(${o._originalIndex})" class="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>` : ''}
                     </div>
                 </div>
             `;
         });
-        list.innerHTML = html;
+        listContainer.innerHTML = html;
     }
+
+    lucide.createIcons();
     openModal('dayPlanModal');
 }
 
@@ -1828,55 +1887,72 @@ function addOrderForSelectedDay() {
     closeModal('dayPlanModal');
     openNewOrderModal();
     if (selectedDayForPlan) {
-        document.getElementById('schedDateTime').value = `${selectedDayForPlan}T09:00`;
+        document.getElementById('schedDateTime').value = `${selectedDayForPlan}T08:00`;
     }
 }
 
 function renderAccessControl() {
     if (activeTab !== 'access') return;
 
+    const total = users.length;
+    const admins = users.filter(u => u.role === 'ADMINISTRADOR').length;
+    const operators = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+    const active = users.filter(u => u.status === 'ACTIVO').length;
+
+    document.getElementById('kpiTotalUsers').textContent = total;
+    document.getElementById('kpiAdminUsers').textContent = admins;
+    document.getElementById('kpiOperatorUsers').textContent = operators;
+    document.getElementById('kpiActiveUsers').textContent = active;
+
+    renderUsersTable();
+}
+
+function renderUsersTable() {
     const search = document.getElementById('userSearchInput').value.toLowerCase();
+    const tbody = document.getElementById('usersTableBody');
+
     const filtered = users.filter(u => 
-        u.name.toLowerCase().includes(search) || 
-        u.username.toLowerCase().includes(search) || 
+        u.name.toLowerCase().includes(search) ||
+        u.username.toLowerCase().includes(search) ||
         u.role.toLowerCase().includes(search)
     );
 
-    document.getElementById('kpiTotalUsers').textContent = users.length;
-    document.getElementById('kpiAdminUsers').textContent = users.filter(u => u.role === 'ADMINISTRADOR').length;
-    document.getElementById('kpiOperatorUsers').textContent = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
-    document.getElementById('kpiActiveUsers').textContent = users.filter(u => u.status === 'ACTIVO').length;
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No se encontraron usuarios</td></tr>`;
+        return;
+    }
 
-    const tbody = document.getElementById('usersTableBody');
     let html = '';
-
     filtered.forEach(u => {
         let roleBadge = '';
-        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-bold text-[10px]">ADMINISTRADOR</span>`;
-        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-bold text-[10px]">SUPERVISOR</span>`;
-        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-bold text-[10px]">OPERADOR</span>`;
-        else roleBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold text-[10px]">LECTOR</span>`;
+        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-bold text-[10px]">ADMINISTRADOR</span>`;
+        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px]">SUPERVISOR</span>`;
+        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">OPERADOR</span>`;
+        else roleBadge = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px]">LECTOR</span>`;
 
         const statusBadge = u.status === 'ACTIVO' ? 
-            `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[10px]">ACTIVO</span>` : 
-            `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-medium text-[10px]">INACTIVO</span>`;
+            `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px]">Activo</span>` : 
+            `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-medium text-[11px]">Inactivo</span>`;
 
         html += `
             <tr class="hover:bg-slate-50 transition">
                 <td class="py-3 px-4 font-semibold text-slate-900">
                     <div>${u.name}</div>
-                    <div class="text-[11px] font-normal text-slate-500">@${u.username}</div>
+                    <div class="text-[10px] text-slate-400 font-mono">@${u.username}</div>
                 </td>
                 <td class="py-3 px-4">${roleBadge}</td>
                 <td class="py-3 px-4 font-mono text-slate-500">••••</td>
                 <td class="py-3 px-4">${statusBadge}</td>
-                <td class="py-3 px-4 text-slate-500">${u.lastAccess}</td>
-                <td class="py-3 px-4 text-right space-x-1">
+                <td class="py-3 px-4 text-slate-500 text-[11px]">${u.lastAccess}</td>
+                <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
                     <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Restablecer PIN">
-                        <i data-lucide="key" class="w-4 h-4"></i>
+                        <i data-lucide="key-round" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="editUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition" title="Editar Usuario">
-                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                    <button onclick="editUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Editar Usuario">
+                        <i data-lucide="edit" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="deleteUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar Usuario">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                 </td>
             </tr>
@@ -1891,52 +1967,70 @@ function openNewUserModal() {
     document.getElementById('editUserId').value = '';
     document.getElementById('userForm').reset();
     document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>Crear Nuevo Usuario</span>`;
+    lucide.createIcons();
     openModal('userModal');
 }
 
 function editUser(userId) {
-    const u = users.find(x => x.id === userId);
-    if (!u) return;
-    document.getElementById('editUserId').value = u.id;
-    document.getElementById('userFullName').value = u.name;
-    document.getElementById('username').value = u.username;
-    document.getElementById('userPin').value = u.pin;
-    document.getElementById('userRole').value = u.role;
-    document.getElementById('userStatus').value = u.status;
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('userFullName').value = user.name;
+    document.getElementById('username').value = user.username;
+    document.getElementById('userPin').value = user.pin;
+    document.getElementById('userRole').value = user.role;
+    document.getElementById('userStatus').value = user.status;
+
     document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-cog" class="w-4 h-4 text-indigo-400"></i><span>Editar Usuario</span>`;
+    lucide.createIcons();
     openModal('userModal');
 }
 
 function saveUser(e) {
     e.preventDefault();
-    const editId = document.getElementById('editUserId').value;
-    
-    const userData = {
-        id: editId || ("U" + (users.length + 1)),
-        name: document.getElementById('userFullName').value,
-        username: document.getElementById('username').value,
-        pin: document.getElementById('userPin').value,
-        role: document.getElementById('userRole').value,
-        status: document.getElementById('userStatus').value,
-        lastAccess: "Reciente"
-    };
+    const id = document.getElementById('editUserId').value;
+    const name = document.getElementById('userFullName').value;
+    const username = document.getElementById('username').value;
+    const pin = document.getElementById('userPin').value;
+    const role = document.getElementById('userRole').value;
+    const status = document.getElementById('userStatus').value;
 
-    if (editId) {
-        const idx = users.findIndex(u => u.id === editId);
-        if (idx >= 0) users[idx] = userData;
+    if (id) {
+        const idx = users.findIndex(u => u.id === id);
+        if (idx !== -1) {
+            users[idx] = { ...users[idx], name, username, pin, role, status };
+        }
     } else {
-        users.push(userData);
+        const newUser = {
+            id: "U" + (users.length + 1),
+            name,
+            username,
+            pin,
+            role,
+            status,
+            lastAccess: "Nunca"
+        };
+        users.push(newUser);
     }
 
     closeModal('userModal');
     renderAccessControl();
 }
 
+function deleteUser(userId) {
+    if (confirm('¿Está seguro de eliminar este usuario?')) {
+        users = users.filter(u => u.id !== userId);
+        renderAccessControl();
+    }
+}
+
 function openResetPinModal(username) {
-    const u = users.find(x => x.username === username);
-    if (!u) return;
-    document.getElementById('resetTargetUsername').value = u.username;
-    document.getElementById('resetTargetUserDisplay').textContent = `${u.name} (@${u.username})`;
+    const user = users.find(u => u.username === username);
+    if (!user) return;
+
+    document.getElementById('resetTargetUsername').value = user.username;
+    document.getElementById('resetTargetUserDisplay').textContent = `${user.name} (@${user.username})`;
     document.getElementById('newPinInput').value = '';
     openModal('resetPinModal');
 }
@@ -1945,13 +2039,53 @@ function handleResetPinSubmit(e) {
     e.preventDefault();
     const username = document.getElementById('resetTargetUsername').value;
     const newPin = document.getElementById('newPinInput').value;
-    const u = users.find(x => x.username === username);
-    if (u) {
-        u.pin = newPin;
-        alert(`PIN para @${username} actualizado con éxito.`);
+
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.pin = newPin;
+        closeModal('resetPinModal');
+        renderAccessControl();
     }
-    closeModal('resetPinModal');
-    renderAccessControl();
+}
+
+function exportDataCSV() {
+    const ordersList = window.orders || [];
+    if (ordersList.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "ID,N_OC,Tipo,Muelle,Cliente,Chofer,Origen,FechaProgramada,Picker,Receptor,Prioridad,TRespuesta_min,TPrep_min,TDescarga_min,Estatus\n";
+
+    ordersList.forEach(o => {
+        const row = [
+            `"${o.id || ''}"`,
+            `"${o.poNumber || ''}"`,
+            `"${o.type || ''}"`,
+            `"${o.dock || ''}"`,
+            `"${o.client || ''}"`,
+            `"${o.driver || ''}"`,
+            `"${o.origin || ''}"`,
+            `"${o.schedDateTime || ''}"`,
+            `"${o.picker || ''}"`,
+            `"${o.receptor || ''}"`,
+            `"${o.priority || ''}"`,
+            o.responseTime || 0,
+            o.prepTime || 0,
+            o.unloadTime || 0,
+            `"${o.status || ''}"`
+        ];
+        csvContent += row.join(",") + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `logistica_pedidos_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 function openShareModal() {
@@ -1967,28 +2101,14 @@ function copyShareUrl() {
     document.getElementById('shareCopyAlert').classList.remove('hidden');
 }
 
-function exportDataCSV() {
-    let csv = "ID,PO_Number,Type,Dock,Client,Driver,Origin,Scheduled,Picker,Receptor,Priority,ResponseMin,PrepMin,UnloadMin,Status,TimeCreated,TimeInProcess,TimeCompleted\n";
-    orders.forEach(o => {
-        csv += `"${o.id}","${o.poNumber}","${o.type}","${o.dock}","${o.client}","${o.driver}","${o.origin}","${o.schedDateTime}","${o.picker}","${o.receptor}","${o.priority}",${o.responseTime},${o.prepTime},${o.unloadTime},"${o.status}","${o.timeCreated || ''}","${o.timeInProcess || ''}","${o.timeCompleted || ''}"\n`;
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `logistica_corporativa_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('hidden');
 }
 
-function openModal(id) {
-    document.getElementById(id).classList.remove('hidden');
-}
-
-function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('hidden');
 }
 </script>
 </body>
