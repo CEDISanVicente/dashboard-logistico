@@ -91,6 +91,10 @@
             }
           }
           
+          if (typeof window.sortOrdersChronologically === 'function') {
+            window.sortOrdersChronologically();
+          }
+
           if (typeof window.renderAllViews === 'function') {
             window.renderAllViews();
           }
@@ -114,7 +118,6 @@
         console.warn("No se pudo conectar a Firebase. Se usará el estado local.", e);
       }
 
-      // Exponer las funciones para guardar/eliminar en Firestore de forma sincrónica con estado local
       window.saveOrderToFirebase = async function(orderData, docId, localIndex) {
         if (db && ordersCollection) {
           try {
@@ -140,6 +143,9 @@
         } else {
           if (!orderData.docId) orderData.docId = "LOCAL-" + Date.now();
           window.orders.push(orderData);
+        }
+        if (typeof window.sortOrdersChronologically === 'function') {
+            window.sortOrdersChronologically();
         }
         if (typeof window.renderAllViews === 'function') window.renderAllViews();
       }
@@ -379,17 +385,17 @@
         </section>
 
         <!-- Analytical Charts Grid -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Chart 1: Volume & Results by Date -->
             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
-                        <h3 class="font-bold text-slate-900 text-base">Volumen y Resultados por Fecha</h3>
+                        <h3 class="font-bold text-slate-900 text-base">Volumen y Resultados</h3>
                         <p class="text-xs text-slate-500">Comportamiento diario de Despachos vs Recepciones</p>
                     </div>
                     <div class="flex items-center space-x-3 text-xs">
-                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block mr-1"></span> Despachos</span>
-                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1"></span> Recepciones</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block mr-1"></span> Desp.</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1"></span> Recp.</span>
                     </div>
                 </div>
                 <div class="h-64 mt-4 relative">
@@ -401,16 +407,32 @@
             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
-                        <h3 class="font-bold text-slate-900 text-base">Rendimiento por Picker y Receptor</h3>
-                        <p class="text-xs text-slate-500">Comparativa de Operaciones e Inversión de Tiempo (mins)</p>
+                        <h3 class="font-bold text-slate-900 text-base">Rendimiento por Operador</h3>
+                        <p class="text-xs text-slate-500">Pickers (Carga) y Receptores (Descarga)</p>
                     </div>
                     <div class="flex items-center space-x-3 text-xs">
-                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-sky-500 inline-block mr-1"></span> Pickers (Carga)</span>
-                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1"></span> Receptores (Descarga)</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-sky-500 inline-block mr-1"></span> Carga</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1"></span> Descarga</span>
                     </div>
                 </div>
                 <div class="h-64 mt-4 relative">
                     <canvas id="pickerPerformanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 3: Total Orders by Client (Ordenado de mayor a menor) -->
+            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Total Pedidos por Cliente</h3>
+                        <p class="text-xs text-slate-500">Ordenado de mayor a menor cantidad de pedidos</p>
+                    </div>
+                    <div class="flex items-center space-x-3 text-xs">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-indigo-500 inline-block mr-1"></span> Órdenes</span>
+                    </div>
+                </div>
+                <div class="h-64 mt-4 relative">
+                    <canvas id="clientPerformanceChart"></canvas>
                 </div>
             </div>
         </section>
@@ -424,7 +446,7 @@
                             <span>Cola de Pedidos y Planificación</span>
                             <span id="tableBadgeCount" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">0</span>
                         </h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Gestión de Muelles con número de Orden de Compra (OC / PO)</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Gestión de Muelles con número de Orden de Compra (OC / PO) • Cronológico (más reciente primero)</p>
                     </div>
 
                     <button onclick="clearFilters()" class="text-xs text-slate-500 hover:text-brand-600 underline flex items-center gap-1 self-start md:self-auto">
@@ -1162,18 +1184,29 @@ let users = [
 // Chart Instances
 let dateChartInstance = null;
 let pickerChartInstance = null;
+let clientChartInstance = null;
+
+window.sortOrdersChronologically = function() {
+    if (!window.orders || !Array.isArray(window.orders)) return;
+    window.orders.sort((a, b) => {
+        const dateA = new Date(a.schedDateTime || a.timeCreated || 0).getTime();
+        const dateB = new Date(b.schedDateTime || b.timeCreated || 0).getTime();
+        return dateB - dateA; // Cronológico descendente: del más reciente al más antiguo
+    });
+};
 
 window.onload = function() {
     lucide.createIcons();
     initSystemData();
+    window.sortOrdersChronologically();
     updateUIForRole();
     renderAllViews();
 };
 
 window.renderAllViews = function() {
+    window.sortOrdersChronologically();
     calculateMetrics();
     applyFiltersAndRender();
-    renderCharts();
     renderCalendar();
     renderAccessControl();
 };
@@ -1213,7 +1246,7 @@ function switchView(tab) {
     if (tab === 'dashboard') {
         document.getElementById('viewDashboard').classList.remove('hidden');
         tabDashboardBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
-        renderCharts();
+        applyFiltersAndRender();
     } else if (tab === 'calendar') {
         document.getElementById('viewCalendar').classList.remove('hidden');
         tabCalendarBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
@@ -1424,6 +1457,7 @@ async function saveOrder(e) {
         } else {
             if (idx >= 0) window.orders[idx] = { ...existingOrder, ...orderData };
             else window.orders.push(orderData);
+            window.sortOrdersChronologically();
             window.renderAllViews();
         }
         closeModal('newOrderModal');
@@ -1461,7 +1495,7 @@ function calculateMetrics() {
     let served = 0, pending = 0;
     let national = 0, imported = 0;
 
-    const ordersList = window.orders || [];
+    const ordersList = getFilteredOrders();
 
     ordersList.forEach(o => {
         if (o.status === 'LISTO_ATENDIDO') served++;
@@ -1514,11 +1548,11 @@ function calculateMetrics() {
     document.getElementById('totalOrdersCount').textContent = `${totalOrders} Pedidos`;
 }
 
-function applyFiltersAndRender() {
+function getFilteredOrders() {
     const searchInput = document.getElementById('searchInput');
-    if (!searchInput) return;
+    if (!searchInput) return window.orders || [];
 
-    const search = searchInput.value.toLowerCase();
+    const search = searchInput.value.toLowerCase().trim();
     const type = document.getElementById('typeFilter').value;
     const status = document.getElementById('statusFilter').value;
     const dateFrom = document.getElementById('dateFromFilter').value;
@@ -1526,9 +1560,8 @@ function applyFiltersAndRender() {
 
     const ordersList = window.orders || [];
 
-    const filtered = ordersList.filter((o, idx) => {
-        o._originalIndex = idx;
-        const matchesSearch = 
+    const filtered = ordersList.filter((o) => {
+        const matchesSearch = !search ||
             (o.id && o.id.toLowerCase().includes(search)) ||
             (o.poNumber && o.poNumber.toLowerCase().includes(search)) ||
             (o.client && o.client.toLowerCase().includes(search)) ||
@@ -1549,9 +1582,25 @@ function applyFiltersAndRender() {
         return matchesSearch && matchesType && matchesStatus && matchesDate;
     });
 
+    // Ordenamiento cronológico descendente: del más reciente al más antiguo
+    filtered.sort((a, b) => {
+        const dateA = new Date(a.schedDateTime || a.timeCreated || 0).getTime();
+        const dateB = new Date(b.schedDateTime || b.timeCreated || 0).getTime();
+        return dateB - dateA;
+    });
+
+    return filtered;
+}
+
+function applyFiltersAndRender() {
+    const filtered = getFilteredOrders();
+
     document.getElementById('tableBadgeCount').textContent = filtered.length;
     const tbody = document.getElementById('ordersTableBody');
     const emptyState = document.getElementById('emptyState');
+
+    renderCharts();
+    calculateMetrics();
 
     if (filtered.length === 0) {
         tbody.innerHTML = '';
@@ -1563,6 +1612,9 @@ function applyFiltersAndRender() {
     let html = '';
 
     filtered.forEach(o => {
+        const origIdx = window.orders.findIndex(item => item === o || (item.id === o.id && item.poNumber === o.poNumber));
+        const finalIdx = origIdx >= 0 ? origIdx : 0;
+
         const isDesp = o.type === 'DESPACHO';
         const badgeType = isDesp ? 
             `<span class="px-2 py-0.5 rounded-md bg-sky-100 text-sky-800 font-semibold text-[10px]">DESPACHO</span>` : 
@@ -1608,11 +1660,11 @@ function applyFiltersAndRender() {
                 <td class="py-3 px-4 text-[11px] text-slate-600">${timingDisplay}</td>
                 <td class="py-3 px-4">${statusBadge}</td>
                 <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
-                    <button onclick="openNewOrderModal(${o._originalIndex})" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar">
+                    <button onclick="openNewOrderModal(${finalIdx})" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar">
                         <i data-lucide="edit" class="w-4 h-4"></i>
                     </button>
                     ${currentRole !== 'LECTOR' ? `
-                    <button onclick="deleteOrder(${o._originalIndex})" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar">
+                    <button onclick="deleteOrder(${finalIdx})" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>` : ''}
                 </td>
@@ -1636,7 +1688,7 @@ function clearFilters() {
 function renderCharts() {
     if (activeTab !== 'dashboard') return;
 
-    const ordersList = window.orders || [];
+    const ordersList = getFilteredOrders();
 
     // Chart 1: Volume by Date
     const datesMap = {};
@@ -1695,14 +1747,12 @@ function renderCharts() {
     ordersList.forEach(o => {
         if (o.type === 'DESPACHO' && o.picker) {
             const name = o.picker + " (Picker)";
-            if (!personMap[name]) personMap[name] = { count: 0, timeTotal: 0, role: 'PICKER' };
+            if (!personMap[name]) personMap[name] = { count: 0, role: 'PICKER' };
             personMap[name].count++;
-            personMap[name].timeTotal += (o.prepTime || 0);
         } else if (o.type === 'RECEPCION' && o.receptor) {
             const name = o.receptor + " (Receptor)";
-            if (!personMap[name]) personMap[name] = { count: 0, timeTotal: 0, role: 'RECEPTOR' };
+            if (!personMap[name]) personMap[name] = { count: 0, role: 'RECEPTOR' };
             personMap[name].count++;
-            personMap[name].timeTotal += (o.unloadTime || o.prepTime || 0);
         }
     });
 
@@ -1737,6 +1787,49 @@ function renderCharts() {
             }
         });
     }
+
+    // Chart 3: Total Orders per Client (Ordenado de mayor a menor)
+    const clientMap = {};
+    ordersList.forEach(o => {
+        const clientName = o.client || 'Sin Cliente Especificado';
+        clientMap[clientName] = (clientMap[clientName] || 0) + 1;
+    });
+
+    // Ordenamiento estricto de MAYOR a MENOR por cantidad de pedidos
+    const sortedClients = Object.entries(clientMap).sort((a, b) => b[1] - a[1]);
+    const clientNames = sortedClients.map(item => item[0]);
+    const clientCounts = sortedClients.map(item => item[1]);
+    
+    const clientColors = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+    const ctx3 = document.getElementById('clientPerformanceChart');
+    if (ctx3) {
+        if (clientChartInstance) clientChartInstance.destroy();
+        clientChartInstance = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: clientNames,
+                datasets: [
+                    {
+                        label: 'Total Pedidos',
+                        data: clientCounts,
+                        backgroundColor: clientNames.map((_, i) => clientColors[i % clientColors.length]),
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y', // Barras horizontales para lectura fluida de nombres
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, ticks: { precision: 0 } },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    }
 }
 
 // Monthly Calendar Functions
@@ -1756,7 +1849,6 @@ function renderCalendar() {
 
     calendarGrid.innerHTML = '';
 
-    // Empty cells before first day
     for (let i = 0; i < firstDayIndex; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = "bg-slate-50/50 rounded-xl min-h-[90px] border border-slate-100/50";
@@ -1836,10 +1928,9 @@ function openDayPlanModal(dateStr) {
                     <div>
                         <div class="font-bold text-slate-900">${o.id} - ${o.poNumber} <span class="ml-2 font-normal text-slate-500">(${o.dock})</span></div>
                         <div class="text-slate-600">${o.client} - Chófer: ${o.driver || 'N/A'}</div>
-                        <div class="text-slate-400 text-[10px]">${isDesp ? 'Picker: ' + (o.picker || 'N/A') : 'Receptor: ' + (o.receptor || 'N/A')}</div>
                     </div>
-                    <div>
-                        <span class="px-2 py-1 rounded text-[10px] font-bold ${isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${o.type}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${o.type}</span>
                     </div>
                 </div>
             `;
@@ -1851,77 +1942,80 @@ function openDayPlanModal(dateStr) {
 
 function addOrderForSelectedDay() {
     closeModal('dayPlanModal');
-    openNewOrderModal();
+    openNewOrderModal(-1);
     if (selectedDayForPlan) {
-        document.getElementById('schedDateTime').value = `${selectedDayForPlan}T08:00`;
+        const timePart = new Date().toTimeString().slice(0,5);
+        document.getElementById('schedDateTime').value = `${selectedDayForPlan}T${timePart}`;
     }
 }
 
-// User & Access Control
+// User Access Control Logic
 function renderAccessControl() {
-    if (activeTab !== 'access') return;
+    let totalUsers = users.length;
+    let admins = users.filter(u => u.role === 'ADMINISTRADOR').length;
+    let operators = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+    let activeUsers = users.filter(u => u.status === 'ACTIVO').length;
 
-    document.getElementById('kpiTotalUsers').textContent = users.length;
-    document.getElementById('kpiAdminUsers').textContent = users.filter(u => u.role === 'ADMINISTRADOR').length;
-    document.getElementById('kpiOperatorUsers').textContent = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
-    document.getElementById('kpiActiveUsers').textContent = users.filter(u => u.status === 'ACTIVO').length;
+    document.getElementById('kpiTotalUsers').textContent = totalUsers;
+    document.getElementById('kpiAdminUsers').textContent = admins;
+    document.getElementById('kpiOperatorUsers').textContent = operators;
+    document.getElementById('kpiActiveUsers').textContent = activeUsers;
 
     renderUsersTable();
 }
 
 function renderUsersTable() {
-    const search = (document.getElementById('userSearchInput')?.value || '').toLowerCase();
     const tbody = document.getElementById('usersTableBody');
     if (!tbody) return;
 
+    const filterVal = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
+
     const filtered = users.filter(u => 
-        u.name.toLowerCase().includes(search) || 
-        u.username.toLowerCase().includes(search) || 
-        u.role.toLowerCase().includes(search)
+        !filterVal || 
+        u.name.toLowerCase().includes(filterVal) || 
+        u.username.toLowerCase().includes(filterVal) ||
+        u.role.toLowerCase().includes(filterVal)
     );
 
     let html = '';
     filtered.forEach(u => {
+        const isActive = u.status === 'ACTIVO';
+        const statusBadge = isActive ? 
+            `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold">Activo</span>` : 
+            `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-semibold">Inactivo</span>`;
+
         html += `
             <tr class="hover:bg-slate-50 transition">
-                <td class="py-3 px-4">
-                    <div class="font-bold text-slate-900">${u.name}</div>
-                    <div class="text-[11px] text-slate-400">@${u.username}</div>
+                <td class="py-3 px-4 font-semibold text-slate-900">
+                    <div>${u.name}</div>
+                    <div class="text-[11px] text-slate-500 font-normal">@${u.username}</div>
                 </td>
                 <td class="py-3 px-4 font-medium text-slate-700">${u.role}</td>
-                <td class="py-3 px-4 font-mono text-slate-500">••••</td>
-                <td class="py-3 px-4">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${u.status === 'ACTIVO' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${u.status}</span>
-                </td>
+                <td class="py-3 px-4 font-mono text-slate-600">••••</td>
+                <td class="py-3 px-4">${statusBadge}</td>
                 <td class="py-3 px-4 text-slate-500">${u.lastAccess}</td>
-                <td class="py-3 px-4 text-right space-x-1">
-                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded" title="Cambiar PIN">
-                        <i data-lucide="key" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="toggleUserStatus('${u.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Activar/Desactivar">
-                        <i data-lucide="power" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="deleteUser('${u.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded" title="Eliminar">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
+                <td class="py-3 px-4 text-right space-x-2">
+                    <button onclick="openResetPinModal('${u.username}')" class="text-amber-600 hover:text-amber-700 text-xs font-medium">Cambiar PIN</button>
+                    <button onclick="toggleUserStatus('${u.id}')" class="text-slate-600 hover:text-slate-800 text-xs font-medium">${isActive ? 'Desactivar' : 'Activar'}</button>
                 </td>
             </tr>
         `;
     });
+
     tbody.innerHTML = html;
-    lucide.createIcons();
 }
 
-function openNewUserModal(userId = null) {
+function openNewUserModal() {
     document.getElementById('userForm').reset();
-    document.getElementById('editUserId').value = userId || '';
-    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>${userId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</span>`;
+    document.getElementById('editUserId').value = '';
+    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>Crear Nuevo Usuario</span>`;
+    lucide.createIcons();
     openModal('userModal');
 }
 
 function saveUser(e) {
     e.preventDefault();
-    const id = document.getElementById('editUserId').value || "U" + (users.length + 1);
+    const id = document.getElementById('editUserId').value || ("U" + (users.length + 1));
     const name = document.getElementById('userFullName').value;
     const username = document.getElementById('username').value;
     const pin = document.getElementById('userPin').value;
@@ -1932,18 +2026,24 @@ function saveUser(e) {
     if (existingIdx >= 0) {
         users[existingIdx] = { ...users[existingIdx], name, username, pin, role, status };
     } else {
-        users.push({ id, name, username, pin, role, status, lastAccess: "Ahora" });
+        users.push({ id, name, username, pin, role, status, lastAccess: "Nunca" });
     }
 
     closeModal('userModal');
     renderAccessControl();
 }
 
+function toggleUserStatus(userId) {
+    const u = users.find(user => user.id === userId);
+    if (u) {
+        u.status = u.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+        renderAccessControl();
+    }
+}
+
 function openResetPinModal(username) {
-    const target = users.find(u => u.username === username);
-    if (!target) return;
-    document.getElementById('resetTargetUsername').value = target.username;
-    document.getElementById('resetTargetUserDisplay').textContent = target.name;
+    document.getElementById('resetTargetUsername').value = username;
+    document.getElementById('resetTargetUserDisplay').textContent = "@" + username;
     document.getElementById('newPinInput').value = '';
     openModal('resetPinModal');
 }
@@ -1952,55 +2052,60 @@ function handleResetPinSubmit(e) {
     e.preventDefault();
     const username = document.getElementById('resetTargetUsername').value;
     const newPin = document.getElementById('newPinInput').value;
-    const target = users.find(u => u.username === username);
-    if (target) {
-        target.pin = newPin;
+    const u = users.find(user => user.username === username);
+    if (u) {
+        u.pin = newPin;
+        alert(`PIN actualizado con éxito para @${username}`);
     }
     closeModal('resetPinModal');
     renderAccessControl();
 }
 
-function toggleUserStatus(id) {
-    const target = users.find(u => u.id === id);
-    if (target) {
-        target.status = target.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
-        renderAccessControl();
-    }
-}
-
-function deleteUser(id) {
-    if (confirm('¿Desea eliminar este usuario del directorio?')) {
-        users = users.filter(u => u.id !== id);
-        renderAccessControl();
-    }
-}
-
-// Utilities
+// Utilities (Share & Export CSV)
 function openShareModal() {
-    document.getElementById('shareUrlInput').value = window.location.href;
-    document.getElementById('shareCopyAlert').classList.add('hidden');
+    const input = document.getElementById('shareUrlInput');
+    if (input) input.value = window.location.href;
+    const alertBox = document.getElementById('shareCopyAlert');
+    if (alertBox) alertBox.classList.add('hidden');
     openModal('shareModal');
 }
 
 function copyShareUrl() {
     const input = document.getElementById('shareUrlInput');
-    input.select();
-    navigator.clipboard.writeText(input.value);
-    document.getElementById('shareCopyAlert').classList.remove('hidden');
+    if (input) {
+        input.select();
+        navigator.clipboard.writeText(input.value).then(() => {
+            const alertBox = document.getElementById('shareCopyAlert');
+            if (alertBox) alertBox.classList.remove('hidden');
+        }).catch(() => {
+            alert('Enlace copiado al portapapeles');
+        });
+    }
 }
 
 function exportDataCSV() {
-    const ordersList = window.orders || [];
-    if (ordersList.length === 0) {
+    const ordersList = getFilteredOrders();
+    if (!ordersList || ordersList.length === 0) {
         alert("No hay datos para exportar.");
         return;
     }
+    const headers = ["ID", "OC", "Tipo", "Muelle", "Cliente", "Chofer", "Origen", "Fecha_Programada", "Picker_Receptor", "Tiempo_Respuesta", "Tiempo_Prep_Descarga", "Estatus"];
+    const rows = ordersList.map(o => [
+        o.id,
+        o.poNumber,
+        o.type,
+        `"${o.dock}"`,
+        `"${o.client}"`,
+        `"${o.driver || ''}"`,
+        o.origin || 'N/A',
+        o.schedDateTime,
+        `"${o.type === 'DESPACHO' ? (o.picker || '') : (o.receptor || '')}"`,
+        o.responseTime || 0,
+        o.type === 'DESPACHO' ? (o.prepTime || 0) : (o.unloadTime || 0),
+        o.status
+    ]);
 
-    let csvContent = "data:text/csv;charset=utf-8,ID,OC,Tipo,Muelle,Cliente,Chofer,Origen,Fecha,Picker,Receptor,Prioridad,T_Respuesta,T_Prep,Estatus\n";
-    ordersList.forEach(o => {
-        csvContent += `"${o.id}","${o.poNumber}","${o.type}","${o.dock}","${o.client}","${o.driver || ''}","${o.origin || ''}","${o.schedDateTime}","${o.picker || ''}","${o.receptor || ''}","${o.priority}",${o.responseTime || 0},${o.prepTime || o.unloadTime || 0},"${o.status}"\n`;
-    });
-
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
