@@ -320,19 +320,18 @@
                 <p class="text-[10px] text-slate-500 mt-1">Recepción en patio</p>
             </div>
 
-            <!-- Metric 4: SKU Promedio por Pedido (General) -->
-            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition border-l-4 border-l-brand-500">
+            <!-- Metric 4: SKU Promedio General -->
+            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition border-l-4 border-l-sky-500">
                 <div class="flex items-center justify-between text-slate-500 mb-2">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider text-brand-800">SKU Prom. / Pedido</span>
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-sky-800">SKU Prom./Pedido</span>
                     <div class="p-1.5 bg-sky-50 text-sky-600 rounded-lg">
-                        <i data-lucide="box" class="w-4 h-4"></i>
+                        <i data-lucide="boxes" class="w-4 h-4"></i>
                     </div>
                 </div>
                 <div class="flex items-baseline justify-between">
-                    <span id="kpiAvgSkus" class="text-xl font-bold text-brand-700">0.0</span>
-                    <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-sky-100 text-sky-800">General</span>
+                    <span id="kpiAvgSkuGeneral" class="text-xl font-bold text-sky-700">0</span>
                 </div>
-                <p class="text-[10px] text-slate-500 mt-1">Promedio de SKUs</p>
+                <p class="text-[10px] text-slate-500 mt-1">Promedio general</p>
             </div>
 
             <!-- Metric 5: Pedidos Atendidos vs En Espera -->
@@ -406,9 +405,9 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
                         <h3 class="font-bold text-slate-900 text-base">Volumen y Resultados</h3>
-                        <p class="text-xs text-slate-500">Comportamiento diario</p>
+                        <p class="text-xs text-slate-500">Despachos vs Recepciones</p>
                     </div>
-                    <div class="flex items-center space-x-3 text-xs">
+                    <div class="flex items-center space-x-2 text-xs">
                         <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block mr-1"></span> Desp.</span>
                         <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1"></span> Recp.</span>
                     </div>
@@ -425,7 +424,7 @@
                         <h3 class="font-bold text-slate-900 text-base">Rendimiento Operador</h3>
                         <p class="text-xs text-slate-500">Pickers y Receptores</p>
                     </div>
-                    <div class="flex items-center space-x-3 text-xs">
+                    <div class="flex items-center space-x-2 text-xs">
                         <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-sky-500 inline-block mr-1"></span> Carga</span>
                         <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block mr-1"></span> Descarga</span>
                     </div>
@@ -440,9 +439,9 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
                         <h3 class="font-bold text-slate-900 text-base">Pedidos por Cliente</h3>
-                        <p class="text-xs text-slate-500">Cantidad de órdenes</p>
+                        <p class="text-xs text-slate-500">Ordenado de mayor a menor</p>
                     </div>
-                    <div class="flex items-center space-x-3 text-xs">
+                    <div class="flex items-center space-x-2 text-xs">
                         <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-indigo-500 inline-block mr-1"></span> Órdenes</span>
                     </div>
                 </div>
@@ -451,19 +450,19 @@
                 </div>
             </div>
 
-            <!-- Chart 4: SKU Promedio por Pedido por Cliente -->
+            <!-- Chart 4: Average SKUs per Order by Client (Ordenado de mayor a menor) -->
             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
-                        <h3 class="font-bold text-slate-900 text-base">SKU Prom. por Cliente</h3>
-                        <p class="text-xs text-slate-500">Promedio de SKUs solicitados</p>
+                        <h3 class="font-bold text-slate-900 text-base">SKU Prom. / Pedido (Cliente)</h3>
+                        <p class="text-xs text-slate-500">Ordenado de mayor a menor</p>
                     </div>
-                    <div class="flex items-center space-x-3 text-xs">
-                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-brand-500 inline-block mr-1"></span> SKUs/Ped</span>
+                    <div class="flex items-center space-x-2 text-xs">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-sky-500 inline-block mr-1"></span> SKUs Prom</span>
                     </div>
                 </div>
                 <div class="h-64 mt-4 relative">
-                    <canvas id="skuPerClientChart"></canvas>
+                    <canvas id="clientSkuChart"></canvas>
                 </div>
             </div>
         </section>
@@ -534,7 +533,7 @@
                             <th class="py-3 px-4">N° Orden Compra (OC)</th>
                             <th class="py-3 px-4">Cliente / Proveedor</th>
                             <th class="py-3 px-4">Muelle / Chófer</th>
-                            <th class="py-3 px-4">SKUs</th>
+                            <th class="py-3 px-4">SKU Solicitados</th>
                             <th class="py-3 px-4">Fecha & Hora Programada</th>
                             <th class="py-3 px-4">Picker / Receptor</th>
                             <th class="py-3 px-4">T. Resp / Prep / Descarga</th>
@@ -907,1239 +906,1350 @@
         </div>
         <div class="p-5 space-y-4">
             <p class="text-xs text-slate-600">
-                Comparte este enlace con tu equipo para que puedan consultar las métricas y la planificación en tiempo real.
+                Enlace directo para compartir la vista actual con el equipo de patio o logística:
             </p>
             <div class="flex items-center space-x-2">
-                <input type="text" id="shareUrlInput" readonly class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-600 focus:outline-none">
-                <button onclick="copyShareUrl()" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-2 rounded-lg text-xs font-medium transition shrink-0 flex items-center gap-1">
-                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                    <span>Copiar</span>
+                <input type="text" id="shareUrlInput" readonly class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-700 focus:outline-none">
+                <button onclick="copyShareUrl()" class="px-3 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium transition shrink-0">
+                    Copiar
                 </button>
             </div>
-            <div id="copySuccessMsg" class="hidden text-center text-xs text-emerald-600 font-medium">
+            <p id="shareCopyAlert" class="hidden text-[11px] text-emerald-600 font-medium text-center">
                 ¡Enlace copiado al portapapeles!
-            </div>
+            </p>
         </div>
     </div>
 </div>
 
-<!-- Modal: Nuevo / Editar Pedido (Formulario Operativo) -->
-<div id="orderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
-        <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center shrink-0">
-            <h3 id="orderModalTitle" class="font-bold text-sm flex items-center gap-2">
-                <i data-lucide="plus-circle" class="w-4 h-4 text-brand-400"></i>
-                <span>Registrar Nuevo Pedido / Recepción</span>
+<!-- Modal: Agregar / Editar Pedido -->
+<div id="newOrderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200 transform transition-all max-h-[90vh] overflow-y-auto">
+        <div class="bg-slate-900 px-6 py-4 text-white flex justify-between items-center sticky top-0 z-10">
+            <h3 id="modalTitle" class="font-bold text-base flex items-center gap-2">
+                <i data-lucide="clipboard-plus" class="w-5 h-5 text-brand-500"></i>
+                <span>Registrar Nuevo Pedido / Planificación</span>
             </h3>
-            <button onclick="closeModal('orderModal')" class="text-slate-400 hover:text-white transition">
-                <i data-lucide="x" class="w-4 h-4"></i>
+            <button onclick="closeModal('newOrderModal')" class="text-slate-400 hover:text-white transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <form id="orderForm" onsubmit="saveOrderForm(event)" class="p-5 space-y-4 overflow-y-auto flex-grow custom-scrollbar">
-            <input type="hidden" id="editDocId" value="">
-            <input type="hidden" id="editLocalIndex" value="">
+        
+        <form id="orderForm" onsubmit="saveOrder(event)" class="p-6 space-y-4">
+            <input type="hidden" id="editIndex" value="-1">
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Operación *</label>
-                    <select id="orderType" required onchange="onOrderTypeChange()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
-                        <option value="DESPACHO">Despacho (Carga)</option>
-                        <option value="RECEPCION">Recepción (Descarga)</option>
-                    </select>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Código / ID Pedido *</label>
+                    <input type="text" id="orderId" required placeholder="Ej: DESP-1092" 
+                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 </div>
                 <div>
-                    <label id="clientProviderLabel" class="block text-xs font-semibold text-slate-700 mb-1">Cliente *</label>
-                    <input type="text" id="clientName" required placeholder="Ej: Supermercados Central" 
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">N° Orden de Compra (OC / PO) *</label>
+                    <input type="text" id="poNumber" required placeholder="Ej: OC-2026-99" 
                         class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">N° de Orden de Compra (OC / PO) *</label>
-                    <input type="text" id="orderPo" required placeholder="Ej: OC-98421" 
-                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Operación *</label>
+                    <select id="orderType" onchange="handleTypeChange()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <option value="DESPACHO">DESPACHO (Carga - Salida)</option>
+                        <option value="RECEPCION">RECEPCIÓN (Descarga - Entrada)</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Muelle Asignado *</label>
-                    <select id="orderMuelle" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                        <option value="Muelle 1">Muelle 1</option>
-                        <option value="Muelle 2">Muelle 2</option>
-                        <option value="Muelle 3">Muelle 3</option>
-                        <option value="Muelle 4">Muelle 4</option>
-                        <option value="Muelle 5">Muelle 5</option>
+                    <select id="dockNumber" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <option value="Muelle 1 (Carga)">Muelle 1 (Carga)</option>
+                        <option value="Muelle 2 (Descarga)">Muelle 2 (Descarga)</option>
+                        <option value="Muelle 3 (Mixto)">Muelle 3 (Mixto)</option>
+                        <option value="Muelle 4 (Especial)">Muelle 4 (Especial)</option>
                     </select>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha Programada *</label>
-                    <input type="date" id="orderDate" required 
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Cliente / Proveedor *</label>
+                    <input type="text" id="clientName" required placeholder="Ej: Distribuidora Central C.A." 
                         class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Hora Programada *</label>
-                    <input type="time" id="orderTime" required 
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Chófer y Placa</label>
+                    <input type="text" id="driverInfo" placeholder="Ej: Juan Delgado (A21-XX)" 
                         class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Chófer / Transportista *</label>
-                    <input type="text" id="orderDriver" required placeholder="Ej: Pedro Pérez" 
-                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                </div>
+            <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Cantidad de SKUs Solicitados *</label>
-                    <input type="number" id="orderSkus" required min="1" placeholder="Ej: 15" value="10"
-                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                </div>
-            </div>
-
-            <div id="receptionOriginContainer" class="hidden">
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Origen de la Recepción</label>
-                <select id="orderOrigin" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
-                    <option value="NACIONAL">Nacional</option>
-                    <option value="IMPORTACION">Importación</option>
-                </select>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1" id="operatorLabel">Picker Asignado</label>
-                    <input type="text" id="orderPicker" placeholder="Ej: Roberto Gómez" 
-                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    <input type="number" id="skuCount" min="1" value="5" required placeholder="Ej: 12" 
+                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none font-semibold text-brand-700">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Estatus del Pedido *</label>
-                    <select id="orderStatus" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
-                        <option value="EN_ESPERA">En Espera</option>
-                        <option value="EN_PREPARACION">En Proceso / Preparación</option>
-                        <option value="LISTO_ATENDIDO">Atendidos / Completados</option>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nivel de Prioridad</label>
+                    <select id="orderPriority" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Crítica">Crítica</option>
+                        <option value="Baja">Baja</option>
                     </select>
                 </div>
             </div>
 
-            <div class="border-t border-slate-200 pt-3 grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-[11px] font-medium text-slate-600 mb-1">T. Respuesta (min)</label>
-                    <input type="number" id="orderRespTime" min="0" placeholder="Ej: 15" value="10"
-                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Origen (Recepciones)</label>
+                    <select id="receptionOrigin" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-slate-100" disabled>
+                        <option value="N/A">N/A (Despacho)</option>
+                        <option value="NACIONAL">Nacional</option>
+                        <option value="IMPORTADA">Importada</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-medium text-slate-600 mb-1">T. Preparación (min)</label>
-                    <input type="number" id="orderPrepTime" min="0" placeholder="Ej: 30" value="25"
-                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-medium text-slate-600 mb-1">T. Descarga (min)</label>
-                    <input type="number" id="orderUnloadTime" min="0" placeholder="Ej: 45" value="40"
-                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha y Hora Programada *</label>
+                    <input type="datetime-local" id="schedDateTime" required 
+                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 </div>
             </div>
 
-            <div class="pt-2 flex justify-end space-x-2 shrink-0">
-                <button type="button" onclick="closeModal('orderModal')" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">
+            <!-- Dynamic Picker or Receptor Field -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label id="pickerReceptorLabel" class="block text-xs font-semibold text-slate-700 mb-1">Picker Asignado / Recolector *</label>
+                    <input type="text" id="pickerName" required placeholder="Ej: Manuel Silva" 
+                        class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">T. Respuesta (min)</label>
+                    <input type="number" id="responseTime" min="0" value="0" readonly placeholder="Auto"
+                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-100 text-slate-500 focus:outline-none cursor-not-allowed" title="Calculado automáticamente al cambiar estatus a En Proceso">
+                </div>
+                <!-- Time prep vs Time unload -->
+                <div id="prepTimeContainer">
+                    <label id="prepTimeLabel" class="block text-[11px] font-semibold text-slate-700 mb-1">T. Prep (min)</label>
+                    <input type="number" id="prepTime" min="0" value="0" readonly placeholder="Auto"
+                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-100 text-slate-500 focus:outline-none cursor-not-allowed" title="Calculado automáticamente al cambiar estatus a Atendido">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Estatus *</label>
+                    <select id="orderStatus" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <option value="EN_ESPERA">EN ESPERA</option>
+                        <option value="EN_PREPARACION">EN PROCESO</option>
+                        <option value="LISTO_ATENDIDO">ATENDIDO</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
+                <button type="button" onclick="closeModal('newOrderModal')" class="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
                     Cancelar
                 </button>
-                <button type="submit" class="px-4 py-1.5 text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-lg shadow-sm">
-                    Guardar Pedido
+                <button type="submit" class="px-5 py-2 text-xs font-medium text-white bg-brand-600 hover:bg-brand-500 rounded-lg shadow-sm transition">
+                    Guardar Registro
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Main Application Script Logic -->
 <script>
-    // Global initial dataset (fallback & seed data)
-    window.initialOrdersData = [
-        {
-            docId: "ORD-101",
-            type: "DESPACHO",
-            po: "OC-88201",
-            client: "Supermercados Central",
-            muelle: "Muelle 1",
-            date: "2026-10-10",
-            time: "08:30",
-            driver: "Carlos Silva",
-            skus: 18,
-            origin: "NACIONAL",
-            picker: "Roberto Gómez",
-            status: "LISTO_ATENDIDO",
-            respTime: 12,
-            prepTime: 35,
-            unloadTime: 0
-        },
-        {
-            docId: "ORD-102",
-            type: "RECEPCION",
-            po: "IMP-4920",
-            client: "Global Import C.A.",
-            muelle: "Muelle 3",
-            date: "2026-10-10",
-            time: "09:15",
-            driver: "Miguel Ángel",
-            skus: 42,
-            origin: "IMPORTACION",
-            picker: "Luis Mendoza",
-            status: "LISTO_ATENDIDO",
-            respTime: 8,
-            prepTime: 0,
-            unloadTime: 45
-        },
-        {
-            docId: "ORD-103",
-            type: "DESPACHO",
-            po: "OC-88202",
-            client: "Hipermercados Líder",
-            muelle: "Muelle 2",
-            date: "2026-10-10",
-            time: "10:00",
-            driver: "José Rivas",
-            skus: 25,
-            origin: "NACIONAL",
-            picker: "Roberto Gómez",
-            status: "EN_PREPARACION",
-            respTime: 15,
-            prepTime: 40,
-            unloadTime: 0
-        },
-        {
-            docId: "ORD-104",
-            type: "RECEPCION",
-            po: "OC-NAC-991",
-            client: "Distribuidora Andina",
-            muelle: "Muelle 4",
-            date: "2026-10-11",
-            time: "11:30",
-            driver: "Ramón Valdés",
-            skus: 12,
-            origin: "NACIONAL",
-            picker: "Ana Torres",
-            status: "EN_ESPERA",
-            respTime: 0,
-            prepTime: 0,
-            unloadTime: 0
-        },
-        {
-            docId: "ORD-105",
-            type: "DESPACHO",
-            po: "OC-88203",
-            client: "Supermercados Central",
-            muelle: "Muelle 1",
-            date: "2026-10-11",
-            time: "14:00",
-            driver: "Ernesto Soto",
-            skus: 30,
-            origin: "NACIONAL",
-            picker: "Roberto Gómez",
-            status: "EN_ESPERA",
-            respTime: 0,
-            prepTime: 0,
-            unloadTime: 0
-        },
-        {
-            docId: "ORD-106",
-            type: "DESPACHO",
-            po: "OC-77312",
-            client: "Farmacias Unidas",
-            muelle: "Muelle 5",
-            date: "2026-10-12",
-            time: "08:00",
-            driver: "Luis Colmenares",
-            skus: 15,
-            origin: "NACIONAL",
-            picker: "Ana Torres",
-            status: "EN_ESPERA",
-            respTime: 0,
-            prepTime: 0,
-            unloadTime: 0
-        }
-    ];
+// Core Application State
+let currentRole = 'LECTOR'; // 'LECTOR', 'SUPERVISOR', 'ADMINISTRADOR'
+let activeTab = 'dashboard';
+let calendarCurrentDate = new Date(2026, 9, 1); // Octubre 2026
+let selectedDayForPlan = null;
 
-    if (!window.orders) {
-        window.orders = [...window.initialOrdersData];
+// Initial Default Orders Data with skuCount added
+window.initialOrdersData = [
+    {
+        id: "DESP-1001",
+        poNumber: "OC-2026-101",
+        type: "DESPACHO",
+        dock: "Muelle 1 (Carga)",
+        client: "Distribuidora Central C.A.",
+        driver: "Juan Delgado (A21-XX)",
+        origin: "N/A",
+        skuCount: 12,
+        schedDateTime: "2026-10-01T08:30",
+        picker: "Manuel Silva",
+        receptor: "",
+        priority: "Alta",
+        responseTime: 12,
+        prepTime: 25,
+        unloadTime: 0,
+        status: "LISTO_ATENDIDO",
+        timeCreated: "2026-10-01T08:00:00.000Z",
+        timeInProcess: "2026-10-01T08:12:00.000Z",
+        timeCompleted: "2026-10-01T08:37:00.000Z"
+    },
+    {
+        id: "RECP-2001",
+        poNumber: "OC-2026-204",
+        type: "RECEPCION",
+        dock: "Muelle 2 (Descarga)",
+        client: "Importadora Logística Global",
+        driver: "Carlos Pérez (B88-YY)",
+        origin: "IMPORTADA",
+        skuCount: 24,
+        schedDateTime: "2026-10-01T10:00",
+        picker: "",
+        receptor: "Roberto Gómez",
+        priority: "Crítica",
+        responseTime: 18,
+        prepTime: 0,
+        unloadTime: 35,
+        status: "LISTO_ATENDIDO",
+        timeCreated: "2026-10-01T09:30:00.000Z",
+        timeInProcess: "2026-10-01T09:48:00.000Z",
+        timeCompleted: "2026-10-01T10:23:00.000Z"
+    },
+    {
+        id: "DESP-1002",
+        poNumber: "OC-2026-105",
+        type: "DESPACHO",
+        dock: "Muelle 1 (Carga)",
+        client: "Mercado San José",
+        driver: "Pedro Ramírez (C44-ZZ)",
+        origin: "N/A",
+        skuCount: 8,
+        schedDateTime: "2026-10-02T11:15",
+        picker: "Carlos Mendoza",
+        receptor: "",
+        priority: "Media",
+        responseTime: 15,
+        prepTime: 30,
+        unloadTime: 0,
+        status: "LISTO_ATENDIDO",
+        timeCreated: "2026-10-02T10:30:00.000Z",
+        timeInProcess: "2026-10-02T10:45:00.000Z",
+        timeCompleted: "2026-10-02T11:15:00.000Z"
+    },
+    {
+        id: "RECP-2002",
+        poNumber: "OC-2026-208",
+        type: "RECEPCION",
+        dock: "Muelle 2 (Descarga)",
+        client: "Alimentos del Norte C.A.",
+        driver: "Luis Torres (D99-WW)",
+        origin: "NACIONAL",
+        skuCount: 15,
+        schedDateTime: "2026-10-03T09:00",
+        picker: "",
+        receptor: "Andrés Blanco",
+        priority: "Alta",
+        responseTime: 10,
+        prepTime: 0,
+        unloadTime: 28,
+        status: "LISTO_ATENDIDO",
+        timeCreated: "2026-10-03T08:20:00.000Z",
+        timeInProcess: "2026-10-03T08:30:00.000Z",
+        timeCompleted: "2026-10-03T08:58:00.000Z"
+    },
+    {
+        id: "DESP-1003",
+        poNumber: "OC-2026-112",
+        type: "DESPACHO",
+        dock: "Muelle 3 (Mixto)",
+        client: "Cervecería Nacional",
+        driver: "Marcos Medina (E12-AA)",
+        origin: "N/A",
+        skuCount: 19,
+        schedDateTime: "2026-10-05T08:00",
+        picker: "Manuel Silva",
+        receptor: "",
+        priority: "Crítica",
+        responseTime: 8,
+        prepTime: 20,
+        unloadTime: 0,
+        status: "EN_PREPARACION",
+        timeCreated: "2026-10-05T07:40:00.000Z",
+        timeInProcess: "2026-10-05T07:48:00.000Z",
+        timeCompleted: null
+    },
+    {
+        id: "RECP-2003",
+        poNumber: "OC-2026-215",
+        type: "RECEPCION",
+        dock: "Muelle 2 (Descarga)",
+        client: "Suministros Industriales",
+        driver: "Hernán López (F33-BB)",
+        origin: "IMPORTADA",
+        skuCount: 30,
+        schedDateTime: "2026-10-05T14:30",
+        picker: "",
+        receptor: "Roberto Gómez",
+        priority: "Media",
+        responseTime: 0,
+        prepTime: 0,
+        unloadTime: 0,
+        status: "EN_ESPERA",
+        timeCreated: "2026-10-05T14:00:00.000Z",
+        timeInProcess: null,
+        timeCompleted: null
+    },
+    {
+        id: "DESP-1004",
+        poNumber: "OC-2026-118",
+        type: "DESPACHO",
+        dock: "Muelle 1 (Carga)",
+        client: "Comercializadora Sur",
+        driver: "José Rivas (G55-CC)",
+        origin: "N/A",
+        skuCount: 6,
+        schedDateTime: "2026-10-05T16:00",
+        picker: "Carlos Mendoza",
+        receptor: "",
+        priority: "Baja",
+        responseTime: 0,
+        prepTime: 0,
+        unloadTime: 0,
+        status: "EN_ESPERA",
+        timeCreated: "2026-10-05T15:30:00.000Z",
+        timeInProcess: null,
+        timeCompleted: null
+    }
+];
+
+window.orders = [...window.initialOrdersData];
+
+// System Users Directory
+let users = [
+    { id: "U1", name: "Carlos Mendoza", username: "cmendoza", role: "ADMINISTRADOR", pin: "1234", status: "ACTIVO", lastAccess: "Hace 5 min" },
+    { id: "U2", name: "Manuel Silva", username: "msilva", role: "SUPERVISOR", pin: "2222", status: "ACTIVO", lastAccess: "Hace 2 horas" },
+    { id: "U3", name: "Roberto Gómez", username: "rgomez", role: "OPERADOR", pin: "3333", status: "ACTIVO", lastAccess: "Ayer" },
+    { id: "U4", name: "Andrés Blanco", username: "ablanco", role: "OPERADOR", pin: "4444", status: "ACTIVO", lastAccess: "Hace 1 día" },
+    { id: "U5", name: "Elena Rostova", username: "erostova", role: "LECTOR", pin: "0000", status: "ACTIVO", lastAccess: "Hace 10 min" }
+];
+
+// Chart Instances
+let dateChartInstance = null;
+let pickerChartInstance = null;
+let clientChartInstance = null;
+let clientSkuChartInstance = null;
+
+window.sortOrdersChronologically = function() {
+    if (!window.orders || !Array.isArray(window.orders)) return;
+    window.orders.sort((a, b) => {
+        const dateA = new Date(a.schedDateTime || a.timeCreated || 0).getTime();
+        const dateB = new Date(b.schedDateTime || b.timeCreated || 0).getTime();
+        return dateB - dateA; // Cronológico descendente: del más reciente al más antiguo
+    });
+};
+
+window.onload = function() {
+    lucide.createIcons();
+    initSystemData();
+    window.sortOrdersChronologically();
+    updateUIForRole();
+    renderAllViews();
+};
+
+window.renderAllViews = function() {
+    window.sortOrdersChronologically();
+    calculateMetrics();
+    applyFiltersAndRender();
+    renderCalendar();
+    renderAccessControl();
+};
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('hidden');
+}
+
+function initSystemData() {
+    const now = new Date();
+    const formatted = now.toISOString().slice(0,16);
+    const dateInput = document.getElementById('schedDateTime');
+    if (dateInput) dateInput.value = formatted;
+}
+
+function switchView(tab) {
+    activeTab = tab;
+    
+    document.getElementById('viewDashboard').classList.add('hidden');
+    document.getElementById('viewCalendar').classList.add('hidden');
+    document.getElementById('viewAccessControl').classList.add('hidden');
+
+    const tabDashboardBtn = document.getElementById('tabDashboardBtn');
+    const tabCalendarBtn = document.getElementById('tabCalendarBtn');
+    const tabAccessBtn = document.getElementById('tabAccessBtn');
+
+    tabDashboardBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+    tabCalendarBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+    tabAccessBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+
+    if (tab === 'dashboard') {
+        document.getElementById('viewDashboard').classList.remove('hidden');
+        tabDashboardBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
+        applyFiltersAndRender();
+    } else if (tab === 'calendar') {
+        document.getElementById('viewCalendar').classList.remove('hidden');
+        tabCalendarBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
+        renderCalendar();
+    } else if (tab === 'access') {
+        document.getElementById('viewAccessControl').classList.remove('hidden');
+        tabAccessBtn.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-indigo-600 text-white shadow-sm";
+        renderAccessControl();
+    }
+}
+
+function updateUIForRole() {
+    const roleBadgeText = document.getElementById('roleBadgeText');
+    const authBtnText = document.getElementById('authBtnText');
+    const authBtnIcon = document.getElementById('authBtnIcon');
+    const readOnlyBanner = document.getElementById('readOnlyBanner');
+
+    if (currentRole === 'LECTOR') {
+        roleBadgeText.textContent = 'Modo Lector';
+        authBtnText.textContent = 'Desbloquear Editor';
+        authBtnIcon.setAttribute('data-lucide', 'lock');
+        readOnlyBanner.classList.remove('hidden');
+    } else if (currentRole === 'SUPERVISOR') {
+        roleBadgeText.textContent = 'Supervisor';
+        authBtnText.textContent = 'Bloquear / Salir';
+        authBtnIcon.setAttribute('data-lucide', 'unlock');
+        readOnlyBanner.classList.add('hidden');
+    } else if (currentRole === 'ADMINISTRADOR') {
+        roleBadgeText.textContent = 'Administrador';
+        authBtnText.textContent = 'Bloquear / Salir';
+        authBtnIcon.setAttribute('data-lucide', 'shield-check');
+        readOnlyBanner.classList.add('hidden');
+    }
+    lucide.createIcons();
+    applyFiltersAndRender();
+}
+
+function toggleAuthModal() {
+    if (currentRole !== 'LECTOR') {
+        currentRole = 'LECTOR';
+        updateUIForRole();
+    } else {
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinError').classList.add('hidden');
+        openModal('authModal');
+    }
+}
+
+function handleAuthSubmit(e) {
+    e.preventDefault();
+    const pin = document.getElementById('pinInput').value;
+    const foundUser = users.find(u => u.pin === pin && u.status === 'ACTIVO');
+
+    if (foundUser) {
+        currentRole = foundUser.role;
+        closeModal('authModal');
+        updateUIForRole();
+    } else {
+        document.getElementById('pinError').classList.remove('hidden');
+    }
+}
+
+function handleTypeChange() {
+    const typeSelect = document.getElementById('orderType');
+    const originSelect = document.getElementById('receptionOrigin');
+    const pickerReceptorLabel = document.getElementById('pickerReceptorLabel');
+    const pickerInput = document.getElementById('pickerName');
+    const prepTimeLabel = document.getElementById('prepTimeLabel');
+
+    if (typeSelect.value === 'RECEPCION') {
+        originSelect.disabled = false;
+        originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-white";
+        if (originSelect.value === 'N/A') originSelect.value = 'NACIONAL';
+
+        pickerReceptorLabel.textContent = "Receptor Asignado / Personal de Recepción *";
+        pickerInput.placeholder = "Ej: Roberto Gómez";
+
+        prepTimeLabel.textContent = "T. Descarga (min)";
+        prepTimeLabel.className = "block text-[11px] font-semibold text-emerald-800 mb-1";
+    } else {
+        originSelect.value = 'N/A';
+        originSelect.disabled = true;
+        originSelect.className = "w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none bg-slate-100";
+
+        pickerReceptorLabel.textContent = "Picker Asignado / Recolector *";
+        pickerInput.placeholder = "Ej: Manuel Silva";
+
+        prepTimeLabel.textContent = "T. Prep (min)";
+        prepTimeLabel.className = "block text-[11px] font-semibold text-slate-700 mb-1";
+    }
+}
+
+function handleNewOrderClick() {
+    if (currentRole === 'LECTOR') {
+        toggleAuthModal();
+        return;
+    }
+    openNewOrderModal();
+}
+
+function openNewOrderModal(editIdx = -1) {
+    document.getElementById('editIndex').value = editIdx;
+    const modalTitle = document.getElementById('modalTitle');
+    
+    if (editIdx >= 0) {
+        modalTitle.innerHTML = `<i data-lucide="edit-3" class="w-5 h-5 text-brand-500"></i><span>Editar Registro de Pedido</span>`;
+        const o = window.orders[editIdx];
+        document.getElementById('orderId').value = o.id;
+        document.getElementById('poNumber').value = o.poNumber;
+        document.getElementById('orderType').value = o.type;
+        handleTypeChange();
+        document.getElementById('dockNumber').value = o.dock;
+        document.getElementById('clientName').value = o.client;
+        document.getElementById('driverInfo').value = o.driver;
+        document.getElementById('skuCount').value = o.skuCount || 5;
+        document.getElementById('receptionOrigin').value = o.origin;
+        document.getElementById('schedDateTime').value = o.schedDateTime;
+        
+        document.getElementById('pickerName').value = o.type === 'RECEPCION' ? o.receptor : o.picker;
+        document.getElementById('orderPriority').value = o.priority;
+        document.getElementById('responseTime').value = o.responseTime || 0;
+        document.getElementById('prepTime').value = o.type === 'RECEPCION' ? (o.unloadTime || o.prepTime || 0) : (o.prepTime || 0);
+        document.getElementById('orderStatus').value = o.status;
+    } else {
+        modalTitle.innerHTML = `<i data-lucide="clipboard-plus" class="w-5 h-5 text-brand-500"></i><span>Registrar Nuevo Pedido / Planificación</span>`;
+        document.getElementById('orderForm').reset();
+        document.getElementById('editIndex').value = -1;
+        document.getElementById('orderId').value = "ORD-" + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('poNumber').value = "OC-2026-" + Math.floor(100 + Math.random() * 900);
+        document.getElementById('skuCount').value = 10;
+        document.getElementById('responseTime').value = 0;
+        document.getElementById('prepTime').value = 0;
+        initSystemData();
+        handleTypeChange();
+    }
+    lucide.createIcons();
+    openModal('newOrderModal');
+}
+
+async function saveOrder(e) {
+    e.preventDefault();
+    if (currentRole === 'LECTOR') return;
+
+    const idx = parseInt(document.getElementById('editIndex').value);
+    const type = document.getElementById('orderType').value;
+    const assignedPerson = document.getElementById('pickerName').value;
+    const newStatus = document.getElementById('orderStatus').value;
+    const nowISO = new Date().toISOString();
+
+    let existingOrder = (idx >= 0 && idx < window.orders.length) ? window.orders[idx] : null;
+
+    let timeCreated = existingOrder ? existingOrder.timeCreated : nowISO;
+    let timeInProcess = existingOrder ? existingOrder.timeInProcess : null;
+    let timeCompleted = existingOrder ? existingOrder.timeCompleted : null;
+
+    let responseTime = existingOrder ? existingOrder.responseTime : 0;
+    let prepTimeVal = existingOrder ? (type === 'DESPACHO' ? existingOrder.prepTime : existingOrder.unloadTime) : 0;
+
+    if (newStatus === 'EN_PREPARACION') {
+        if (!timeInProcess) {
+            timeInProcess = nowISO;
+        }
+        if (timeCreated) {
+            const diffMs = new Date(timeInProcess) - new Date(timeCreated);
+            responseTime = Math.max(0, Math.round(diffMs / (1000 * 60)));
+        }
+    } 
+    else if (newStatus === 'LISTO_ATENDIDO') {
+        if (!timeInProcess) {
+            timeInProcess = nowISO;
+            if (timeCreated) {
+                const diffMsResp = new Date(timeInProcess) - new Date(timeCreated);
+                responseTime = Math.max(0, Math.round(diffMsResp / (1000 * 60)));
+            }
+        }
+        if (!timeCompleted) {
+            timeCompleted = nowISO;
+        }
+        if (timeInProcess) {
+            const diffMsPrep = new Date(timeCompleted) - new Date(timeInProcess);
+            prepTimeVal = Math.max(0, Math.round(diffMsPrep / (1000 * 60)));
+        }
     }
 
-    // Users Database in LocalStorage / Memory
-    window.usersData = JSON.parse(localStorage.getItem('logistics_users')) || [
-        { id: "U-1", name: "Administrador General", username: "admin", pin: "1234", role: "ADMINISTRADOR", status: "ACTIVO", lastLogin: "Hoy, 10:30 AM" },
-        { id: "U-2", name: "Supervisor de Patio", username: "supervisor", pin: "5678", role: "SUPERVISOR", status: "ACTIVO", lastLogin: "Ayer, 16:45 PM" },
-        { id: "U-3", name: "Operador / Picker", username: "operador", pin: "0000", role: "OPERADOR", status: "ACTIVO", lastLogin: "Hace 3 días" }
-    ];
+    const orderData = {
+        id: document.getElementById('orderId').value,
+        poNumber: document.getElementById('poNumber').value,
+        type: type,
+        dock: document.getElementById('dockNumber').value,
+        client: document.getElementById('clientName').value,
+        driver: document.getElementById('driverInfo').value,
+        skuCount: parseInt(document.getElementById('skuCount').value) || 0,
+        origin: type === 'RECEPCION' ? document.getElementById('receptionOrigin').value : 'N/A',
+        schedDateTime: document.getElementById('schedDateTime').value,
+        picker: type === 'DESPACHO' ? assignedPerson : '',
+        receptor: type === 'RECEPCION' ? assignedPerson : '',
+        priority: document.getElementById('orderPriority').value,
+        responseTime: responseTime,
+        prepTime: type === 'DESPACHO' ? prepTimeVal : 0,
+        unloadTime: type === 'RECEPCION' ? prepTimeVal : 0,
+        status: newStatus,
+        timeCreated: timeCreated,
+        timeInProcess: timeInProcess,
+        timeCompleted: timeCompleted
+    };
 
-    // Current Session State
-    window.currentRole = localStorage.getItem('logistics_current_role') || 'LECTOR'; // LECTOR, OPERADOR, SUPERVISOR, ADMINISTRADOR
-    window.currentUsername = localStorage.getItem('logistics_current_user') || 'Invitado';
+    try {
+        const docId = existingOrder ? existingOrder.docId : null;
+        if (window.saveOrderToFirebase) {
+            await window.saveOrderToFirebase(orderData, docId, idx);
+        } else {
+            if (idx >= 0) window.orders[idx] = { ...existingOrder, ...orderData };
+            else window.orders.push(orderData);
+            window.sortOrdersChronologically();
+            window.renderAllViews();
+        }
+        closeModal('newOrderModal');
+        if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
+    } catch (err) {
+        console.error("Error guardando pedido:", err);
+    }
+}
 
-    // Charts instances references
-    let dateChartInstance = null;
-    let pickerChartInstance = null;
-    let clientChartInstance = null;
-    let skuPerClientChartInstance = null;
+async function deleteOrder(idx) {
+    if (currentRole === 'LECTOR') {
+        toggleAuthModal();
+        return;
+    }
+    if (confirm('¿Está seguro de eliminar esta orden?')) {
+        try {
+            const target = window.orders[idx];
+            if (target && window.deleteOrderFromFirebase) {
+                await window.deleteOrderFromFirebase(target.docId, idx);
+            } else {
+                window.orders.splice(idx, 1);
+                window.renderAllViews();
+            }
+            if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
+        } catch (err) {
+            console.error("Error al eliminar orden:", err);
+        }
+    }
+}
 
-    // Calendar state
-    let calendarCurrentDate = new Date(2026, 9, 1); // Octubre 2026
-    let selectedCalendarDateStr = "";
+function calculateMetrics() {
+    let totalResp = 0, countResp = 0;
+    let totalPrep = 0, countPrep = 0;
+    let totalUnload = 0, countUnload = 0;
+    let served = 0, pending = 0;
+    let national = 0, imported = 0;
+    let totalSkuSum = 0;
 
-    // Initialization on load
-    window.addEventListener('DOMContentLoaded', () => {
-        lucide.createIcons();
-        updateRoleUI();
-        sortOrdersChronologically();
-        renderAllViews();
-        setupShareUrl();
-        
-        // Set default filter dates for today/current month
-        const todayStr = new Date().toISOString().split('T')[0];
-        document.getElementById('dateFromFilter').value = "";
-        document.getElementById('dateToFilter').value = "";
+    const ordersList = getFilteredOrders();
+
+    ordersList.forEach(o => {
+        if (o.status === 'LISTO_ATENDIDO') served++;
+        else pending++;
+
+        if (o.type === 'RECEPCION') {
+            if (o.origin === 'NACIONAL') national++;
+            if (o.origin === 'IMPORTADA') imported++;
+            if (o.unloadTime > 0) {
+                totalUnload += o.unloadTime;
+                countUnload++;
+            }
+        }
+
+        if (o.responseTime > 0) {
+            totalResp += o.responseTime;
+            countResp++;
+        }
+
+        if (o.type === 'DESPACHO' && o.prepTime > 0) {
+            totalPrep += o.prepTime;
+            countPrep++;
+        }
+
+        totalSkuSum += (o.skuCount || 0);
     });
 
-    function sortOrdersChronologically() {
-        if (!window.orders) return;
-        window.orders.sort((a, b) => {
-            const dateA = new Date(`${a.date || '2026-01-01'}T${a.time || '00:00'}`);
-            const dateB = new Date(`${b.date || '2026-01-01'}T${b.time || '00:00'}`);
-            return dateB - dateA; // Más reciente primero
-        });
-    }
+    const avgResp = countResp ? Math.round(totalResp / countResp) : 0;
+    const avgPrep = countPrep ? Math.round(totalPrep / countPrep) : 0;
+    const avgUnload = countUnload ? Math.round(totalUnload / countUnload) : 0;
+    const totalOrders = ordersList.length;
+    const avgSkuGeneral = totalOrders ? (totalSkuSum / totalOrders).toFixed(1) : '0';
+    const otifRate = totalOrders ? Math.round((served / totalOrders) * 100) : 0;
 
-    function renderAllViews() {
-        renderDashboardMetrics();
-        renderCharts();
-        applyFiltersAndRender();
-        renderCalendar();
-        renderUsersTable();
-    }
+    document.getElementById('kpiAvgResponse').textContent = `${avgResp} min`;
+    document.getElementById('kpiAvgPrep').textContent = `${avgPrep} min`;
+    document.getElementById('kpiAvgUnload').textContent = `${avgUnload} min`;
+    document.getElementById('kpiAvgSkuGeneral').textContent = avgSkuGeneral;
+    
+    document.getElementById('kpiServed').textContent = served;
+    document.getElementById('kpiPending').textContent = pending;
+    
+    const servedPct = totalOrders ? (served / totalOrders) * 100 : 0;
+    document.getElementById('kpiProgressBarServed').style.width = `${servedPct}%`;
+    document.getElementById('kpiProgressBarPending').style.width = `${100 - servedPct}%`;
 
-    // View Switcher logic
-    function switchView(viewName) {
-        const viewDashboard = document.getElementById('viewDashboard');
-        const viewCalendar = document.getElementById('viewCalendar');
-        const viewAccessControl = document.getElementById('viewAccessControl');
+    document.getElementById('kpiNationalRecp').textContent = national;
+    document.getElementById('kpiImportRecp').textContent = imported;
+    const recpTotal = national + imported || 1;
+    document.getElementById('kpiBarNational').style.width = `${(national / recpTotal) * 100}%`;
+    document.getElementById('kpiBarImport').style.width = `${(imported / recpTotal) * 100}%`;
 
-        const btnDash = document.getElementById('tabDashboardBtn');
-        const btnCal = document.getElementById('tabCalendarBtn');
-        const btnAccess = document.getElementById('tabAccessBtn');
+    document.getElementById('kpiOTIF').textContent = `${otifRate}%`;
+    document.getElementById('totalOrdersCount').textContent = `${totalOrders} Pedidos`;
+}
 
-        // Reset all tabs
-        viewDashboard.classList.add('hidden');
-        viewCalendar.classList.add('hidden');
-        viewAccessControl.classList.add('hidden');
+function getFilteredOrders() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return window.orders || [];
 
-        btnDash.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
-        btnCal.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
-        btnAccess.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200";
+    const search = searchInput.value.toLowerCase().trim();
+    const type = document.getElementById('typeFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    const dateFrom = document.getElementById('dateFromFilter').value;
+    const dateTo = document.getElementById('dateToFilter').value;
 
-        if (viewName === 'dashboard') {
-            viewDashboard.classList.remove('hidden');
-            btnDash.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
-            renderCharts(); // Re-render charts to fix canvas sizing
-        } else if (viewName === 'calendar') {
-            viewCalendar.classList.remove('hidden');
-            btnCal.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-brand-600 text-white shadow-sm";
-            renderCalendar();
-        } else if (viewName === 'access') {
-            viewAccessControl.classList.remove('hidden');
-            btnAccess.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition bg-indigo-600 text-white shadow-sm";
-            renderUsersTable();
+    const ordersList = window.orders || [];
+
+    const filtered = ordersList.filter((o) => {
+        const matchesSearch = !search ||
+            (o.id && o.id.toLowerCase().includes(search)) ||
+            (o.poNumber && o.poNumber.toLowerCase().includes(search)) ||
+            (o.client && o.client.toLowerCase().includes(search)) ||
+            (o.driver && o.driver.toLowerCase().includes(search)) ||
+            (o.picker && o.picker.toLowerCase().includes(search)) ||
+            (o.receptor && o.receptor.toLowerCase().includes(search));
+
+        const matchesType = (type === 'ALL') || (o.type === type);
+        const matchesStatus = (status === 'ALL') || (o.status === status);
+
+        let matchesDate = true;
+        if (o.schedDateTime) {
+            const orderDate = o.schedDateTime.split('T')[0];
+            if (dateFrom && orderDate < dateFrom) matchesDate = false;
+            if (dateTo && orderDate > dateTo) matchesDate = false;
         }
-        lucide.createIcons();
-    }
 
-    // Role & Auth Management
-    function toggleAuthModal() {
-        if (window.currentRole !== 'LECTOR') {
-            // Logout
-            window.currentRole = 'LECTOR';
-            window.currentUsername = 'Invitado';
-            localStorage.setItem('logistics_current_role', 'LECTOR');
-            localStorage.setItem('logistics_current_user', 'Invitado');
-            updateRoleUI();
-            alertCustom("Has salido del modo editor. Ahora estás en modo consulta.");
-        } else {
-            openModal('authModal');
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinError').classList.add('hidden');
-        }
-    }
+        return matchesSearch && matchesType && matchesStatus && matchesDate;
+    });
 
-    function handleAuthSubmit(event) {
-        event.preventDefault();
-        const pin = document.getElementById('pinInput').value.trim();
-        
-        const matchedUser = window.usersData.find(u => u.pin === pin && u.status === 'ACTIVO');
-        if (matchedUser) {
-            window.currentRole = matchedUser.role;
-            window.currentUsername = matchedUser.name;
-            localStorage.setItem('logistics_current_role', matchedUser.role);
-            localStorage.setItem('logistics_current_user', matchedUser.name);
-            
-            matchedUser.lastLogin = "Hace un momento";
-            localStorage.setItem('logistics_users', JSON.stringify(window.usersData));
+    // Ordenamiento cronológico descendente: del más reciente al más antiguo
+    filtered.sort((a, b) => {
+        const dateA = new Date(a.schedDateTime || a.timeCreated || 0).getTime();
+        const dateB = new Date(b.schedDateTime || b.timeCreated || 0).getTime();
+        return dateB - dateA;
+    });
 
-            closeModal('authModal');
-            updateRoleUI();
-            alertCustom(`¡Bienvenido, ${matchedUser.name}! Rol asignado: ${matchedUser.role}`);
-        } else {
-            document.getElementById('pinError').classList.remove('hidden');
-        }
-    }
+    return filtered;
+}
 
-    function updateRoleUI() {
-        const badge = document.getElementById('roleBadge');
-        const badgeText = document.getElementById('roleBadgeText');
-        const authBtnText = document.getElementById('authBtnText');
-        const authBtnIcon = document.getElementById('authBtnIcon');
-        const readOnlyBanner = document.getElementById('readOnlyBanner');
-        const newOrderBtn = document.getElementById('newOrderBtn');
+function applyFiltersAndRender() {
+    const filtered = getFilteredOrders();
 
-        const isEditor = window.currentRole !== 'LECTOR';
+    document.getElementById('tableBadgeCount').textContent = filtered.length;
+    const tbody = document.getElementById('ordersTableBody');
+    const emptyState = document.getElementById('emptyState');
 
-        if (isEditor) {
-            badge.className = "text-xs px-2.5 py-1 rounded-lg bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 flex items-center gap-1.5";
-            badgeText.textContent = `${window.currentRole}: ${window.currentUsername}`;
-            authBtnText.textContent = "Cerrar Sesión";
-            authBtnIcon.setAttribute('data-lucide', 'log-out');
-            authBtnIcon.className = "w-4 h-4 text-rose-400";
-            readOnlyBanner.classList.add('hidden');
-            newOrderBtn.classList.remove('opacity-50');
-        } else {
-            badge.className = "text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1.5";
-            badgeText.textContent = "Modo Lector";
-            authBtnText.textContent = "Desbloquear Editor";
-            authBtnIcon.setAttribute('data-lucide', 'lock');
-            authBtnIcon.className = "w-4 h-4 text-amber-400";
-            readOnlyBanner.classList.remove('hidden');
-        }
-        lucide.createIcons();
-    }
+    renderCharts();
+    calculateMetrics();
 
-    function checkEditorPermission() {
-        if (window.currentRole === 'LECTOR') {
-            toggleAuthModal();
-            return false;
-        }
-        return true;
-    }
-
-    // Dashboard Metrics Calculation
-    function renderDashboardMetrics() {
-        const orders = window.orders || [];
-        const total = orders.length;
-
-        let totalResp = 0;
-        let respCount = 0;
-        let totalPrep = 0;
-        let prepCount = 0;
-        let totalUnload = 0;
-        let unloadCount = 0;
-
-        let servedCount = 0;
-        let pendingCount = 0;
-
-        let nationalCount = 0;
-        let importCount = 0;
-
-        let totalSkusSum = 0;
-
-        orders.forEach(o => {
-            const skusVal = parseInt(o.skus) || 10;
-            totalSkusSum += skusVal;
-
-            if (o.respTime && parseInt(o.respTime) > 0) {
-                totalResp += parseInt(o.respTime);
-                respCount++;
-            }
-            if (o.type === 'DESPACHO' && o.prepTime && parseInt(o.prepTime) > 0) {
-                totalPrep += parseInt(o.prepTime);
-                prepCount++;
-            }
-            if (o.type === 'RECEPCION' && o.unloadTime && parseInt(o.unloadTime) > 0) {
-                totalUnload += parseInt(o.unloadTime);
-                unloadCount++;
-            }
-
-            if (o.status === 'LISTO_ATENDIDO') servedCount++;
-            else pendingCount++;
-
-            if (o.type === 'RECEPCION') {
-                if (o.origin === 'IMPORTACION') importCount++;
-                else nationalCount++;
-            }
-        });
-
-        const avgResp = respCount > 0 ? Math.round(totalResp / respCount) : 0;
-        const avgPrep = prepCount > 0 ? Math.round(totalPrep / prepCount) : 0;
-        const avgUnload = unloadCount > 0 ? Math.round(totalUnload / unloadCount) : 0;
-        const avgSkus = total > 0 ? (totalSkusSum / total).toFixed(1) : "0.0";
-
-        document.getElementById('kpiAvgResponse').textContent = `${avgResp} min`;
-        document.getElementById('kpiAvgPrep').textContent = `${avgPrep} min`;
-        document.getElementById('kpiAvgUnload').textContent = `${avgUnload} min`;
-        document.getElementById('kpiAvgSkus').textContent = avgSkus;
-
-        document.getElementById('kpiServed').textContent = servedCount;
-        document.getElementById('kpiPending').textContent = pendingCount;
-
-        const servedPct = total > 0 ? Math.round((servedCount / total) * 100) : 50;
-        const pendingPct = 100 - servedPct;
-        document.getElementById('kpiProgressBarServed').style.width = `${servedPct}%`;
-        document.getElementById('kpiProgressBarPending').style.width = `${pendingPct}%`;
-
-        document.getElementById('kpiNationalRecp').textContent = nationalCount;
-        document.getElementById('kpiImportRecp').textContent = importCount;
-
-        const totalRecp = nationalCount + importCount;
-        const natPct = totalRecp > 0 ? Math.round((nationalCount / totalRecp) * 100) : 50;
-        const impPct = 100 - natPct;
-        document.getElementById('kpiBarNational').style.width = `${natPct}%`;
-        document.getElementById('kpiBarImport').style.width = `${impPct}%`;
-
-        const otif = total > 0 ? Math.round((servedCount / total) * 96) : 0; // Simulador OTIF realista
-        document.getElementById('kpiOTIF').textContent = `${Math.min(otif + 4, 99)}%`;
-        document.getElementById('totalOrdersCount').textContent = `${total} Pedidos`;
-    }
-
-    // Charts Rendering (Chart.js)
-    function renderCharts() {
-        const orders = window.orders || [];
-
-        // 1. Date Performance Chart
-        const dateMap = {};
-        orders.forEach(o => {
-            const d = o.date || '2026-10-10';
-            if (!dateMap[d]) dateMap[d] = { desp: 0, recp: 0 };
-            if (o.type === 'DESPACHO') dateMap[d].desp++;
-            else dateMap[d].recp++;
-        });
-
-        const sortedDates = Object.keys(dateMap).sort();
-        const despCounts = sortedDates.map(d => dateMap[d].desp);
-        const recpCounts = sortedDates.map(d => dateMap[d].recp);
-
-        const ctxDate = document.getElementById('datePerformanceChart').getContext('2d');
-        if (dateChartInstance) dateChartInstance.destroy();
-        dateChartInstance = new Chart(ctxDate, {
-            type: 'bar',
-            data: {
-                labels: sortedDates.map(d => d.split('-').reverse().slice(0,2).join('/')),
-                datasets: [
-                    { label: 'Despachos', data: despCounts, backgroundColor: '#3b82f6', borderRadius: 4 },
-                    { label: 'Recepciones', data: recpCounts, backgroundColor: '#10b981', borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-            }
-        });
-
-        // 2. Picker / Operator Performance Chart
-        const operatorMap = {};
-        orders.forEach(o => {
-            const op = o.picker || o.driver || 'General';
-            if (!operatorMap[op]) operatorMap[op] = { carga: 0, descarga: 0 };
-            if (o.type === 'DESPACHO') operatorMap[op].carga++;
-            else operatorMap[op].descarga++;
-        });
-
-        const operators = Object.keys(operatorMap).slice(0, 6);
-        const cargaData = operators.map(op => operatorMap[op].carga);
-        const descargaData = operators.map(op => operatorMap[op].descarga);
-
-        const ctxPicker = document.getElementById('pickerPerformanceChart').getContext('2d');
-        if (pickerChartInstance) pickerChartInstance.destroy();
-        pickerChartInstance = new Chart(ctxPicker, {
-            type: 'bar',
-            data: {
-                labels: operators,
-                datasets: [
-                    { label: 'Carga', data: cargaData, backgroundColor: '#0ea5e9', borderRadius: 4 },
-                    { label: 'Descarga', data: descargaData, backgroundColor: '#10b981', borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-            }
-        });
-
-        // 3. Client Performance Chart (Ordenado de mayor a menor)
-        const clientMap = {};
-        orders.forEach(o => {
-            const cli = o.client || 'Desconocido';
-            clientMap[cli] = (clientMap[cli] || 0) + 1;
-        });
-
-        const sortedClients = Object.keys(clientMap).sort((a, b) => clientMap[b] - clientMap[a]).slice(0, 6);
-        const clientCounts = sortedClients.map(c => clientMap[c]);
-
-        const ctxClient = document.getElementById('clientPerformanceChart').getContext('2d');
-        if (clientChartInstance) clientChartInstance.destroy();
-        clientChartInstance = new Chart(ctxClient, {
-            type: 'bar',
-            data: {
-                labels: sortedClients,
-                datasets: [{
-                    label: 'Órdenes',
-                    data: clientCounts,
-                    backgroundColor: '#6366f1',
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-            }
-        });
-
-        // 4. SKU Promedio por Pedido por Cliente Chart
-        const clientSkuMap = {};
-        orders.forEach(o => {
-            const cli = o.client || 'Desconocido';
-            const skus = parseInt(o.skus) || 10;
-            if (!clientSkuMap[cli]) {
-                clientSkuMap[cli] = { totalSkus: 0, count: 0 };
-            }
-            clientSkuMap[cli].totalSkus += skus;
-            clientSkuMap[cli].count += 1;
-        });
-
-        const skuClients = Object.keys(clientSkuMap).slice(0, 6);
-        const skuAverages = skuClients.map(c => parseFloat((clientSkuMap[c].totalSkus / clientSkuMap[c].count).toFixed(1)));
-
-        const ctxSkuClient = document.getElementById('skuPerClientChart').getContext('2d');
-        if (skuPerClientChartInstance) skuPerClientChartInstance.destroy();
-        skuPerClientChartInstance = new Chart(ctxSkuClient, {
-            type: 'line',
-            data: {
-                labels: skuClients,
-                datasets: [{
-                    label: 'SKU Promedio',
-                    data: skuAverages,
-                    borderColor: '#0284c7',
-                    backgroundColor: 'rgba(2, 132, 199, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
-    }
-
-    // Filtering and Rendering Table
-    function applyFiltersAndRender() {
-        const search = document.getElementById('searchInput').value.toLowerCase();
-        const typeF = document.getElementById('typeFilter').value;
-        const statusF = document.getElementById('statusFilter').value;
-        const dateFrom = document.getElementById('dateFromFilter').value;
-        const dateTo = document.getElementById('dateToFilter').value;
-
-        const orders = window.orders || [];
-
-        const filtered = orders.filter(o => {
-            const matchSearch = (o.client && o.client.toLowerCase().includes(search)) ||
-                                (o.po && o.po.toLowerCase().includes(search)) ||
-                                (o.picker && o.picker.toLowerCase().includes(search)) ||
-                                (o.driver && o.driver.toLowerCase().includes(search)) ||
-                                (o.muelle && o.muelle.toLowerCase().includes(search));
-
-            const matchType = typeF === 'ALL' || o.type === typeF;
-            const matchStatus = statusF === 'ALL' || o.status === statusF;
-
-            let matchDate = true;
-            if (dateFrom && o.date < dateFrom) matchDate = false;
-            if (dateTo && o.date > dateTo) matchDate = false;
-
-            return matchSearch && matchType && matchStatus && matchDate;
-        });
-
-        const tbody = document.getElementById('ordersTableBody');
-        const emptyState = document.getElementById('emptyState');
-        const tableBadgeCount = document.getElementById('tableBadgeCount');
-
+    if (filtered.length === 0) {
         tbody.innerHTML = '';
-        tableBadgeCount.textContent = filtered.length;
+        emptyState.classList.remove('hidden');
+        return;
+    }
 
-        if (filtered.length === 0) {
-            emptyState.classList.remove('hidden');
-            return;
+    emptyState.classList.add('hidden');
+    let html = '';
+
+    filtered.forEach(o => {
+        const origIdx = window.orders.findIndex(item => item === o || (item.id === o.id && item.poNumber === o.poNumber));
+        const finalIdx = origIdx >= 0 ? origIdx : 0;
+
+        const isDesp = o.type === 'DESPACHO';
+        const badgeType = isDesp ? 
+            `<span class="px-2 py-0.5 rounded-md bg-sky-100 text-sky-800 font-semibold text-[10px]">DESPACHO</span>` : 
+            `<span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-semibold text-[10px]">RECEPCIÓN</span>`;
+
+        let statusBadge = '';
+        if (o.status === 'EN_ESPERA') {
+            statusBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>En Espera</span>`;
+        } else if (o.status === 'EN_PREPARACION') {
+            statusBadge = `<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>En Proceso</span>`;
         } else {
-            emptyState.classList.add('hidden');
+            statusBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Atendido</span>`;
         }
 
-        filtered.forEach((o, index) => {
-            const originalIndex = orders.indexOf(o);
-            const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50/80 transition";
+        const dateObj = new Date(o.schedDateTime);
+        const dateFormatted = isNaN(dateObj.getTime()) ? o.schedDateTime : (dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) + ' ' + dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
 
-            const isDespacho = o.type === 'DESPACHO';
-            const typeBadgeColor = isDespacho ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
-            
-            let statusBadge = '';
-            if (o.status === 'LISTO_ATENDIDO') {
-                statusBadge = '<span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-100 text-emerald-800">Atendido</span>';
-            } else if (o.status === 'EN_PREPARACION') {
-                statusBadge = '<span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-800">En Proceso</span>';
-            } else {
-                statusBadge = '<span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-200 text-slate-700">En Espera</span>';
+        const personDisplay = isDesp ? 
+            `<span class="flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5 text-sky-600"></i> Picker: ${o.picker || 'Sin Asignar'}</span>` :
+            `<span class="flex items-center gap-1"><i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-600"></i> Receptor: ${o.receptor || 'Sin Asignar'}</span>`;
+
+        const timingDisplay = isDesp ? 
+            `Resp: <strong>${o.responseTime || 0}m</strong> | Prep: <strong>${o.prepTime || 0}m</strong>` : 
+            `Resp: <strong>${o.responseTime || 0}m</strong> | Descarga: <strong class="text-emerald-700">${o.unloadTime || o.prepTime || 0}m</strong>`;
+
+        html += `
+            <tr class="hover:bg-slate-50 transition">
+                <td class="py-3 px-4 font-semibold text-slate-900">
+                    <div>${o.id}</div>
+                    <div class="mt-0.5">${badgeType}</div>
+                </td>
+                <td class="py-3 px-4 font-mono font-medium text-slate-800">${o.poNumber}</td>
+                <td class="py-3 px-4">
+                    <div class="font-medium text-slate-900">${o.client}</div>
+                    ${!isDesp ? `<div class="text-[10px] text-slate-500 uppercase">Origen: ${o.origin || 'NACIONAL'}</div>` : ''}
+                </td>
+                <td class="py-3 px-4">
+                    <div class="font-medium text-slate-800">${o.dock}</div>
+                    <div class="text-[11px] text-slate-500">${o.driver || 'N/A'}</div>
+                </td>
+                <td class="py-3 px-4 font-semibold text-sky-700">
+                    <span class="px-2 py-1 rounded bg-sky-50 border border-sky-100">${o.skuCount || 0} SKUs</span>
+                </td>
+                <td class="py-3 px-4 text-slate-700 whitespace-nowrap">${dateFormatted}</td>
+                <td class="py-3 px-4 font-medium text-slate-800">${personDisplay}</td>
+                <td class="py-3 px-4 text-[11px] text-slate-600">${timingDisplay}</td>
+                <td class="py-3 px-4">${statusBadge}</td>
+                <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                    <button onclick="openNewOrderModal(${finalIdx})" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar">
+                        <i data-lucide="edit" class="w-4 h-4"></i>
+                    </button>
+                    ${currentRole !== 'LECTOR' ? `
+                    <button onclick="deleteOrder(${finalIdx})" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>` : ''}
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+    lucide.createIcons();
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('typeFilter').value = 'ALL';
+    document.getElementById('statusFilter').value = 'ALL';
+    document.getElementById('dateFromFilter').value = '';
+    document.getElementById('dateToFilter').value = '';
+    applyFiltersAndRender();
+}
+
+function renderCharts() {
+    if (activeTab !== 'dashboard') return;
+
+    const ordersList = getFilteredOrders();
+
+    // Chart 1: Volume by Date
+    const datesMap = {};
+    ordersList.forEach(o => {
+        if (o.schedDateTime) {
+            const dateStr = o.schedDateTime.split('T')[0];
+            if (!datesMap[dateStr]) datesMap[dateStr] = { despachos: 0, recepciones: 0 };
+            if (o.type === 'DESPACHO') datesMap[dateStr].despachos++;
+            else datesMap[dateStr].recepciones++;
+        }
+    });
+
+    const sortedDates = Object.keys(datesMap).sort();
+    const despData = sortedDates.map(d => datesMap[d].despachos);
+    const recpData = sortedDates.map(d => datesMap[d].recepciones);
+
+    const ctx1 = document.getElementById('datePerformanceChart');
+    if (ctx1) {
+        if (dateChartInstance) dateChartInstance.destroy();
+        dateChartInstance = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: sortedDates.map(d => {
+                    const parts = d.split('-');
+                    return `${parts[2]}/${parts[1]}`;
+                }),
+                datasets: [
+                    {
+                        label: 'Despachos',
+                        data: despData,
+                        backgroundColor: '#38bdf8',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Recepciones',
+                        data: recpData,
+                        backgroundColor: '#34d399',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                }
             }
-
-            tr.innerHTML = `
-                <td class="py-3 px-4 font-medium">
-                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${typeBadgeColor}">${o.type}</span>
-                    <span class="block text-[10px] text-slate-400 mt-0.5">${o.docId || 'LOCAL'}</span>
-                </td>
-                <td class="py-3 px-4 font-bold text-slate-900">${o.po || 'N/A'}</td>
-                <td class="py-3 px-4">
-                    <span class="font-medium text-slate-900 block">${o.client}</span>
-                    ${o.origin ? `<span class="text-[10px] text-indigo-600 font-medium">Origen: ${o.origin}</span>` : ''}
-                </td>
-                <td class="py-3 px-4">
-                    <span class="font-semibold text-slate-800 block">${o.muelle || 'Muelle 1'}</span>
-                    <span class="text-[10px] text-slate-500">Chófer: ${o.driver || 'N/A'}</span>
-                </td>
-                <td class="py-3 px-4">
-                    <span class="font-bold text-brand-700 bg-brand-50 px-2 py-1 rounded-md border border-brand-200">${o.skus || 10} SKUs</span>
-                </td>
-                <td class="py-3 px-4 text-slate-600">
-                    <span class="block font-medium">${o.date || '--'}</span>
-                    <span class="text-[10px] text-slate-400">${o.time || '--:--'}</span>
-                </td>
-                <td class="py-3 px-4 text-slate-600">
-                    <span class="font-medium">${o.picker || 'Sin asignar'}</span>
-                </td>
-                <td class="py-3 px-4">
-                    <div class="text-[11px] space-x-1">
-                        <span class="text-blue-600 font-medium" title="T. Respuesta">${o.respTime || 0}m</span> /
-                        <span class="text-amber-600 font-medium" title="T. Preparación">${o.prepTime || 0}m</span> /
-                        <span class="text-emerald-600 font-medium" title="T. Descarga">${o.unloadTime || 0}m</span>
-                    </div>
-                </td>
-                <td class="py-3 px-4">
-                    ${statusBadge}
-                </td>
-                <td class="py-3 px-4 text-right space-x-1">
-                    <button onclick="editOrder(${originalIndex})" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition" title="Editar Pedido">
-                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                    </button>
-                    <button onclick="deleteOrder(${originalIndex})" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition" title="Eliminar Pedido">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
         });
-        lucide.createIcons();
     }
 
-    function clearFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('typeFilter').value = 'ALL';
-        document.getElementById('statusFilter').value = 'ALL';
-        document.getElementById('dateFromFilter').value = '';
-        document.getElementById('dateToFilter').value = '';
-        applyFiltersAndRender();
-    }
-
-    // Modal Control Helper Functions
-    function openModal(modalId) {
-        document.getElementById(modalId).classList.remove('hidden');
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
-    }
-
-    // New Order Modal Handling
-    function handleNewOrderClick() {
-        if (!checkEditorPermission()) return;
-
-        document.getElementById('orderModalTitle').innerHTML = '<i data-lucide="plus-circle" class="w-4 h-4 text-brand-400"></i><span>Registrar Nuevo Pedido / Recepción</span>';
-        document.getElementById('editDocId').value = '';
-        document.getElementById('editLocalIndex').value = '';
-        
-        document.getElementById('orderType').value = 'DESPACHO';
-        document.getElementById('clientName').value = '';
-        document.getElementById('orderPo').value = `OC-${Math.floor(10000 + Math.random() * 90000)}`;
-        document.getElementById('orderMuelle').value = 'Muelle 1';
-        document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('orderTime').value = '10:00';
-        document.getElementById('orderDriver').value = '';
-        document.getElementById('orderSkus').value = '15';
-        document.getElementById('orderPicker').value = '';
-        document.getElementById('orderStatus').value = 'EN_ESPERA';
-        document.getElementById('orderRespTime').value = '10';
-        document.getElementById('orderPrepTime').value = '25';
-        document.getElementById('orderUnloadTime').value = '0';
-        
-        onOrderTypeChange();
-        openModal('orderModal');
-        lucide.createIcons();
-    }
-
-    function onOrderTypeChange() {
-        const type = document.getElementById('orderType').value;
-        const originContainer = document.getElementById('receptionOriginContainer');
-        const clientLabel = document.getElementById('clientProviderLabel');
-        const operatorLabel = document.getElementById('operatorLabel');
-
-        if (type === 'RECEPCION') {
-            originContainer.classList.remove('hidden');
-            clientLabel.textContent = 'Proveedor *';
-            operatorLabel.textContent = 'Receptor Asignado';
-        } else {
-            originContainer.classList.add('hidden');
-            clientLabel.textContent = 'Cliente *';
-            operatorLabel.textContent = 'Picker Asignado';
+    // Chart 2: Performance by Operator
+    const personMap = {};
+    ordersList.forEach(o => {
+        if (o.type === 'DESPACHO' && o.picker) {
+            const name = o.picker + " (Picker)";
+            if (!personMap[name]) personMap[name] = { count: 0, role: 'PICKER' };
+            personMap[name].count++;
+        } else if (o.type === 'RECEPCION' && o.receptor) {
+            const name = o.receptor + " (Receptor)";
+            if (!personMap[name]) personMap[name] = { count: 0, role: 'RECEPTOR' };
+            personMap[name].count++;
         }
-    }
+    });
 
-    function editOrder(index) {
-        if (!checkEditorPermission()) return;
-        const o = window.orders[index];
-        if (!o) return;
+    const personNames = Object.keys(personMap);
+    const countData = personNames.map(p => personMap[p].count);
+    const colors = personNames.map(p => personMap[p].role === 'PICKER' ? '#38bdf8' : '#34d399');
 
-        document.getElementById('orderModalTitle').innerHTML = '<i data-lucide="edit-3" class="w-4 h-4 text-brand-400"></i><span>Editar Pedido / Recepción</span>';
-        document.getElementById('editDocId').value = o.docId || '';
-        document.getElementById('editLocalIndex').value = index;
-
-        document.getElementById('orderType').value = o.type || 'DESPACHO';
-        onOrderTypeChange();
-
-        document.getElementById('clientName').value = o.client || '';
-        document.getElementById('orderPo').value = o.po || '';
-        document.getElementById('orderMuelle').value = o.muelle || 'Muelle 1';
-        document.getElementById('orderDate').value = o.date || new Date().toISOString().split('T')[0];
-        document.getElementById('orderTime').value = o.time || '10:00';
-        document.getElementById('orderDriver').value = o.driver || '';
-        document.getElementById('orderSkus').value = o.skus || 10;
-        document.getElementById('orderOrigin').value = o.origin || 'NACIONAL';
-        document.getElementById('orderPicker').value = o.picker || '';
-        document.getElementById('orderStatus').value = o.status || 'EN_ESPERA';
-        document.getElementById('orderRespTime').value = o.respTime || 10;
-        document.getElementById('orderPrepTime').value = o.prepTime || 25;
-        document.getElementById('orderUnloadTime').value = o.unloadTime || 0;
-
-        openModal('orderModal');
-        lucide.createIcons();
-    }
-
-    async function saveOrderForm(event) {
-        event.preventDefault();
-
-        const docId = document.getElementById('editDocId').value;
-        const localIndexVal = document.getElementById('editLocalIndex').value;
-        const localIndex = localIndexVal !== '' ? parseInt(localIndexVal) : undefined;
-
-        const orderData = {
-            type: document.getElementById('orderType').value,
-            client: document.getElementById('clientName').value.trim(),
-            po: document.getElementById('orderPo').value.trim(),
-            muelle: document.getElementById('orderMuelle').value,
-            date: document.getElementById('orderDate').value,
-            time: document.getElementById('orderTime').value,
-            driver: document.getElementById('orderDriver').value.trim(),
-            skus: parseInt(document.getElementById('orderSkus').value) || 10,
-            origin: document.getElementById('orderType').value === 'RECEPCION' ? document.getElementById('orderOrigin').value : 'NACIONAL',
-            picker: document.getElementById('orderPicker').value.trim() || 'Sin asignar',
-            status: document.getElementById('orderStatus').value,
-            respTime: parseInt(document.getElementById('orderRespTime').value) || 0,
-            prepTime: parseInt(document.getElementById('orderPrepTime').value) || 0,
-            unloadTime: parseInt(document.getElementById('orderUnloadTime').value) || 0
-        };
-
-        if (docId) orderData.docId = docId;
-
-        closeModal('orderModal');
-
-        if (typeof window.saveOrderToFirebase === 'function') {
-            await window.saveOrderToFirebase(orderData, docId, localIndex);
-        } else {
-            // Fallback local
-            if (localIndex !== undefined && localIndex >= 0) {
-                window.orders[localIndex] = { ...window.orders[localIndex], ...orderData };
-            } else {
-                orderData.docId = "LOCAL-" + Date.now();
-                window.orders.push(orderData);
+    const ctx2 = document.getElementById('pickerPerformanceChart');
+    if (ctx2) {
+        if (pickerChartInstance) pickerChartInstance.destroy();
+        pickerChartInstance = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: personNames,
+                datasets: [
+                    {
+                        label: 'Operaciones Atendidas',
+                        data: countData,
+                        backgroundColor: colors,
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                }
             }
-            sortOrdersChronologically();
-            renderAllViews();
-        }
+        });
     }
 
-    async function deleteOrder(index) {
-        if (!checkEditorPermission()) return;
-        if (!confirm("¿Estás seguro de eliminar este registro del sistema?")) return;
+    // Chart 3: Total Orders by Client (Ordenado estrictamente de mayor a menor)
+    const clientMap = {};
+    ordersList.forEach(o => {
+        const clientName = o.client || 'Sin Cliente Especificado';
+        clientMap[clientName] = (clientMap[clientName] || 0) + 1;
+    });
 
-        const o = window.orders[index];
-        const docId = o ? o.docId : null;
+    const sortedClients = Object.entries(clientMap).sort((a, b) => b[1] - a[1]);
+    const clientNames = sortedClients.map(item => item[0]);
+    const clientCounts = sortedClients.map(item => item[1]);
+    
+    const clientColors = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
 
-        if (typeof window.deleteOrderFromFirebase === 'function') {
-            await window.deleteOrderFromFirebase(docId, index);
-        } else {
-            window.orders.splice(index, 1);
-            sortOrdersChronologically();
-            renderAllViews();
-        }
-    }
-
-    // Monthly Calendar View Logic
-    function renderCalendar() {
-        const year = calendarCurrentDate.getFullYear();
-        const month = calendarCurrentDate.getMonth();
-
-        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
-
-        const firstDayIndex = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-
-        const grid = document.getElementById('calendarGrid');
-        grid.innerHTML = '';
-
-        // Empty slots before first day
-        for (let i = 0; i < firstDayIndex; i++) {
-            const emptyDiv = document.createElement('div');
-            emptyDiv.className = "bg-slate-50/50 rounded-xl h-24 sm:h-28 border border-slate-100 opacity-40";
-            grid.appendChild(emptyDiv);
-        }
-
-        const orders = window.orders || [];
-
-        for (let day = 1; day <= totalDays; day++) {
-            const dayStr = String(day).padStart(2, '0');
-            const monthStr = String(month + 1).padStart(2, '0');
-            const fullDateStr = `${year}-${monthStr}-${dayStr}`;
-
-            const dayOrders = orders.filter(o => o.date === fullDateStr);
-
-            const cell = document.createElement('div');
-            cell.className = "bg-white rounded-xl h-24 sm:h-28 border border-slate-200 p-2 flex flex-col justify-between hover:border-brand-400 transition cursor-pointer shadow-xs";
-            cell.onclick = () => openDayPlanModal(fullDateStr);
-
-            let badgesHtml = '';
-            dayOrders.slice(0, 2).forEach(o => {
-                const color = o.type === 'DESPACHO' ? 'bg-sky-500 text-white' : 'bg-emerald-500 text-white';
-                badgesHtml += `<div class="text-[10px] px-1.5 py-0.5 rounded truncate ${color} font-medium mb-0.5" title="${o.po} - ${o.client}">${o.po}: ${o.client}</div>`;
-            });
-
-            if (dayOrders.length > 2) {
-                badgesHtml += `<div class="text-[9px] text-slate-500 font-bold px-1">+${dayOrders.length - 2} más</div>`;
+    const ctx3 = document.getElementById('clientPerformanceChart');
+    if (ctx3) {
+        if (clientChartInstance) clientChartInstance.destroy();
+        clientChartInstance = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: clientNames,
+                datasets: [
+                    {
+                        label: 'Total Pedidos',
+                        data: clientCounts,
+                        backgroundColor: clientNames.map((_, i) => clientColors[i % clientColors.length]),
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y', // Barras horizontales para lectura fluida de nombres
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, ticks: { precision: 0 } },
+                    y: { grid: { display: false } }
+                }
             }
+        });
+    }
 
-            cell.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-700">${day}</span>
-                    ${dayOrders.length > 0 ? `<span class="text-[10px] px-1.5 py-0.2 bg-brand-50 text-brand-700 font-bold rounded-full">${dayOrders.length}</span>` : ''}
-                </div>
-                <div class="overflow-hidden flex-grow mt-1">
-                    ${badgesHtml}
-                </div>
-            `;
-            grid.appendChild(cell);
+    // Chart 4: Average SKUs per Order by Client (Ordenado estrictamente de mayor a menor)
+    const clientSkuMap = {};
+    ordersList.forEach(o => {
+        const clientName = o.client || 'Sin Cliente Especificado';
+        if (!clientSkuMap[clientName]) {
+            clientSkuMap[clientName] = { totalSku: 0, ordersCount: 0 };
         }
+        clientSkuMap[clientName].totalSku += (o.skuCount || 0);
+        clientSkuMap[clientName].ordersCount += 1;
+    });
+
+    const clientSkuAverages = Object.keys(clientSkuMap).map(c => {
+        const data = clientSkuMap[c];
+        const avg = data.ordersCount > 0 ? (data.totalSku / data.ordersCount) : 0;
+        return { client: c, avgSku: parseFloat(avg.toFixed(1)) };
+    });
+
+    // Ordenamiento de mayor a menor valor promedio de SKUs por pedido
+    clientSkuAverages.sort((a, b) => b.avgSku - a.avgSku);
+
+    const skuLabels = clientSkuAverages.map(item => item.client);
+    const skuAvgData = clientSkuAverages.map(item => item.avgSku);
+
+    const ctx4 = document.getElementById('clientSkuChart');
+    if (ctx4) {
+        if (clientSkuChartInstance) clientSkuChartInstance.destroy();
+        clientSkuChartInstance = new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: skuLabels,
+                datasets: [
+                    {
+                        label: 'SKUs Promedio por Pedido',
+                        data: skuAvgData,
+                        backgroundColor: '#0284c7',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y', // Barras horizontales para facilitar visualización de nombres de clientes
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, ticks: { precision: 0 } },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    }
+}
+
+// Monthly Calendar Functions
+function renderCalendar() {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarMonthYear = document.getElementById('calendarMonthYear');
+    if (!calendarGrid || !calendarMonthYear) return;
+
+    const year = calendarCurrentDate.getFullYear();
+    const month = calendarCurrentDate.getMonth();
+
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    calendarMonthYear.textContent = `${monthNames[month]} ${year}`;
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    calendarGrid.innerHTML = '';
+
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = "bg-slate-50/50 rounded-xl min-h-[90px] border border-slate-100/50";
+        calendarGrid.appendChild(emptyCell);
     }
 
-    function prevMonth() {
-        calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
-        renderCalendar();
-    }
+    const ordersList = window.orders || [];
 
-    function nextMonth() {
-        calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
-        renderCalendar();
-    }
+    for (let day = 1; day <= totalDays; day++) {
+        const monthStr = String(month + 1).padStart(2, '0');
+        const dayStr = String(day).padStart(2, '0');
+        const formattedDate = `${year}-${monthStr}-${dayStr}`;
 
-    function todayMonth() {
-        calendarCurrentDate = new Date();
-        renderCalendar();
-    }
-
-    function openDayPlanModal(dateStr) {
-        selectedCalendarDateStr = dateStr;
-        const orders = window.orders || [];
-        const dayOrders = orders.filter(o => o.date === dateStr);
-
+        const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(formattedDate));
         const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
         const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
 
-        document.getElementById('dayPlanTitle').textContent = `Plan de Operaciones: ${dateStr.split('-').reverse().join('/')}`;
-        document.getElementById('dayTotalCount').textContent = `${dayOrders.length} Operaciones`;
-        document.getElementById('dayDespCount').textContent = despCount;
-        document.getElementById('dayRecpCount').textContent = recpCount;
+        const dayCell = document.createElement('div');
+        dayCell.className = "bg-white hover:bg-slate-50 rounded-xl p-2 min-h-[90px] border border-slate-200 cursor-pointer flex flex-col justify-between transition shadow-sm";
+        dayCell.onclick = () => openDayPlanModal(formattedDate);
 
-        const listContainer = document.getElementById('dayPlanList');
-        listContainer.innerHTML = '';
+        let badgesHtml = '';
+        if (despCount > 0) {
+            badgesHtml += `<span class="text-[10px] bg-sky-100 text-sky-800 font-semibold px-1.5 py-0.5 rounded">${despCount} Desp.</span>`;
+        }
+        if (recpCount > 0) {
+            badgesHtml += `<span class="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-1.5 py-0.5 rounded">${recpCount} Recp.</span>`;
+        }
 
-        if (dayOrders.length === 0) {
-            listContainer.innerHTML = `
-                <div class="text-center py-8 text-slate-400">
-                    <p class="text-xs">No hay operaciones programadas para esta fecha.</p>
+        dayCell.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-xs text-slate-700">${day}</span>
+                ${dayOrders.length > 0 ? `<span class="text-[10px] font-bold text-slate-400">${dayOrders.length}</span>` : ''}
+            </div>
+            <div class="flex flex-col gap-1 mt-1">
+                ${badgesHtml}
+            </div>
+        `;
+        calendarGrid.appendChild(dayCell);
+    }
+}
+
+function prevMonth() {
+    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+    renderCalendar();
+}
+
+function todayMonth() {
+    calendarCurrentDate = new Date(2026, 9, 1);
+    renderCalendar();
+}
+
+function openDayPlanModal(dateStr) {
+    selectedDayForPlan = dateStr;
+    const ordersList = window.orders || [];
+    const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+
+    document.getElementById('dayPlanTitle').textContent = `Plan de Operaciones: ${dateStr}`;
+    document.getElementById('dayTotalCount').textContent = `${dayOrders.length} Operaciones`;
+    document.getElementById('dayDespCount').textContent = dayOrders.filter(o => o.type === 'DESPACHO').length;
+    document.getElementById('dayRecpCount').textContent = dayOrders.filter(o => o.type === 'RECEPCION').length;
+
+    const container = document.getElementById('dayPlanList');
+    if (dayOrders.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-slate-400 text-xs">
+                No hay operaciones programadas para este día.
+            </div>
+        `;
+    } else {
+        let html = '';
+        dayOrders.forEach(o => {
+            const isDesp = o.type === 'DESPACHO';
+            const badgeType = isDesp ? 
+                `<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold text-[10px]">DESPACHO</span>` : 
+                `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">RECEPCIÓN</span>`;
+
+            html += `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-slate-900">${o.id}</span>
+                            ${badgeType}
+                            <span class="font-mono text-slate-600">${o.poNumber}</span>
+                        </div>
+                        <div class="font-medium text-slate-800 mt-1">${o.client}</div>
+                        <div class="text-[11px] text-slate-500 mt-0.5">Muelle: ${o.dock} | SKU: <strong class="text-sky-700">${o.skuCount || 0}</strong> | Asignado: ${isDesp ? o.picker : o.receptor}</div>
+                    </div>
+                    <div class="flex items-center space-x-2 self-end sm:self-auto">
+                        <span class="px-2 py-1 rounded bg-slate-200 text-slate-700 font-medium">${o.status}</span>
+                    </div>
                 </div>
             `;
-        } else {
-            dayOrders.forEach(o => {
-                const isDesp = o.type === 'DESPACHO';
-                const card = document.createElement('div');
-                card.className = "bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between";
-                card.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${o.type}</span>
-                            <span class="font-bold text-xs text-slate-900">${o.po}</span>
-                            <span class="text-xs text-slate-500">• ${o.muelle}</span>
-                        </div>
-                        <p class="text-xs font-semibold text-slate-800">${o.client}</p>
-                        <p class="text-[11px] text-slate-500">Hora: ${o.time} | Chófer: ${o.driver || 'N/A'} | SKUs: ${o.skus || 10}</p>
-                    </div>
-                    <div>
-                        <span class="text-[10px] px-2 py-1 rounded-lg font-medium bg-white border border-slate-200 text-slate-700">${o.status}</span>
-                    </div>
-                `;
-                listContainer.appendChild(card);
-            });
-        }
-
-        openModal('dayPlanModal');
-        lucide.createIcons();
+        });
+        container.innerHTML = html;
     }
+    openModal('dayPlanModal');
+}
 
-    function addOrderForSelectedDay() {
-        closeModal('dayPlanModal');
-        handleNewOrderClick();
-        if (selectedCalendarDateStr) {
-            document.getElementById('orderDate').value = selectedCalendarDateStr;
-        }
+function addOrderForSelectedDay() {
+    closeModal('dayPlanModal');
+    openNewOrderModal(-1);
+    if (selectedDayForPlan) {
+        document.getElementById('schedDateTime').value = selectedDayForPlan + "T09:00";
     }
+}
 
-    // User Access Control Functions
-    function renderUsersTable() {
-        const search = document.getElementById('userSearchInput')?.value.toLowerCase() || '';
-        const tbody = document.getElementById('usersTableBody');
-        if (!tbody) return;
+// User Management Functions
+function renderAccessControl() {
+    const tbody = document.getElementById('usersTableBody');
+    if (!tbody) return;
 
-        const users = window.usersData || [];
-        const filtered = users.filter(u => u.name.toLowerCase().includes(search) || u.username.toLowerCase().includes(search) || u.role.toLowerCase().includes(search));
+    const searchInput = document.getElementById('userSearchInput');
+    const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-        tbody.innerHTML = '';
+    const filteredUsers = users.filter(u => 
+        !search || u.name.toLowerCase().includes(search) || u.username.toLowerCase().includes(search) || u.role.toLowerCase().includes(search)
+    );
 
-        let totalU = users.length;
-        let adminU = users.filter(u => u.role === 'ADMINISTRADOR').length;
-        let opU = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
-        let activeU = users.filter(u => u.status === 'ACTIVO').length;
+    let totalUsers = users.length;
+    let adminCount = users.filter(u => u.role === 'ADMINISTRADOR').length;
+    let operatorCount = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+    let activeCount = users.filter(u => u.status === 'ACTIVO').length;
 
-        document.getElementById('kpiTotalUsers').textContent = totalU;
-        document.getElementById('kpiAdminUsers').textContent = adminU;
-        document.getElementById('kpiOperatorUsers').textContent = opU;
-        document.getElementById('kpiActiveUsers').textContent = activeU;
+    document.getElementById('kpiTotalUsers').textContent = totalUsers;
+    document.getElementById('kpiAdminUsers').textContent = adminCount;
+    document.getElementById('kpiOperatorUsers').textContent = operatorCount;
+    document.getElementById('kpiActiveUsers').textContent = activeCount;
 
-        filtered.forEach(u => {
-            const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50/80 transition";
+    let html = '';
+    filteredUsers.forEach(u => {
+        let roleBadge = '';
+        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 font-semibold text-[11px]">Administrador</span>`;
+        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold text-[11px]">Supervisor</span>`;
+        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[11px]">Operador</span>`;
+        else roleBadge = `<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-semibold text-[11px]">Lector</span>`;
 
-            let roleBadge = 'bg-slate-100 text-slate-700 border-slate-200';
-            if (u.role === 'ADMINISTRADOR') roleBadge = 'bg-purple-50 text-purple-700 border-purple-200';
-            else if (u.role === 'SUPERVISOR') roleBadge = 'bg-indigo-50 text-indigo-700 border-indigo-200';
-            else if (u.role === 'OPERADOR') roleBadge = 'bg-blue-50 text-blue-700 border-blue-200';
+        let statusBadge = u.status === 'ACTIVO' ? 
+            `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Activo</span>` :
+            `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Inactivo</span>`;
 
-            let statusBadge = u.status === 'ACTIVO' 
-                ? '<span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-100 text-emerald-800">Activo</span>'
-                : '<span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-rose-100 text-rose-800">Inactivo</span>';
-
-            tr.innerHTML = `
+        html += `
+            <tr class="hover:bg-slate-50 transition">
                 <td class="py-3 px-4">
-                    <span class="font-bold text-slate-900 block">${u.name}</span>
-                    <span class="text-[10px] text-slate-400">@${u.username}</span>
+                    <div class="font-bold text-slate-900">${u.name}</div>
+                    <div class="text-[11px] text-slate-500 font-mono">@${u.username}</div>
                 </td>
-                <td class="py-3 px-4">
-                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-md border ${roleBadge}">${u.role}</span>
-                </td>
-                <td class="py-3 px-4 font-mono text-slate-600">••••</td>
+                <td class="py-3 px-4">${roleBadge}</td>
+                <td class="py-3 px-4 font-mono text-slate-600 tracking-widest">••••</td>
                 <td class="py-3 px-4">${statusBadge}</td>
-                <td class="py-3 px-4 text-slate-500">${u.lastLogin || 'Nunca'}</td>
-                <td class="py-3 px-4 text-right space-x-1">
-                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg transition" title="Restablecer PIN">
-                        <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+                <td class="py-3 px-4 text-slate-500 text-[11px]">${u.lastAccess}</td>
+                <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Restablecer PIN">
+                        <i data-lucide="key-round" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="deleteUser('${u.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition" title="Eliminar Usuario">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    <button onclick="toggleUserStatus('${u.id}')" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Cambiar Estado">
+                        <i data-lucide="user-cog" class="w-4 h-4"></i>
                     </button>
                 </td>
-            `;
-            tbody.appendChild(tr);
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+    lucide.createIcons();
+}
+
+function openNewUserModal() {
+    if (currentRole !== 'ADMINISTRADOR') {
+        alert('Se requieren permisos de Administrador para gestionar usuarios.');
+        return;
+    }
+    document.getElementById('userForm').reset();
+    document.getElementById('editUserId').value = '';
+    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>Crear Nuevo Usuario</span>`;
+    openModal('userModal');
+    lucide.createIcons();
+}
+
+function saveUser(e) {
+    e.preventDefault();
+    const fullName = document.getElementById('userFullName').value;
+    const username = document.getElementById('username').value.trim();
+    const pin = document.getElementById('userPin').value;
+    const role = document.getElementById('userRole').value;
+    const status = document.getElementById('userStatus').value;
+
+    const existingIdx = users.findIndex(u => u.username === username);
+    if (existingIdx >= 0) {
+        users[existingIdx] = { ...users[existingIdx], name: fullName, role, pin, status };
+    } else {
+        users.push({
+            id: "U" + (users.length + 1),
+            name: fullName,
+            username: username,
+            role: role,
+            pin: pin,
+            status: status,
+            lastAccess: "Nunca"
         });
-        lucide.createIcons();
     }
 
-    function openNewUserModal() {
-        if (!checkEditorPermission()) return;
-        document.getElementById('userModalTitle').innerHTML = '<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>Crear Nuevo Usuario</span>';
-        document.getElementById('editUserId').value = '';
-        document.getElementById('userFullName').value = '';
-        document.getElementById('username').value = '';
-        document.getElementById('userPin').value = '';
-        document.getElementById('userRole').value = 'OPERADOR';
-        document.getElementById('userStatus').value = 'ACTIVO';
-        openModal('userModal');
+    closeModal('userModal');
+    renderAccessControl();
+}
+
+function openResetPinModal(username) {
+    if (currentRole !== 'ADMINISTRADOR') {
+        alert('Se requieren permisos de Administrador para restablecer PINs.');
+        return;
+    }
+    const u = users.find(item => item.username === username);
+    if (!u) return;
+
+    document.getElementById('resetTargetUsername').value = username;
+    document.getElementById('resetTargetUserDisplay').textContent = `${u.name} (@${u.username})`;
+    document.getElementById('newPinInput').value = '';
+    openModal('resetPinModal');
+}
+
+function handleResetPinSubmit(e) {
+    e.preventDefault();
+    const username = document.getElementById('resetTargetUsername').value;
+    const newPin = document.getElementById('newPinInput').value;
+
+    const u = users.find(item => item.username === username);
+    if (u) {
+        u.pin = newPin;
+        closeModal('resetPinModal');
+        renderAccessControl();
+    }
+}
+
+function toggleUserStatus(userId) {
+    if (currentRole !== 'ADMINISTRADOR') {
+        alert('Se requieren permisos de Administrador.');
+        return;
+    }
+    const u = users.find(item => item.id === userId);
+    if (u) {
+        u.status = u.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+        renderAccessControl();
+    }
+}
+
+function openShareModal() {
+    const shareUrlInput = document.getElementById('shareUrlInput');
+    shareUrlInput.value = window.location.href;
+    openModal('shareModal');
+}
+
+function copyShareUrl() {
+    const shareUrlInput = document.getElementById('shareUrlInput');
+    shareUrlInput.select();
+    shareUrlInput.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(shareUrlInput.value);
+    
+    const alertEl = document.getElementById('shareCopyAlert');
+    alertEl.classList.remove('hidden');
+    setTimeout(() => {
+        alertEl.classList.add('hidden');
+    }, 2500);
+}
+
+function exportDataCSV() {
+    const ordersList = getFilteredOrders();
+    if (ordersList.length === 0) {
+        alert('No hay datos para exportar.');
+        return;
     }
 
-    function saveUser(event) {
-        event.preventDefault();
-        const id = document.getElementById('editUserId').value;
-        const name = document.getElementById('userFullName').value.trim();
-        const username = document.getElementById('username').value.trim().toLowerCase();
-        const pin = document.getElementById('userPin').value.trim();
-        const role = document.getElementById('userRole').value;
-        const status = document.getElementById('userStatus').value;
+    let csvContent = "data:text/csv;charset=utf-8,ID,OC,Tipo,Cliente,Muelle,SKUs,FechaProgramada,Estado,PickerReceptor\r\n";
+    
+    ordersList.forEach(o => {
+        const person = o.type === 'DESPACHO' ? o.picker : o.receptor;
+        const row = [o.id, o.poNumber, o.type, `"${o.client}"`, `"${o.dock}"`, o.skuCount || 0, o.schedDateTime, o.status, `"${person}"`];
+        csvContent += row.join(",") + "\r\n";
+    });
 
-        if (id) {
-            const user = window.usersData.find(u => u.id === id);
-            if (user) {
-                user.name = name;
-                user.username = username;
-                user.pin = pin;
-                user.role = role;
-                user.status = status;
-            }
-        } else {
-            const newUser = {
-                id: "U-" + Date.now(),
-                name,
-                username,
-                pin,
-                role,
-                status,
-                lastLogin: "Nuevo"
-            };
-            window.usersData.push(newUser);
-        }
-
-        localStorage.setItem('logistics_users', JSON.stringify(window.usersData));
-        closeModal('userModal');
-        renderUsersTable();
-        alertCustom("Usuario guardado correctamente.");
-    }
-
-    function openResetPinModal(username) {
-        if (!checkEditorPermission()) return;
-        const user = window.usersData.find(u => u.username === username);
-        if (!user) return;
-
-        document.getElementById('resetTargetUsername').value = username;
-        document.getElementById('resetTargetUserDisplay').textContent = `${user.name} (@${user.username})`;
-        document.getElementById('newPinInput').value = '';
-        openModal('resetPinModal');
-    }
-
-    function handleResetPinSubmit(event) {
-        event.preventDefault();
-        const username = document.getElementById('resetTargetUsername').value;
-        const newPin = document.getElementById('newPinInput').value.trim();
-
-        const user = window.usersData.find(u => u.username === username);
-        if (user) {
-            user.pin = newPin;
-            localStorage.setItem('logistics_users', JSON.stringify(window.usersData));
-            closeModal('resetPinModal');
-            alertCustom(`PIN actualizado correctamente para ${user.name}`);
-        }
-    }
-
-    function deleteUser(id) {
-        if (!checkEditorPermission()) return;
-        if (window.usersData.length <= 1) {
-            alertCustom("No puedes eliminar el último usuario del sistema.");
-            return;
-        }
-        if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
-
-        window.usersData = window.usersData.filter(u => u.id !== id);
-        localStorage.setItem('logistics_users', JSON.stringify(window.usersData));
-        renderUsersTable();
-    }
-
-    // Export & Share Functions
-    function exportDataCSV() {
-        const orders = window.orders || [];
-        let csvContent = "data:text/csv;charset=utf-8,ID,Tipo,OC,Cliente,Muelle,Fecha,Hora,Chofer,SKUs,Origen,Picker,Estatus,T.Resp,T.Prep,T.Descarga\n";
-
-        orders.forEach(o => {
-            const row = [
-                o.docId || '',
-                o.type || '',
-                o.po || '',
-                `"${o.client || ''}"`,
-                o.muelle || '',
-                o.date || '',
-                o.time || '',
-                `"${o.driver || ''}"`,
-                o.skus || 10,
-                o.origin || '',
-                `"${o.picker || ''}"`,
-                o.status || '',
-                o.respTime || 0,
-                o.prepTime || 0,
-                o.unloadTime || 0
-            ].join(",");
-            csvContent += row + "\n";
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `dashboard_logistico_2026_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function setupShareUrl() {
-        const shareInput = document.getElementById('shareUrlInput');
-        if (shareInput) {
-            shareInput.value = window.location.href;
-        }
-    }
-
-    function openShareModal() {
-        setupShareUrl();
-        openModal('shareModal');
-        document.getElementById('copySuccessMsg').classList.add('hidden');
-    }
-
-    function copyShareUrl() {
-        const shareInput = document.getElementById('shareUrlInput');
-        shareInput.select();
-        shareInput.setSelectionRange(0, 99999);
-        document.execCommand('copy');
-
-        const msg = document.getElementById('copySuccessMsg');
-        msg.classList.remove('hidden');
-        setTimeout(() => {
-            msg.classList.add('hidden');
-        }, 3000);
-    }
-
-    function alertCustom(message) {
-        alert(message);
-    }
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `dashboard_logistico_2026_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 </script>
 
 </body>
