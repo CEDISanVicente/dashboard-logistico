@@ -46,7 +46,6 @@
         }
     </style>
 
-    <!-- Firebase SDKs & Realtime Synchronization Logic -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
       import { 
@@ -170,7 +169,6 @@
 
 <body class="min-h-full flex flex-col font-sans antialiased text-slate-800 bg-slate-100">
 
-<!-- Top Header / Bar -->
 <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <!-- Brand Logo and Identity -->
@@ -434,7 +432,7 @@
                 </div>
             </div>
 
-            <!-- Chart 3: Total Orders by Client (Ordenado de mayor a menor) -->
+            <!-- Chart 3: Total Orders by Client -->
             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
@@ -450,7 +448,7 @@
                 </div>
             </div>
 
-            <!-- Chart 4: Average SKUs per Order by Client (Ordenado de mayor a menor) -->
+            <!-- Chart 4: Average SKUs per Order by Client -->
             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
@@ -507,6 +505,7 @@
                             <option value="EN_ESPERA">En Espera</option>
                             <option value="EN_PREPARACION">En Proceso</option>
                             <option value="LISTO_ATENDIDO">Atendidos / Completados</option>
+                            <option value="DESPACHADO">Despachados</option>
                         </select>
                     </div>
 
@@ -1034,7 +1033,7 @@
                 <div id="prepTimeContainer">
                     <label id="prepTimeLabel" class="block text-[11px] font-semibold text-slate-700 mb-1">T. Prep (min)</label>
                     <input type="number" id="prepTime" min="0" value="0" readonly placeholder="Auto"
-                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-100 text-slate-500 focus:outline-none cursor-not-allowed" title="Calculado automáticamente al cambiar estatus a Atendido">
+                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-100 text-slate-500 focus:outline-none cursor-not-allowed" title="Calculado automáticamente al cambiar estatus a Atendido o Despachado">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-700 mb-1">Estatus *</label>
@@ -1042,6 +1041,7 @@
                         <option value="EN_ESPERA">EN ESPERA</option>
                         <option value="EN_PREPARACION">EN PROCESO</option>
                         <option value="LISTO_ATENDIDO">ATENDIDO</option>
+                        <option value="DESPACHADO">DESPACHADO</option>
                     </select>
                 </div>
             </div>
@@ -1125,7 +1125,7 @@ window.initialOrdersData = [
         responseTime: 15,
         prepTime: 30,
         unloadTime: 0,
-        status: "LISTO_ATENDIDO",
+        status: "DESPACHADO",
         timeCreated: "2026-10-02T10:30:00.000Z",
         timeInProcess: "2026-10-02T10:45:00.000Z",
         timeCompleted: "2026-10-02T11:15:00.000Z"
@@ -1461,7 +1461,7 @@ async function saveOrder(e) {
             responseTime = Math.max(0, Math.round(diffMs / (1000 * 60)));
         }
     } 
-    else if (newStatus === 'LISTO_ATENDIDO') {
+    else if (newStatus === 'LISTO_ATENDIDO' || newStatus === 'DESPACHADO') {
         if (!timeInProcess) {
             timeInProcess = nowISO;
             if (timeCreated) {
@@ -1549,7 +1549,7 @@ function calculateMetrics() {
     const ordersList = getFilteredOrders();
 
     ordersList.forEach(o => {
-        if (o.status === 'LISTO_ATENDIDO') served++;
+        if (o.status === 'LISTO_ATENDIDO' || o.status === 'DESPACHADO') served++;
         else pending++;
 
         if (o.type === 'RECEPCION') {
@@ -1680,6 +1680,8 @@ function applyFiltersAndRender() {
             statusBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>En Espera</span>`;
         } else if (o.status === 'EN_PREPARACION') {
             statusBadge = `<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>En Proceso</span>`;
+        } else if (o.status === 'DESPACHADO') {
+            statusBadge = `<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>Despachado</span>`;
         } else {
             statusBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Atendido</span>`;
         }
@@ -1899,17 +1901,15 @@ function renderCharts() {
         clientSkuMap[clientName].ordersCount += 1;
     });
 
-    const clientSkuAverages = Object.keys(clientSkuMap).map(c => {
-        const data = clientSkuMap[c];
-        const avg = data.ordersCount > 0 ? (data.totalSku / data.ordersCount) : 0;
-        return { client: c, avgSku: parseFloat(avg.toFixed(1)) };
+    const clientSkuAvgArray = Object.keys(clientSkuMap).map(client => {
+        const avg = clientSkuMap[client].ordersCount > 0 ? (clientSkuMap[client].totalSku / clientSkuMap[client].ordersCount) : 0;
+        return { client, avg: parseFloat(avg.toFixed(1)) };
     });
 
-    // Ordenamiento de mayor a menor valor promedio de SKUs por pedido
-    clientSkuAverages.sort((a, b) => b.avgSku - a.avgSku);
+    clientSkuAvgArray.sort((a, b) => b.avg - a.avg);
 
-    const skuLabels = clientSkuAverages.map(item => item.client);
-    const skuAvgData = clientSkuAverages.map(item => item.avgSku);
+    const skuClientNames = clientSkuAvgArray.map(item => item.client);
+    const skuAvgValues = clientSkuAvgArray.map(item => item.avg);
 
     const ctx4 = document.getElementById('clientSkuChart');
     if (ctx4) {
@@ -1917,23 +1917,23 @@ function renderCharts() {
         clientSkuChartInstance = new Chart(ctx4, {
             type: 'bar',
             data: {
-                labels: skuLabels,
+                labels: skuClientNames,
                 datasets: [
                     {
-                        label: 'SKUs Promedio por Pedido',
-                        data: skuAvgData,
-                        backgroundColor: '#0284c7',
+                        label: 'SKUs Promedio',
+                        data: skuAvgValues,
+                        backgroundColor: '#0ea5e9',
                         borderRadius: 6
                     }
                 ]
             },
             options: {
-                indexAxis: 'y', // Barras horizontales para facilitar visualización de nombres de clientes
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { beginAtZero: true, ticks: { precision: 0 } },
+                    x: { beginAtZero: true, ticks: { precision: 1 } },
                     y: { grid: { display: false } }
                 }
             }
@@ -1941,63 +1941,58 @@ function renderCharts() {
     }
 }
 
-// Monthly Calendar Functions
 function renderCalendar() {
-    const calendarGrid = document.getElementById('calendarGrid');
-    const calendarMonthYear = document.getElementById('calendarMonthYear');
-    if (!calendarGrid || !calendarMonthYear) return;
+    const grid = document.getElementById('calendarGrid');
+    const title = document.getElementById('calendarMonthYear');
+    if (!grid || !title) return;
 
     const year = calendarCurrentDate.getFullYear();
     const month = calendarCurrentDate.getMonth();
 
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    calendarMonthYear.textContent = `${monthNames[month]} ${year}`;
+    title.textContent = `${monthNames[month]} ${year}`;
 
     const firstDayIndex = new Date(year, month, 1).getDay();
     const totalDays = new Date(year, month + 1, 0).getDate();
 
-    calendarGrid.innerHTML = '';
+    let html = '';
 
     for (let i = 0; i < firstDayIndex; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = "bg-slate-50/50 rounded-xl min-h-[90px] border border-slate-100/50";
-        calendarGrid.appendChild(emptyCell);
+        html += `<div class="bg-slate-50/40 rounded-xl min-h-[90px] border border-transparent"></div>`;
     }
-
-    const ordersList = window.orders || [];
 
     for (let day = 1; day <= totalDays; day++) {
         const monthStr = String(month + 1).padStart(2, '0');
         const dayStr = String(day).padStart(2, '0');
-        const formattedDate = `${year}-${monthStr}-${dayStr}`;
+        const dateString = `${year}-${monthStr}-${dayStr}`;
 
-        const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(formattedDate));
-        const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
-        const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
-
-        const dayCell = document.createElement('div');
-        dayCell.className = "bg-white hover:bg-slate-50 rounded-xl p-2 min-h-[90px] border border-slate-200 cursor-pointer flex flex-col justify-between transition shadow-sm";
-        dayCell.onclick = () => openDayPlanModal(formattedDate);
-
+        const dayOrders = (window.orders || []).filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateString));
+        
         let badgesHtml = '';
-        if (despCount > 0) {
-            badgesHtml += `<span class="text-[10px] bg-sky-100 text-sky-800 font-semibold px-1.5 py-0.5 rounded">${despCount} Desp.</span>`;
-        }
-        if (recpCount > 0) {
-            badgesHtml += `<span class="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-1.5 py-0.5 rounded">${recpCount} Recp.</span>`;
+        dayOrders.slice(0, 3).forEach(o => {
+            const isDesp = o.type === 'DESPACHO';
+            const bgClass = isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800';
+            badgesHtml += `<div class="text-[9px] px-1.5 py-0.5 rounded truncate font-medium ${bgClass}" title="${o.id} - ${o.client}">• ${o.id} (${o.poNumber})</div>`;
+        });
+
+        if (dayOrders.length > 3) {
+            badgesHtml += `<div class="text-[9px] text-slate-500 font-semibold px-1">+${dayOrders.length - 3} más</div>`;
         }
 
-        dayCell.innerHTML = `
-            <div class="flex items-center justify-between">
-                <span class="font-bold text-xs text-slate-700">${day}</span>
-                ${dayOrders.length > 0 ? `<span class="text-[10px] font-bold text-slate-400">${dayOrders.length}</span>` : ''}
-            </div>
-            <div class="flex flex-col gap-1 mt-1">
-                ${badgesHtml}
+        html += `
+            <div onclick="openDayPlanModal('${dateString}')" class="bg-white rounded-xl min-h-[90px] p-2 border border-slate-200 hover:border-brand-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-700">${day}</span>
+                    ${dayOrders.length > 0 ? `<span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-700">${dayOrders.length}</span>` : ''}
+                </div>
+                <div class="space-y-1 mt-1 overflow-hidden">
+                    ${badgesHtml}
+                </div>
             </div>
         `;
-        calendarGrid.appendChild(dayCell);
     }
+
+    grid.innerHTML = html;
 }
 
 function prevMonth() {
@@ -2017,48 +2012,66 @@ function todayMonth() {
 
 function openDayPlanModal(dateStr) {
     selectedDayForPlan = dateStr;
-    const ordersList = window.orders || [];
-    const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+    const parts = dateStr.split('-');
+    const formattedTitle = `Plan de Operaciones: ${parts[2]}/${parts[1]}/${parts[0]}`;
+    
+    document.getElementById('dayPlanTitle').textContent = formattedTitle;
 
-    document.getElementById('dayPlanTitle').textContent = `Plan de Operaciones: ${dateStr}`;
+    const dayOrders = (window.orders || []).filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
+    const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
+    const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
+
     document.getElementById('dayTotalCount').textContent = `${dayOrders.length} Operaciones`;
-    document.getElementById('dayDespCount').textContent = dayOrders.filter(o => o.type === 'DESPACHO').length;
-    document.getElementById('dayRecpCount').textContent = dayOrders.filter(o => o.type === 'RECEPCION').length;
+    document.getElementById('dayDespCount').textContent = despCount;
+    document.getElementById('dayRecpCount').textContent = recpCount;
 
-    const container = document.getElementById('dayPlanList');
+    const listContainer = document.getElementById('dayPlanList');
+    
     if (dayOrders.length === 0) {
-        container.innerHTML = `
+        listContainer.innerHTML = `
             <div class="text-center py-8 text-slate-400 text-xs">
-                No hay operaciones programadas para este día.
+                <p>No hay operaciones programadas para este día.</p>
             </div>
         `;
     } else {
         let html = '';
         dayOrders.forEach(o => {
+            const origIdx = window.orders.findIndex(item => item === o);
             const isDesp = o.type === 'DESPACHO';
-            const badgeType = isDesp ? 
-                `<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold text-[10px]">DESPACHO</span>` : 
-                `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">RECEPCIÓN</span>`;
-
             html += `
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3 text-xs">
                     <div>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-2">
                             <span class="font-bold text-slate-900">${o.id}</span>
-                            ${badgeType}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${o.type}</span>
                             <span class="font-mono text-slate-600">${o.poNumber}</span>
                         </div>
-                        <div class="font-medium text-slate-800 mt-1">${o.client}</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5">Muelle: ${o.dock} | SKU: <strong class="text-sky-700">${o.skuCount || 0}</strong> | Asignado: ${isDesp ? o.picker : o.receptor}</div>
+                        <div class="text-slate-600 mt-1"><strong>Cliente:</strong> ${o.client} • <strong>Muelle:</strong> ${o.dock}</div>
+                        <div class="text-[11px] text-slate-500 mt-0.5"><strong>SKUs:</strong> ${o.skuCount || 0} | <strong>Persona:</strong> ${isDesp ? o.picker : o.receptor}</div>
                     </div>
-                    <div class="flex items-center space-x-2 self-end sm:self-auto">
-                        <span class="px-2 py-1 rounded bg-slate-200 text-slate-700 font-medium">${o.status}</span>
+                    <div class="flex items-center space-x-1 shrink-0">
+                        <button onclick="closeModal('dayPlanModal'); openNewOrderModal(${origIdx})" class="p-1.5 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg text-slate-600 transition" title="Editar">
+                            <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                        </button>
+                        ${currentRole !== 'LECTOR' ? `
+                        <button onclick="deleteOrder(${origIdx})" class="p-1.5 bg-white border border-rose-200 hover:bg-rose-50 rounded-lg text-rose-600 transition" title="Eliminar">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>` : ''}
                     </div>
                 </div>
             `;
         });
-        container.innerHTML = html;
+        listContainer.innerHTML = html;
+        lucide.createIcons();
     }
+
+    const addBtn = document.getElementById('addOrderForDayBtn');
+    if (currentRole === 'LECTOR') {
+        addBtn.classList.add('hidden');
+    } else {
+        addBtn.classList.remove('hidden');
+    }
+
     openModal('dayPlanModal');
 }
 
@@ -2066,61 +2079,67 @@ function addOrderForSelectedDay() {
     closeModal('dayPlanModal');
     openNewOrderModal(-1);
     if (selectedDayForPlan) {
-        document.getElementById('schedDateTime').value = selectedDayForPlan + "T09:00";
+        const datetimeField = document.getElementById('schedDateTime');
+        if (datetimeField) {
+            datetimeField.value = selectedDayForPlan + "T09:00";
+        }
     }
 }
 
-// User Management Functions
 function renderAccessControl() {
+    const searchInput = document.getElementById('userSearchInput');
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+    const filteredUsers = users.filter(u => 
+        !query || u.name.toLowerCase().includes(query) || u.username.toLowerCase().includes(query) || u.role.toLowerCase().includes(query)
+    );
+
+    document.getElementById('kpiTotalUsers').textContent = users.length;
+    document.getElementById('kpiAdminUsers').textContent = users.filter(u => u.role === 'ADMINISTRADOR').length;
+    document.getElementById('kpiOperatorUsers').textContent = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+    document.getElementById('kpiActiveUsers').textContent = users.filter(u => u.status === 'ACTIVO').length;
+
     const tbody = document.getElementById('usersTableBody');
     if (!tbody) return;
 
-    const searchInput = document.getElementById('userSearchInput');
-    const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
-
-    const filteredUsers = users.filter(u => 
-        !search || u.name.toLowerCase().includes(search) || u.username.toLowerCase().includes(search) || u.role.toLowerCase().includes(search)
-    );
-
-    let totalUsers = users.length;
-    let adminCount = users.filter(u => u.role === 'ADMINISTRADOR').length;
-    let operatorCount = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
-    let activeCount = users.filter(u => u.status === 'ACTIVO').length;
-
-    document.getElementById('kpiTotalUsers').textContent = totalUsers;
-    document.getElementById('kpiAdminUsers').textContent = adminCount;
-    document.getElementById('kpiOperatorUsers').textContent = operatorCount;
-    document.getElementById('kpiActiveUsers').textContent = activeCount;
+    if (filteredUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">No se encontraron usuarios</td></tr>`;
+        return;
+    }
 
     let html = '';
     filteredUsers.forEach(u => {
         let roleBadge = '';
-        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 font-semibold text-[11px]">Administrador</span>`;
-        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold text-[11px]">Supervisor</span>`;
-        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[11px]">Operador</span>`;
-        else roleBadge = `<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-semibold text-[11px]">Lector</span>`;
+        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-semibold text-[10px]">Administrador</span>`;
+        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold text-[10px]">Supervisor</span>`;
+        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[10px]">Operador</span>`;
+        else roleBadge = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[10px]">Lector</span>`;
 
         let statusBadge = u.status === 'ACTIVO' ? 
-            `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Activo</span>` :
-            `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-medium text-[11px] inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Inactivo</span>`;
+            `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px]">Activo</span>` :
+            `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-medium text-[11px]">Inactivo</span>`;
 
         html += `
             <tr class="hover:bg-slate-50 transition">
-                <td class="py-3 px-4">
-                    <div class="font-bold text-slate-900">${u.name}</div>
-                    <div class="text-[11px] text-slate-500 font-mono">@${u.username}</div>
+                <td class="py-3 px-4 font-semibold text-slate-900">
+                    <div>${u.name}</div>
+                    <div class="text-[11px] text-slate-400 font-mono">@${u.username}</div>
                 </td>
                 <td class="py-3 px-4">${roleBadge}</td>
-                <td class="py-3 px-4 font-mono text-slate-600 tracking-widest">••••</td>
+                <td class="py-3 px-4 font-mono text-slate-600">••••</td>
                 <td class="py-3 px-4">${statusBadge}</td>
-                <td class="py-3 px-4 text-slate-500 text-[11px]">${u.lastAccess}</td>
+                <td class="py-3 px-4 text-slate-500">${u.lastAccess}</td>
                 <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
-                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Restablecer PIN">
+                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-slate-100 rounded-lg transition" title="Cambiar PIN">
                         <i data-lucide="key-round" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="toggleUserStatus('${u.id}')" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Cambiar Estado">
-                        <i data-lucide="user-cog" class="w-4 h-4"></i>
+                    ${currentRole === 'ADMINISTRADOR' ? `
+                    <button onclick="openEditUserModal('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Editar Usuario">
+                        <i data-lucide="edit" class="w-4 h-4"></i>
                     </button>
+                    <button onclick="deleteUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar Usuario">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>` : ''}
                 </td>
             </tr>
         `;
@@ -2132,35 +2151,57 @@ function renderAccessControl() {
 
 function openNewUserModal() {
     if (currentRole !== 'ADMINISTRADOR') {
-        alert('Se requieren permisos de Administrador para gestionar usuarios.');
+        alert('Se requieren privilegios de Administrador para gestionar cuentas de usuario.');
         return;
     }
     document.getElementById('userForm').reset();
     document.getElementById('editUserId').value = '';
     document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>Crear Nuevo Usuario</span>`;
     openModal('userModal');
-    lucide.createIcons();
+}
+
+function openEditUserModal(id) {
+    const u = users.find(item => item.id === id);
+    if (!u) return;
+
+    document.getElementById('editUserId').value = u.id;
+    document.getElementById('userFullName').value = u.name;
+    document.getElementById('username').value = u.username;
+    document.getElementById('userPin').value = u.pin;
+    document.getElementById('userRole').value = u.role;
+    document.getElementById('userStatus').value = u.status;
+
+    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-cog" class="w-4 h-4 text-indigo-400"></i><span>Editar Usuario</span>`;
+    openModal('userModal');
 }
 
 function saveUser(e) {
     e.preventDefault();
-    const fullName = document.getElementById('userFullName').value;
-    const username = document.getElementById('username').value.trim();
+    const editId = document.getElementById('editUserId').value;
+    const name = document.getElementById('userFullName').value;
+    const username = document.getElementById('username').value;
     const pin = document.getElementById('userPin').value;
     const role = document.getElementById('userRole').value;
     const status = document.getElementById('userStatus').value;
 
-    const existingIdx = users.findIndex(u => u.username === username);
-    if (existingIdx >= 0) {
-        users[existingIdx] = { ...users[existingIdx], name: fullName, role, pin, status };
+    if (editId) {
+        const u = users.find(item => item.id === editId);
+        if (u) {
+            u.name = name;
+            u.username = username;
+            u.pin = pin;
+            u.role = role;
+            u.status = status;
+        }
     } else {
+        const newId = "U" + (users.length + 1);
         users.push({
-            id: "U" + (users.length + 1),
-            name: fullName,
-            username: username,
-            role: role,
-            pin: pin,
-            status: status,
+            id: newId,
+            name,
+            username,
+            role,
+            pin,
+            status,
             lastAccess: "Nunca"
         });
     }
@@ -2169,11 +2210,15 @@ function saveUser(e) {
     renderAccessControl();
 }
 
-function openResetPinModal(username) {
-    if (currentRole !== 'ADMINISTRADOR') {
-        alert('Se requieren permisos de Administrador para restablecer PINs.');
-        return;
+function deleteUser(id) {
+    if (currentRole !== 'ADMINISTRADOR') return;
+    if (confirm('¿Está seguro de eliminar este usuario?')) {
+        users = users.filter(u => u.id !== id);
+        renderAccessControl();
     }
+}
+
+function openResetPinModal(username) {
     const u = users.find(item => item.username === username);
     if (!u) return;
 
@@ -2196,59 +2241,42 @@ function handleResetPinSubmit(e) {
     }
 }
 
-function toggleUserStatus(userId) {
-    if (currentRole !== 'ADMINISTRADOR') {
-        alert('Se requieren permisos de Administrador.');
-        return;
-    }
-    const u = users.find(item => item.id === userId);
-    if (u) {
-        u.status = u.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
-        renderAccessControl();
-    }
-}
-
 function openShareModal() {
-    const shareUrlInput = document.getElementById('shareUrlInput');
-    shareUrlInput.value = window.location.href;
+    const urlInput = document.getElementById('shareUrlInput');
+    urlInput.value = window.location.href;
+    document.getElementById('shareCopyAlert').classList.add('hidden');
     openModal('shareModal');
 }
 
 function copyShareUrl() {
-    const shareUrlInput = document.getElementById('shareUrlInput');
-    shareUrlInput.select();
-    shareUrlInput.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(shareUrlInput.value);
-    
+    const urlInput = document.getElementById('shareUrlInput');
+    urlInput.select();
+    navigator.clipboard.writeText(urlInput.value);
     const alertEl = document.getElementById('shareCopyAlert');
     alertEl.classList.remove('hidden');
-    setTimeout(() => {
-        alertEl.classList.add('hidden');
-    }, 2500);
+    setTimeout(() => alertEl.classList.add('hidden'), 3000);
 }
 
 function exportDataCSV() {
     const ordersList = getFilteredOrders();
     if (ordersList.length === 0) {
-        alert('No hay datos para exportar.');
+        alert('No hay datos disponibles para exportar.');
         return;
     }
 
-    let csvContent = "data:text/csv;charset=utf-8,ID,OC,Tipo,Cliente,Muelle,SKUs,FechaProgramada,Estado,PickerReceptor\r\n";
-    
+    let csv = 'ID,Tipo,OC,Cliente,Muelle,Chofer,SKUs,Fecha Programada,Estatus,Tiempo Respuesta (min),Tiempo Prep/Descarga (min)\n';
     ordersList.forEach(o => {
-        const person = o.type === 'DESPACHO' ? o.picker : o.receptor;
-        const row = [o.id, o.poNumber, o.type, `"${o.client}"`, `"${o.dock}"`, o.skuCount || 0, o.schedDateTime, o.status, `"${person}"`];
-        csvContent += row.join(",") + "\r\n";
+        csv += `"${o.id}","${o.type}","${o.poNumber}","${o.client}","${o.dock}","${o.driver || ''}",${o.skuCount || 0},"${o.schedDateTime}","${o.status}",${o.responseTime || 0},${o.type === 'DESPACHO' ? (o.prepTime || 0) : (o.unloadTime || 0)}\n`;
     });
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `dashboard_logistico_2026_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'dashboard_logistico_2026.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 </script>
 
