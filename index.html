@@ -80,9 +80,9 @@
         // Escuchar cambios en tiempo real desde Firestore
         onSnapshot(ordersCollection, (snapshot) => {
           if (!snapshot.empty) {
-            window.orders = snapshot.docs.map(doc => ({
-              docId: doc.id,
-              ...doc.data()
+            window.orders = snapshot.docs.map(docSnap => ({
+              docId: docSnap.id,
+              ...docSnap.data()
             }));
           } else {
             if (!window.orders || window.orders.length === 0) {
@@ -238,7 +238,6 @@
     </div>
 </header>
 
-<!-- Main Content Area -->
 <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
     <!-- Read Only Notice Banner -->
@@ -396,7 +395,6 @@
             </div>
         </section>
 
-        <!-- Analytical Charts Grid -->
         <section class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
             <!-- Chart 1: Volume & Results by Date -->
             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
@@ -465,7 +463,6 @@
             </div>
         </section>
 
-        <!-- Queue Management & Table Section -->
         <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50 space-y-3">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1026,14 +1023,14 @@
             <div class="grid grid-cols-3 gap-3">
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-700 mb-1">T. Respuesta (min)</label>
-                    <input type="number" id="responseTime" min="0" value="0" readonly placeholder="Auto"
-                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-100 text-slate-500 focus:outline-none cursor-not-allowed" title="Calculado automáticamente al cambiar estatus a En Proceso">
+                    <input type="number" id="responseTime" min="0" value="0"
+                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500" title="Calculado automáticamente o ajustable">
                 </div>
                 <!-- Time prep vs Time unload -->
                 <div id="prepTimeContainer">
                     <label id="prepTimeLabel" class="block text-[11px] font-semibold text-slate-700 mb-1">T. Prep (min)</label>
-                    <input type="number" id="prepTime" min="0" value="0" readonly placeholder="Auto"
-                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-slate-100 text-slate-500 focus:outline-none cursor-not-allowed" title="Calculado automáticamente al cambiar estatus a Atendido o Despachado">
+                    <input type="number" id="prepTime" min="0" value="0"
+                        class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500" title="Calculado automáticamente o ajustable">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-700 mb-1">Estatus *</label>
@@ -1449,32 +1446,34 @@ async function saveOrder(e) {
     let timeInProcess = existingOrder ? existingOrder.timeInProcess : null;
     let timeCompleted = existingOrder ? existingOrder.timeCompleted : null;
 
-    let responseTime = existingOrder ? existingOrder.responseTime : 0;
-    let prepTimeVal = existingOrder ? (type === 'DESPACHO' ? existingOrder.prepTime : existingOrder.unloadTime) : 0;
+    // Obtener valores ingresados o calculados en el formulario
+    let responseTime = parseInt(document.getElementById('responseTime').value) || 0;
+    let prepTimeVal = parseInt(document.getElementById('prepTime').value) || 0;
 
+    // Lógica inteligente de tiempos ante cambios de estatus
     if (newStatus === 'EN_PREPARACION') {
         if (!timeInProcess) {
             timeInProcess = nowISO;
-        }
-        if (timeCreated) {
-            const diffMs = new Date(timeInProcess) - new Date(timeCreated);
-            responseTime = Math.max(0, Math.round(diffMs / (1000 * 60)));
+            if (timeCreated && responseTime === 0) {
+                const diffMs = new Date(timeInProcess) - new Date(timeCreated);
+                responseTime = Math.max(0, Math.round(diffMs / (1000 * 60)));
+            }
         }
     } 
     else if (newStatus === 'LISTO_ATENDIDO' || newStatus === 'DESPACHADO') {
         if (!timeInProcess) {
             timeInProcess = nowISO;
-            if (timeCreated) {
+            if (timeCreated && responseTime === 0) {
                 const diffMsResp = new Date(timeInProcess) - new Date(timeCreated);
                 responseTime = Math.max(0, Math.round(diffMsResp / (1000 * 60)));
             }
         }
         if (!timeCompleted) {
             timeCompleted = nowISO;
-        }
-        if (timeInProcess) {
-            const diffMsPrep = new Date(timeCompleted) - new Date(timeInProcess);
-            prepTimeVal = Math.max(0, Math.round(diffMsPrep / (1000 * 60)));
+            if (timeInProcess && prepTimeVal === 0) {
+                const diffMsPrep = new Date(timeCompleted) - new Date(timeInProcess);
+                prepTimeVal = Math.max(0, Math.round(diffMsPrep / (1000 * 60)));
+            }
         }
     }
 
@@ -1514,6 +1513,66 @@ async function saveOrder(e) {
         if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
     } catch (err) {
         console.error("Error guardando pedido:", err);
+    }
+}
+
+async function quickUpdateStatus(idx, newStatus) {
+    if (currentRole === 'LECTOR') {
+        toggleAuthModal();
+        return;
+    }
+    const order = window.orders[idx];
+    if (!order) return;
+
+    const nowISO = new Date().toISOString();
+    let timeInProcess = order.timeInProcess;
+    let timeCompleted = order.timeCompleted;
+    let responseTime = order.responseTime || 0;
+    let prepTimeVal = order.type === 'RECEPCION' ? (order.unloadTime || 0) : (order.prepTime || 0);
+
+    if (newStatus === 'EN_PREPARACION') {
+        if (!timeInProcess) {
+            timeInProcess = nowISO;
+            if (order.timeCreated && responseTime === 0) {
+                responseTime = Math.max(0, Math.round((new Date(timeInProcess) - new Date(order.timeCreated)) / (1000 * 60)));
+            }
+        }
+    } else if (newStatus === 'LISTO_ATENDIDO' || newStatus === 'DESPACHADO') {
+        if (!timeInProcess) {
+            timeInProcess = nowISO;
+            if (order.timeCreated && responseTime === 0) {
+                responseTime = Math.max(0, Math.round((new Date(timeInProcess) - new Date(order.timeCreated)) / (1000 * 60)));
+            }
+        }
+        if (!timeCompleted) {
+            timeCompleted = nowISO;
+            if (timeInProcess && prepTimeVal === 0) {
+                prepTimeVal = Math.max(0, Math.round((new Date(timeCompleted) - new Date(timeInProcess)) / (1000 * 60)));
+            }
+        }
+    }
+
+    const updatedData = {
+        ...order,
+        status: newStatus,
+        timeInProcess: timeInProcess,
+        timeCompleted: timeCompleted,
+        responseTime: responseTime,
+        prepTime: order.type === 'DESPACHO' ? prepTimeVal : order.prepTime,
+        unloadTime: order.type === 'RECEPCION' ? prepTimeVal : order.unloadTime
+    };
+
+    try {
+        if (window.saveOrderToFirebase) {
+            await window.saveOrderToFirebase(updatedData, order.docId, idx);
+        } else {
+            window.orders[idx] = updatedData;
+            window.sortOrdersChronologically();
+            window.renderAllViews();
+        }
+        if (selectedDayForPlan) openDayPlanModal(selectedDayForPlan);
+    } catch (err) {
+        console.error("Error al actualizar estatus rápidamente:", err);
     }
 }
 
@@ -1718,15 +1777,28 @@ function applyFiltersAndRender() {
                 <td class="py-3 px-4 text-slate-700 whitespace-nowrap">${dateFormatted}</td>
                 <td class="py-3 px-4 font-medium text-slate-800">${personDisplay}</td>
                 <td class="py-3 px-4 text-[11px] text-slate-600">${timingDisplay}</td>
-                <td class="py-3 px-4">${statusBadge}</td>
-                <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
-                    <button onclick="openNewOrderModal(${finalIdx})" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Editar">
-                        <i data-lucide="edit" class="w-4 h-4"></i>
-                    </button>
-                    ${currentRole !== 'LECTOR' ? `
-                    <button onclick="deleteOrder(${finalIdx})" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>` : ''}
+                <td class="py-3 px-4">
+                    <div class="flex flex-col gap-1">
+                        ${statusBadge}
+                        ${currentRole !== 'LECTOR' ? `
+                        <select onchange="quickUpdateStatus(${finalIdx}, this.value)" class="text-[10px] bg-slate-100 border border-slate-300 rounded px-1 py-0.5 text-slate-700 font-medium focus:outline-none">
+                            <option value="EN_ESPERA" ${o.status==='EN_ESPERA'?'selected':''}>En Espera</option>
+                            <option value="EN_PREPARACION" ${o.status==='EN_PREPARACION'?'selected':''}>En Proceso</option>
+                            <option value="LISTO_ATENDIDO" ${o.status==='LISTO_ATENDIDO'?'selected':''}>Atendido</option>
+                            <option value="DESPACHADO" ${o.status==='DESPACHADO'?'selected':''}>Despachado</option>
+                        </select>` : ''}
+                    </div>
+                </td>
+                <td class="py-3 px-4 text-right">
+                    <div class="flex items-center justify-end space-x-1.5">
+                        <button onclick="openNewOrderModal(${finalIdx})" class="p-1.5 bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-600 rounded-lg transition" title="Editar Registro">
+                            <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                        </button>
+                        ${currentRole !== 'LECTOR' ? `
+                        <button onclick="deleteOrder(${finalIdx})" class="p-1.5 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-lg transition" title="Eliminar Registro">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>` : ''}
+                    </div>
                 </td>
             </tr>
         `;
@@ -1746,247 +1818,183 @@ function clearFilters() {
 }
 
 function renderCharts() {
-    if (activeTab !== 'dashboard') return;
-
     const ordersList = getFilteredOrders();
 
-    // Chart 1: Volume by Date
-    const datesMap = {};
+    // Chart 1: Date performance (Despachos vs Recepciones por fecha)
+    const dateMap = {};
     ordersList.forEach(o => {
-        if (o.schedDateTime) {
-            const dateStr = o.schedDateTime.split('T')[0];
-            if (!datesMap[dateStr]) datesMap[dateStr] = { despachos: 0, recepciones: 0 };
-            if (o.type === 'DESPACHO') datesMap[dateStr].despachos++;
-            else datesMap[dateStr].recepciones++;
+        if (!o.schedDateTime) return;
+        const d = o.schedDateTime.split('T')[0];
+        if (!dateMap[d]) dateMap[d] = { desp: 0, recp: 0 };
+        if (o.type === 'DESPACHO') dateMap[d].desp++;
+        else dateMap[d].recp++;
+    });
+
+    const sortedDates = Object.keys(dateMap).sort();
+    const despCounts = sortedDates.map(d => dateMap[d].desp);
+    const recpCounts = sortedDates.map(d => dateMap[d].recp);
+
+    const ctxDate = document.getElementById('datePerformanceChart').getContext('2d');
+    if (dateChartInstance) dateChartInstance.destroy();
+    dateChartInstance = new Chart(ctxDate, {
+        type: 'bar',
+        data: {
+            labels: sortedDates.length ? sortedDates : ['Sin Datos'],
+            datasets: [
+                { label: 'Despachos', data: sortedDates.length ? despCounts : [0], backgroundColor: '#38bdf8', borderRadius: 4 },
+                { label: 'Recepciones', data: sortedDates.length ? recpCounts : [0], backgroundColor: '#34d399', borderRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 } } }
         }
     });
 
-    const sortedDates = Object.keys(datesMap).sort();
-    const despData = sortedDates.map(d => datesMap[d].despachos);
-    const recpData = sortedDates.map(d => datesMap[d].recepciones);
-
-    const ctx1 = document.getElementById('datePerformanceChart');
-    if (ctx1) {
-        if (dateChartInstance) dateChartInstance.destroy();
-        dateChartInstance = new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: sortedDates.map(d => {
-                    const parts = d.split('-');
-                    return `${parts[2]}/${parts[1]}`;
-                }),
-                datasets: [
-                    {
-                        label: 'Despachos',
-                        data: despData,
-                        backgroundColor: '#38bdf8',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Recepciones',
-                        data: recpData,
-                        backgroundColor: '#34d399',
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { precision: 0 } }
-                }
-            }
-        });
-    }
-
-    // Chart 2: Performance by Operator
-    const personMap = {};
+    // Chart 2: Picker and Receptor performance
+    const operatorMap = {};
     ordersList.forEach(o => {
-        if (o.type === 'DESPACHO' && o.picker) {
-            const name = o.picker + " (Picker)";
-            if (!personMap[name]) personMap[name] = { count: 0, role: 'PICKER' };
-            personMap[name].count++;
-        } else if (o.type === 'RECEPCION' && o.receptor) {
-            const name = o.receptor + " (Receptor)";
-            if (!personMap[name]) personMap[name] = { count: 0, role: 'RECEPTOR' };
-            personMap[name].count++;
+        const op = o.type === 'DESPACHO' ? (o.picker || 'Sin Picker') : (o.receptor || 'Sin Receptor');
+        if (!operatorMap[op]) operatorMap[op] = { carga: 0, descarga: 0 };
+        if (o.type === 'DESPACHO') operatorMap[op].carga++;
+        else operatorMap[op].descarga++;
+    });
+
+    const opLabels = Object.keys(operatorMap).slice(0, 5);
+    const opCarga = opLabels.map(l => operatorMap[l].carga);
+    const opDescarga = opLabels.map(l => operatorMap[l].descarga);
+
+    const ctxPicker = document.getElementById('pickerPerformanceChart').getContext('2d');
+    if (pickerChartInstance) pickerChartInstance.destroy();
+    pickerChartInstance = new Chart(ctxPicker, {
+        type: 'bar',
+        data: {
+            labels: opLabels.length ? opLabels : ['Sin Asignar'],
+            datasets: [
+                { label: 'Carga', data: opLabels.length ? opCarga : [0], backgroundColor: '#0ea5e9', borderRadius: 4 },
+                { label: 'Descarga', data: opLabels.length ? opDescarga : [0], backgroundColor: '#10b981', borderRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 } } }
         }
     });
 
-    const personNames = Object.keys(personMap);
-    const countData = personNames.map(p => personMap[p].count);
-    const colors = personNames.map(p => personMap[p].role === 'PICKER' ? '#38bdf8' : '#34d399');
-
-    const ctx2 = document.getElementById('pickerPerformanceChart');
-    if (ctx2) {
-        if (pickerChartInstance) pickerChartInstance.destroy();
-        pickerChartInstance = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: personNames,
-                datasets: [
-                    {
-                        label: 'Operaciones Atendidas',
-                        data: countData,
-                        backgroundColor: colors,
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { precision: 0 } }
-                }
-            }
-        });
-    }
-
-    // Chart 3: Total Orders by Client (Ordenado estrictamente de mayor a menor)
+    // Chart 3: Total Orders by Client
     const clientMap = {};
     ordersList.forEach(o => {
-        const clientName = o.client || 'Sin Cliente Especificado';
-        clientMap[clientName] = (clientMap[clientName] || 0) + 1;
+        const c = o.client || 'Cliente General';
+        clientMap[c] = (clientMap[c] || 0) + 1;
     });
 
-    const sortedClients = Object.entries(clientMap).sort((a, b) => b[1] - a[1]);
-    const clientNames = sortedClients.map(item => item[0]);
-    const clientCounts = sortedClients.map(item => item[1]);
-    
-    const clientColors = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
+    const sortedClients = Object.keys(clientMap).sort((a,b) => clientMap[b] - clientMap[a]).slice(0, 5);
+    const clientCounts = sortedClients.map(c => clientMap[c]);
 
-    const ctx3 = document.getElementById('clientPerformanceChart');
-    if (ctx3) {
-        if (clientChartInstance) clientChartInstance.destroy();
-        clientChartInstance = new Chart(ctx3, {
-            type: 'bar',
-            data: {
-                labels: clientNames,
-                datasets: [
-                    {
-                        label: 'Total Pedidos',
-                        data: clientCounts,
-                        backgroundColor: clientNames.map((_, i) => clientColors[i % clientColors.length]),
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                indexAxis: 'y', // Barras horizontales para lectura fluida de nombres
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, ticks: { precision: 0 } },
-                    y: { grid: { display: false } }
-                }
-            }
-        });
-    }
-
-    // Chart 4: Average SKUs per Order by Client (Ordenado estrictamente de mayor a menor)
-    const clientSkuMap = {};
-    ordersList.forEach(o => {
-        const clientName = o.client || 'Sin Cliente Especificado';
-        if (!clientSkuMap[clientName]) {
-            clientSkuMap[clientName] = { totalSku: 0, ordersCount: 0 };
+    const ctxClient = document.getElementById('clientPerformanceChart').getContext('2d');
+    if (clientChartInstance) clientChartInstance.destroy();
+    clientChartInstance = new Chart(ctxClient, {
+        type: 'doughnut',
+        data: {
+            labels: sortedClients.length ? sortedClients : ['Sin Clientes'],
+            datasets: [{
+                data: sortedClients.length ? clientCounts : [1],
+                backgroundColor: ['#6366f1', '#0ea5e9', '#34d399', '#f59e0b', '#ec4899']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
         }
-        clientSkuMap[clientName].totalSku += (o.skuCount || 0);
-        clientSkuMap[clientName].ordersCount += 1;
     });
 
-    const clientSkuAvgArray = Object.keys(clientSkuMap).map(client => {
-        const avg = clientSkuMap[client].ordersCount > 0 ? (clientSkuMap[client].totalSku / clientSkuMap[client].ordersCount) : 0;
-        return { client, avg: parseFloat(avg.toFixed(1)) };
+    // Chart 4: Average SKUs per client
+    const clientSkuMap = {};
+    const clientSkuCountMap = {};
+    ordersList.forEach(o => {
+        const c = o.client || 'Cliente General';
+        clientSkuMap[c] = (clientSkuMap[c] || 0) + (o.skuCount || 0);
+        clientSkuCountMap[c] = (clientSkuCountMap[c] || 0) + 1;
     });
 
-    clientSkuAvgArray.sort((a, b) => b.avg - a.avg);
+    const skuClientLabels = Object.keys(clientSkuMap).slice(0, 5);
+    const avgSkuData = skuClientLabels.map(c => (clientSkuMap[c] / (clientSkuCountMap[c] || 1)).toFixed(1));
 
-    const skuClientNames = clientSkuAvgArray.map(item => item.client);
-    const skuAvgValues = clientSkuAvgArray.map(item => item.avg);
-
-    const ctx4 = document.getElementById('clientSkuChart');
-    if (ctx4) {
-        if (clientSkuChartInstance) clientSkuChartInstance.destroy();
-        clientSkuChartInstance = new Chart(ctx4, {
-            type: 'bar',
-            data: {
-                labels: skuClientNames,
-                datasets: [
-                    {
-                        label: 'SKUs Promedio',
-                        data: skuAvgValues,
-                        backgroundColor: '#0ea5e9',
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, ticks: { precision: 1 } },
-                    y: { grid: { display: false } }
-                }
-            }
-        });
-    }
+    const ctxSku = document.getElementById('clientSkuChart').getContext('2d');
+    if (clientSkuChartInstance) clientSkuChartInstance.destroy();
+    clientSkuChartInstance = new Chart(ctxSku, {
+        type: 'bar',
+        data: {
+            labels: skuClientLabels.length ? skuClientLabels : ['Sin SKUs'],
+            datasets: [{
+                label: 'SKUs Prom',
+                data: skuClientLabels.length ? avgSkuData : [0],
+                backgroundColor: '#38bdf8',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false } }, y: { beginAtZero: true } }
+        }
+    });
 }
 
 function renderCalendar() {
-    const grid = document.getElementById('calendarGrid');
-    const title = document.getElementById('calendarMonthYear');
-    if (!grid || !title) return;
-
     const year = calendarCurrentDate.getFullYear();
     const month = calendarCurrentDate.getMonth();
 
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    title.textContent = `${monthNames[month]} ${year}`;
+    document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
 
     const firstDayIndex = new Date(year, month, 1).getDay();
     const totalDays = new Date(year, month + 1, 0).getDate();
 
+    const grid = document.getElementById('calendarGrid');
     let html = '';
 
+    // Días vacíos previos al inicio del mes
     for (let i = 0; i < firstDayIndex; i++) {
-        html += `<div class="bg-slate-50/40 rounded-xl min-h-[90px] border border-transparent"></div>`;
+        html += `<div class="bg-slate-50/40 rounded-xl min-h-[100px] p-2 border border-slate-100 opacity-40"></div>`;
     }
 
+    const ordersList = window.orders || [];
+
     for (let day = 1; day <= totalDays; day++) {
-        const monthStr = String(month + 1).padStart(2, '0');
         const dayStr = String(day).padStart(2, '0');
-        const dateString = `${year}-${monthStr}-${dayStr}`;
+        const monthStr = String(month + 1).padStart(2, '0');
+        const dateKey = `${year}-${monthStr}-${dayStr}`;
 
-        const dayOrders = (window.orders || []).filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateString));
-        
+        const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateKey));
+        const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
+        const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
+
         let badgesHtml = '';
-        dayOrders.slice(0, 3).forEach(o => {
-            const isDesp = o.type === 'DESPACHO';
-            const bgClass = isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800';
-            badgesHtml += `<div class="text-[9px] px-1.5 py-0.5 rounded truncate font-medium ${bgClass}" title="${o.id} - ${o.client}">• ${o.id} (${o.poNumber})</div>`;
-        });
-
-        if (dayOrders.length > 3) {
-            badgesHtml += `<div class="text-[9px] text-slate-500 font-semibold px-1">+${dayOrders.length - 3} más</div>`;
+        if (despCount > 0) {
+            badgesHtml += `<div class="text-[10px] px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold truncate">🚚 ${despCount} Despacho${despCount>1?'s':''}</div>`;
+        }
+        if (recpCount > 0) {
+            badgesHtml += `<div class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold truncate">📥 ${recpCount} Recepción${recpCount>1?'s':''}</div>`;
         }
 
+        const isToday = new Date().toISOString().startsWith(dateKey);
+
         html += `
-            <div onclick="openDayPlanModal('${dateString}')" class="bg-white rounded-xl min-h-[90px] p-2 border border-slate-200 hover:border-brand-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+            <div onclick="openDayPlanModal('${dateKey}')" class="bg-white rounded-xl min-h-[100px] p-2.5 border ${isToday ? 'border-brand-500 ring-2 ring-brand-500/20' : 'border-slate-200'} hover:border-brand-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-700">${day}</span>
-                    ${dayOrders.length > 0 ? `<span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-700">${dayOrders.length}</span>` : ''}
+                    <span class="text-xs font-bold ${isToday ? 'bg-brand-600 text-white w-6 h-6 rounded-full flex items-center justify-center' : 'text-slate-700'}">${day}</span>
+                    ${dayOrders.length > 0 ? `<span class="text-[10px] font-bold px-1.5 py-0.2 bg-slate-100 rounded-full text-slate-600">${dayOrders.length} OC</span>` : ''}
                 </div>
-                <div class="space-y-1 mt-1 overflow-hidden">
+                <div class="space-y-1 mt-2">
                     ${badgesHtml}
+                    ${dayOrders.length === 0 ? `<span class="text-[10px] text-slate-300 italic">Sin programar</span>` : ''}
                 </div>
             </div>
         `;
@@ -2006,72 +2014,70 @@ function nextMonth() {
 }
 
 function todayMonth() {
-    calendarCurrentDate = new Date(2026, 9, 1);
+    calendarCurrentDate = new Date();
     renderCalendar();
 }
 
-function openDayPlanModal(dateStr) {
-    selectedDayForPlan = dateStr;
-    const parts = dateStr.split('-');
-    const formattedTitle = `Plan de Operaciones: ${parts[2]}/${parts[1]}/${parts[0]}`;
-    
-    document.getElementById('dayPlanTitle').textContent = formattedTitle;
+function openDayPlanModal(dateKey) {
+    selectedDayForPlan = dateKey;
+    const ordersList = window.orders || [];
+    const dayOrders = ordersList.filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateKey));
 
-    const dayOrders = (window.orders || []).filter(o => o.schedDateTime && o.schedDateTime.startsWith(dateStr));
-    const despCount = dayOrders.filter(o => o.type === 'DESPACHO').length;
-    const recpCount = dayOrders.filter(o => o.type === 'RECEPCION').length;
+    const dateParts = dateKey.split('-');
+    const formattedTitle = `${dateParts[2]} de Octubre de ${dateParts[0]}`; // Ajustado para el contexto corporativo 2026
+    document.getElementById('dayPlanTitle').textContent = `Operaciones: ${formattedTitle}`;
+    document.getElementById('dayPlanSubtitle').textContent = `Listado cronológico de órdenes para esta fecha`;
+
+    const despC = dayOrders.filter(o => o.type === 'DESPACHO').length;
+    const recpC = dayOrders.filter(o => o.type === 'RECEPCION').length;
 
     document.getElementById('dayTotalCount').textContent = `${dayOrders.length} Operaciones`;
-    document.getElementById('dayDespCount').textContent = despCount;
-    document.getElementById('dayRecpCount').textContent = recpCount;
+    document.getElementById('dayDespCount').textContent = despC;
+    document.getElementById('dayRecpCount').textContent = recpC;
 
     const listContainer = document.getElementById('dayPlanList');
-    
     if (dayOrders.length === 0) {
         listContainer.innerHTML = `
-            <div class="text-center py-8 text-slate-400 text-xs">
-                <p>No hay operaciones programadas para este día.</p>
+            <div class="text-center py-8 text-slate-400">
+                <i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                <p class="text-xs font-medium">No hay operaciones programadas para este día.</p>
             </div>
         `;
-    } else {
-        let html = '';
-        dayOrders.forEach(o => {
-            const origIdx = window.orders.findIndex(item => item === o);
-            const isDesp = o.type === 'DESPACHO';
-            html += `
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3 text-xs">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-slate-900">${o.id}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${o.type}</span>
-                            <span class="font-mono text-slate-600">${o.poNumber}</span>
-                        </div>
-                        <div class="text-slate-600 mt-1"><strong>Cliente:</strong> ${o.client} • <strong>Muelle:</strong> ${o.dock}</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5"><strong>SKUs:</strong> ${o.skuCount || 0} | <strong>Persona:</strong> ${isDesp ? o.picker : o.receptor}</div>
-                    </div>
-                    <div class="flex items-center space-x-1 shrink-0">
-                        <button onclick="closeModal('dayPlanModal'); openNewOrderModal(${origIdx})" class="p-1.5 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg text-slate-600 transition" title="Editar">
-                            <i data-lucide="edit" class="w-3.5 h-3.5"></i>
-                        </button>
-                        ${currentRole !== 'LECTOR' ? `
-                        <button onclick="deleteOrder(${origIdx})" class="p-1.5 bg-white border border-rose-200 hover:bg-rose-50 rounded-lg text-rose-600 transition" title="Eliminar">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>` : ''}
-                    </div>
-                </div>
-            `;
-        });
-        listContainer.innerHTML = html;
         lucide.createIcons();
+        openModal('dayPlanModal');
+        return;
     }
 
-    const addBtn = document.getElementById('addOrderForDayBtn');
-    if (currentRole === 'LECTOR') {
-        addBtn.classList.add('hidden');
-    } else {
-        addBtn.classList.remove('hidden');
-    }
+    let html = '';
+    dayOrders.forEach(o => {
+        const origIdx = window.orders.findIndex(item => item === o);
+        const isDesp = o.type === 'DESPACHO';
+        html += `
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-xs text-slate-900">${o.id}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${isDesp ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${o.type}</span>
+                        <span class="text-xs font-mono font-medium text-slate-600">${o.poNumber}</span>
+                    </div>
+                    <div class="text-xs text-slate-700 font-medium">Cliente: ${o.client} • <span class="text-sky-700 font-semibold">${o.skuCount || 0} SKUs</span></div>
+                    <div class="text-[11px] text-slate-500">Muelle: ${o.dock} | Asignado: ${isDesp ? o.picker : o.receptor}</div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="openNewOrderModal(${origIdx})" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 rounded-lg font-medium transition">
+                        Editar
+                    </button>
+                    ${currentRole !== 'LECTOR' ? `
+                    <button onclick="deleteOrder(${origIdx})" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 rounded-lg font-medium transition">
+                        Borrar
+                    </button>` : ''}
+                </div>
+            </div>
+        `;
+    });
 
+    listContainer.innerHTML = html;
+    lucide.createIcons();
     openModal('dayPlanModal');
 }
 
@@ -2079,14 +2085,21 @@ function addOrderForSelectedDay() {
     closeModal('dayPlanModal');
     openNewOrderModal(-1);
     if (selectedDayForPlan) {
-        const datetimeField = document.getElementById('schedDateTime');
-        if (datetimeField) {
-            datetimeField.value = selectedDayForPlan + "T09:00";
-        }
+        document.getElementById('schedDateTime').value = `${selectedDayForPlan}T08:00`;
     }
 }
 
 function renderAccessControl() {
+    const totalUsers = users.length;
+    const adminUsers = users.filter(u => u.role === 'ADMINISTRADOR').length;
+    const operatorUsers = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
+    const activeUsers = users.filter(u => u.status === 'ACTIVO').length;
+
+    document.getElementById('kpiTotalUsers').textContent = totalUsers;
+    document.getElementById('kpiAdminUsers').textContent = adminUsers;
+    document.getElementById('kpiOperatorUsers').textContent = operatorUsers;
+    document.getElementById('kpiActiveUsers').textContent = activeUsers;
+
     const searchInput = document.getElementById('userSearchInput');
     const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
@@ -2094,26 +2107,15 @@ function renderAccessControl() {
         !query || u.name.toLowerCase().includes(query) || u.username.toLowerCase().includes(query) || u.role.toLowerCase().includes(query)
     );
 
-    document.getElementById('kpiTotalUsers').textContent = users.length;
-    document.getElementById('kpiAdminUsers').textContent = users.filter(u => u.role === 'ADMINISTRADOR').length;
-    document.getElementById('kpiOperatorUsers').textContent = users.filter(u => u.role === 'SUPERVISOR' || u.role === 'OPERADOR').length;
-    document.getElementById('kpiActiveUsers').textContent = users.filter(u => u.status === 'ACTIVO').length;
-
     const tbody = document.getElementById('usersTableBody');
-    if (!tbody) return;
-
-    if (filteredUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs">No se encontraron usuarios</td></tr>`;
-        return;
-    }
-
     let html = '';
+
     filteredUsers.forEach(u => {
         let roleBadge = '';
-        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-semibold text-[10px]">Administrador</span>`;
-        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold text-[10px]">Supervisor</span>`;
-        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[10px]">Operador</span>`;
-        else roleBadge = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[10px]">Lector</span>`;
+        if (u.role === 'ADMINISTRADOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-semibold text-[10px]">ADMINISTRADOR</span>`;
+        else if (u.role === 'SUPERVISOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-semibold text-[10px]">SUPERVISOR</span>`;
+        else if (u.role === 'OPERADOR') roleBadge = `<span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-semibold text-[10px]">OPERADOR</span>`;
+        else roleBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-[10px]">LECTOR</span>`;
 
         let statusBadge = u.status === 'ACTIVO' ? 
             `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium text-[11px]">Activo</span>` :
@@ -2121,25 +2123,24 @@ function renderAccessControl() {
 
         html += `
             <tr class="hover:bg-slate-50 transition">
-                <td class="py-3 px-4 font-semibold text-slate-900">
-                    <div>${u.name}</div>
-                    <div class="text-[11px] text-slate-400 font-mono">@${u.username}</div>
+                <td class="py-3 px-4">
+                    <div class="font-bold text-slate-900">${u.name}</div>
+                    <div class="text-[11px] text-slate-500 font-mono">@${u.username}</div>
                 </td>
                 <td class="py-3 px-4">${roleBadge}</td>
-                <td class="py-3 px-4 font-mono text-slate-600">••••</td>
+                <td class="py-3 px-4 font-mono font-bold text-slate-700">••••</td>
                 <td class="py-3 px-4">${statusBadge}</td>
-                <td class="py-3 px-4 text-slate-500">${u.lastAccess}</td>
-                <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
-                    <button onclick="openResetPinModal('${u.username}')" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-slate-100 rounded-lg transition" title="Cambiar PIN">
-                        <i data-lucide="key-round" class="w-4 h-4"></i>
-                    </button>
-                    ${currentRole === 'ADMINISTRADOR' ? `
-                    <button onclick="openEditUserModal('${u.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Editar Usuario">
-                        <i data-lucide="edit" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="deleteUser('${u.id}')" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Eliminar Usuario">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>` : ''}
+                <td class="py-3 px-4 text-slate-600">${u.lastAccess}</td>
+                <td class="py-3 px-4 text-right">
+                    <div class="flex items-center justify-end space-x-1.5">
+                        <button onclick="openResetPinModal('${u.username}')" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-700 rounded-lg font-medium transition" title="Cambiar PIN">
+                            PIN
+                        </button>
+                        ${currentRole === 'ADMINISTRADOR' ? `
+                        <button onclick="toggleUserStatus('${u.username}')" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition">
+                            ${u.status === 'ACTIVO' ? 'Desactivar' : 'Activar'}
+                        </button>` : ''}
+                    </div>
                 </td>
             </tr>
         `;
@@ -2151,58 +2152,38 @@ function renderAccessControl() {
 
 function openNewUserModal() {
     if (currentRole !== 'ADMINISTRADOR') {
-        alert('Se requieren privilegios de Administrador para gestionar cuentas de usuario.');
+        alert('Se requiere rol de Administrador para gestionar nuevos usuarios.');
         return;
     }
     document.getElementById('userForm').reset();
-    document.getElementById('editUserId').value = '';
     document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i><span>Crear Nuevo Usuario</span>`;
     openModal('userModal');
-}
-
-function openEditUserModal(id) {
-    const u = users.find(item => item.id === id);
-    if (!u) return;
-
-    document.getElementById('editUserId').value = u.id;
-    document.getElementById('userFullName').value = u.name;
-    document.getElementById('username').value = u.username;
-    document.getElementById('userPin').value = u.pin;
-    document.getElementById('userRole').value = u.role;
-    document.getElementById('userStatus').value = u.status;
-
-    document.getElementById('userModalTitle').innerHTML = `<i data-lucide="user-cog" class="w-4 h-4 text-indigo-400"></i><span>Editar Usuario</span>`;
-    openModal('userModal');
+    lucide.createIcons();
 }
 
 function saveUser(e) {
     e.preventDefault();
-    const editId = document.getElementById('editUserId').value;
     const name = document.getElementById('userFullName').value;
     const username = document.getElementById('username').value;
     const pin = document.getElementById('userPin').value;
     const role = document.getElementById('userRole').value;
     const status = document.getElementById('userStatus').value;
 
-    if (editId) {
-        const u = users.find(item => item.id === editId);
-        if (u) {
-            u.name = name;
-            u.username = username;
-            u.pin = pin;
-            u.role = role;
-            u.status = status;
-        }
+    const existing = users.find(u => u.username === username);
+    if (existing) {
+        existing.name = name;
+        existing.pin = pin;
+        existing.role = role;
+        existing.status = status;
     } else {
-        const newId = "U" + (users.length + 1);
         users.push({
-            id: newId,
+            id: "U" + (users.length + 1),
             name,
             username,
             role,
             pin,
             status,
-            lastAccess: "Nunca"
+            lastAccess: "Recién creado"
         });
     }
 
@@ -2210,20 +2191,13 @@ function saveUser(e) {
     renderAccessControl();
 }
 
-function deleteUser(id) {
-    if (currentRole !== 'ADMINISTRADOR') return;
-    if (confirm('¿Está seguro de eliminar este usuario?')) {
-        users = users.filter(u => u.id !== id);
-        renderAccessControl();
-    }
-}
-
 function openResetPinModal(username) {
-    const u = users.find(item => item.username === username);
-    if (!u) return;
-
+    if (currentRole !== 'ADMINISTRADOR' && currentRole !== 'SUPERVISOR') {
+        alert('Se requiere privilegios de Administrador o Supervisor.');
+        return;
+    }
     document.getElementById('resetTargetUsername').value = username;
-    document.getElementById('resetTargetUserDisplay').textContent = `${u.name} (@${u.username})`;
+    document.getElementById('resetTargetUserDisplay').textContent = username;
     document.getElementById('newPinInput').value = '';
     openModal('resetPinModal');
 }
@@ -2233,7 +2207,7 @@ function handleResetPinSubmit(e) {
     const username = document.getElementById('resetTargetUsername').value;
     const newPin = document.getElementById('newPinInput').value;
 
-    const u = users.find(item => item.username === username);
+    const u = users.find(user => user.username === username);
     if (u) {
         u.pin = newPin;
         closeModal('resetPinModal');
@@ -2241,42 +2215,48 @@ function handleResetPinSubmit(e) {
     }
 }
 
+function toggleUserStatus(username) {
+    const u = users.find(user => user.username === username);
+    if (u) {
+        u.status = u.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+        renderAccessControl();
+    }
+}
+
 function openShareModal() {
-    const urlInput = document.getElementById('shareUrlInput');
-    urlInput.value = window.location.href;
+    document.getElementById('shareUrlInput').value = window.location.href;
     document.getElementById('shareCopyAlert').classList.add('hidden');
     openModal('shareModal');
 }
 
 function copyShareUrl() {
-    const urlInput = document.getElementById('shareUrlInput');
-    urlInput.select();
-    navigator.clipboard.writeText(urlInput.value);
-    const alertEl = document.getElementById('shareCopyAlert');
-    alertEl.classList.remove('hidden');
-    setTimeout(() => alertEl.classList.add('hidden'), 3000);
+    const input = document.getElementById('shareUrlInput');
+    input.select();
+    try {
+        document.execCommand('copy');
+        const alertBox = document.getElementById('shareCopyAlert');
+        alertBox.classList.remove('hidden');
+        setTimeout(() => alertBox.classList.add('hidden'), 3000);
+    } catch (err) {
+        console.warn("No se pudo copiar automáticamente");
+    }
 }
 
 function exportDataCSV() {
     const ordersList = getFilteredOrders();
-    if (ordersList.length === 0) {
-        alert('No hay datos disponibles para exportar.');
-        return;
-    }
-
-    let csv = 'ID,Tipo,OC,Cliente,Muelle,Chofer,SKUs,Fecha Programada,Estatus,Tiempo Respuesta (min),Tiempo Prep/Descarga (min)\n';
+    let csvContent = "data:text/csv;charset=utf-8,ID,OC,Tipo,Cliente,Muelle,SKUs,Estatus,Fecha\n";
+    
     ordersList.forEach(o => {
-        csv += `"${o.id}","${o.type}","${o.poNumber}","${o.client}","${o.dock}","${o.driver || ''}",${o.skuCount || 0},"${o.schedDateTime}","${o.status}",${o.responseTime || 0},${o.type === 'DESPACHO' ? (o.prepTime || 0) : (o.unloadTime || 0)}\n`;
+        csvContent += `"${o.id}","${o.poNumber}","${o.type}","${o.client}","${o.dock}","${o.skuCount || 0}","${o.status}","${o.schedDateTime}"\n`;
     });
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', 'dashboard_logistico_2026.csv');
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "reporte_logistica_2026.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 </script>
 
